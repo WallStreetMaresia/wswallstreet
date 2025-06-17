@@ -203,7 +203,6 @@
                         <button id="open-access-modal-btn" class="text-white font-semibold py-2 px-4 rounded-lg btn-action bg-blue-600 hover:bg-blue-700">GERENCIAR</button>
                         <button id="open-fill-modal-btn" class="text-white font-semibold py-2 px-6 rounded-lg btn-action">PREENCHER</button>
                     `;
-                    // O listener de 'open-fill-modal-btn' será adicionado globalmente mais abaixo
                     document.getElementById('open-access-modal-btn').addEventListener('click', () => {
                         loadAllowedUsers();
                         openModal(document.getElementById('access-modal'));
@@ -219,7 +218,6 @@
         
         document.getElementById('logout-btn').addEventListener('click', () => fbAuth.signOut());
         
-        // --- LÓGICA DE DADOS CENTRALIZADA (COM MIGRAÇÃO E BACKUP) ---
         let db;
         const dbRef = fbDb.collection('application_data').doc('main');
         const LOCAL_DB_KEY = 'wallstreetDashboardData';
@@ -228,18 +226,15 @@
             try {
                 const doc = await dbRef.get();
                 if (doc.exists && doc.data().dailyData && Object.keys(doc.data().dailyData).length > 0) {
-                    console.log("Dados carregados do Firestore.");
                     return doc.data();
                 }
                 const localDataString = localStorage.getItem(LOCAL_DB_KEY);
                 if (localDataString) {
-                    console.log("Dados antigos encontrados no localStorage. Migrando para o Firestore...");
                     const localDb = JSON.parse(localDataString);
                     await dbRef.set(localDb);
                     localStorage.removeItem(LOCAL_DB_KEY); 
                     return localDb;
                 }
-                console.log("Firestore e localStorage vazios. Inicializando com dados de backup.");
                 const backupData = {"dailyData":{"2025-05-09":{"conexao":{"contratados":37,"retencao":0},"retencao_cat":{"contratados":59,"retencao":4},"introducao":{"contratados":10,"retencao":0},"evolucao":{"contratados":0,"retencao":0},"interacao":{"contratados":0,"retencao":0},"expansao":{"contratados":0,"retencao":0}},"2025-05-10":{"conexao":{"contratados":1166,"retencao":291},"retencao_cat":{"contratados":126,"retencao":50},"introducao":{"contratados":105,"retencao":29},"evolucao":{"contratados":54,"retencao":10},"interacao":{"contratados":0,"retencao":0},"expansao":{"contratados":0,"retencao":0}},"2025-05-11":{"conexao":{"contratados":176,"retencao":62},"retencao_cat":{"contratados":14,"retencao":4},"introducao":{"contratados":87,"retencao":31},"evolucao":{"contratados":0,"retencao":0},"interacao":{"contratados":0,"retencao":0},"expansao":{"contratados":10,"retencao":5}},"2025-05-12":{"conexao":{"contratados":177,"retencao":45},"retencao_cat":{"contratados":25,"retencao":5},"introducao":{"contratados":200,"retencao":52},"evolucao":{"contratados":0,"retencao":0},"interacao":{"contratados":0,"retencao":0},"expansao":{"contratados":4,"retencao":2}},"2025-05-13":{"conexao":{"contratados":176,"retencao":62},"retencao_cat":{"contratados":14,"retencao":4},"introducao":{"contratados":87,"retencao":31},"evolucao":{"contratados":0,"retencao":0},"interacao":{"contratados":0,"retencao":0},"expansao":{"contratados":10,"retencao":5}},"2025-05-14":{"conexao":{"contratados":144,"retencao":49},"retencao_cat":{"contratados":19,"retencao":8},"introducao":{"contratados":107,"retencao":41},"evolucao":{"contratados":0,"retencao":0},"interacao":{"contratados":0,"retencao":0},"expansao":{"contratados":5,"retencao":1}},"2025-05-15":{"conexao":{"contratados":115,"retencao":39},"retencao_cat":{"contratados":15,"retencao":3},"introducao":{"contratados":160,"retencao":70},"evolucao":{"contratados":0,"retencao":0},"interacao":{"contratados":0,"retencao":0},"expansao":{"contratados":0,"retencao":0}},"2025-05-16":{"conexao":{"contratados":57,"retencao":17},"retencao_cat":{"contratados":27,"retencao":9},"introducao":{"contratados":138,"retencao":50},"evolucao":{"contratados":0,"retencao":0},"interacao":{"contratados":0,"retencao":0},"expansao":{"contratados":0,"retencao":0}},"2025-05-17":{"conexao":{"contratados":136,"retencao":50},"retencao_cat":{"contratados":29,"retencao":8},"introducao":{"contratados":145,"retencao":51},"evolucao":{"contratados":0,"retencao":0},"interacao":{"contratados":0,"retencao":0},"expansao":{"contratados":2,"retencao":0}},"2025-05-18":{"conexao":{"contratados":107,"retencao":43},"retencao_cat":{"contratados":43,"retencao":14},"introducao":{"contratados":217,"retencao":71},"evolucao":{"contratados":0,"retencao":0},"interacao":{"contratados":0,"retencao":0},"expansao":{"contratados":1,"retencao":0}},"2025-05-19":{"conexao":{"contratados":144,"retencao":56},"retencao_cat":{"contratados":25,"retencao":10},"introducao":{"contratados":198,"retencao":51},"evolucao":{"contratados":0,"retencao":0},"interacao":{"contratados":2,"retencao":0},"expansao":{"contratados":3,"retencao":0}},"2025-04-17":{"conexao":{"contratados":136,"retencao":50},"retencao_cat":{"contratados":29,"retencao":8},"introducao":{"contratados":145,"retencao":51},"evolucao":{"contratados":0,"retencao":0},"interacao":{"contratados":0,"retencao":0},"expansao":{"contratados":2,"retencao":0}},"2025-06-18":{"conexao":{"contratados":107,"retencao":43},"retencao_cat":{"contratados":43,"retencao":14},"introducao":{"contratados":217,"retencao":71},"evolucao":{"contratados":0,"retencao":0},"interacao":{"contratados":0,"retencao":0},"expansao":{"contratados":1,"retencao":0}},"2025-05-20":{"conexao":{"contratados":110,"retencao":40},"retencao_cat":{"contratados":44,"retencao":21},"introducao":{"contratados":267,"retencao":114},"evolucao":{"contratados":0,"retencao":0},"interacao":{"contratados":0,"retencao":0},"expansao":{"contratados":1,"retencao":0}},"2025-05-21":{"conexao":{"contratados":107,"retencao":5},"retencao_cat":{"contratados":42,"retencao":4},"introducao":{"contratados":189,"retencao":12},"evolucao":{"contratados":0,"retencao":0},"interacao":{"contratados":7,"retencao":0},"expansao":{"contratados":0,"retencao":0}},"2025-05-22":{"conexao":{"contratados":42,"retencao":11},"retencao_cat":{"contratados":30,"retencao":12},"introducao":{"contratados":133,"retencao":40},"evolucao":{"contratados":0,"retencao":0},"interacao":{"contratados":59,"retencao":25},"expansao":{"contratados":0,"retencao":0}},"2025-05-23":{"conexao":{"contratados":42,"retencao":11},"retencao_cat":{"contratados":30,"retencao":12},"introducao":{"contratados":133,"retencao":40},"evolucao":{"contratados":0,"retencao":0},"interacao":{"contratados":59,"retencao":25},"expansao":{"contratados":0,"retencao":0}},"2025-05-24":{"conexao":{"contratados":48,"retencao":18},"retencao_cat":{"contratados":28,"retencao":10},"introducao":{"contratados":131,"retencao":45},"evolucao":{"contratados":0,"retencao":0},"interacao":{"contratados":100,"retencao":35},"expansao":{"contratados":0,"retencao":0}},"2025-05-25":{"conexao":{"contratados":86,"retencao":27},"retencao_cat":{"contratados":62,"retencao":20},"introducao":{"contratados":154,"retencao":60},"evolucao":{"contratados":0,"retencao":0},"interacao":{"contratados":66,"retencao":27},"expansao":{"contratados":20,"retencao":3}},"2025-05-26":{"conexao":{"contratados":90,"retencao":21},"retencao_cat":{"contratados":184,"retencao":47},"introducao":{"contratados":134,"retencao":33},"evolucao":{"contratados":69,"retencao":13},"interacao":{"contratados":109,"retencao":30},"expansao":{"contratados":0,"retencao":0}},"2025-05-27":{"conexao":{"contratados":63,"retencao":23},"retencao_cat":{"contratados":77,"retencao":23},"introducao":{"contratados":72,"retencao":28},"evolucao":{"contratados":19,"retencao":7},"interacao":{"contratados":75,"retencao":31},"expansao":{"contratados":0,"retencao":0}},"2025-05-28":{"conexao":{"contratados":49,"retencao":22},"retencao_cat":{"contratados":59,"retencao":20},"introducao":{"contratados":53,"retencao":13},"evolucao":{"contratados":64,"retencao":24},"interacao":{"contratados":47,"retencao":19},"expansao":{"contratados":0,"retencao":0}},"2025-05-29":{"conexao":{"contratados":54,"retencao":16},"retencao_cat":{"contratados":44,"retencao":16},"introducao":{"contratados":49,"retencao":24},"evolucao":{"contratados":105,"retencao":34},"interacao":{"contratados":81,"retencao":31},"expansao":{"contratados":0,"retencao":0}},"2025-05-30":{"conexao":{"contratados":57,"retencao":19},"retencao_cat":{"contratados":22,"retencao":6},"introducao":{"contratados":55,"retencao":15},"evolucao":{"contratados":93,"retencao":21},"interacao":{"contratados":65,"retencao":18},"expansao":{"contratados":0,"retencao":0}},"2025-05-31":{"conexao":{"contratados":67,"retencao":30},"retencao_cat":{"contratados":32,"retencao":11},"introducao":{"contratados":61,"retencao":23},"evolucao":{"contratados":86,"retencao":26},"interacao":{"contratados":36,"retencao":12},"expansao":{"contratados":0,"retencao":0}},"2025-06-01":{"conexao":{"contratados":100,"retencao":34},"retencao_cat":{"contratados":239,"retencao":100},"introducao":{"contratados":82,"retencao":32},"evolucao":{"contratados":165,"retencao":64},"interacao":{"contratados":85,"retencao":36},"expansao":{"contratados":0,"retencao":0}},"2025-06-02":{"conexao":{"contratados":135,"retencao":48},"retencao_cat":{"contratados":101,"retencao":26},"introducao":{"contratados":120,"retencao":27},"evolucao":{"contratados":82,"retencao":21},"interacao":{"contratados":66,"retencao":20},"expansao":{"contratados":0,"retencao":0}},"2025-06-03":{"conexao":{"contratados":86,"retencao":32},"retencao_cat":{"contratados":78,"retencao":23},"introducao":{"contratados":47,"retencao":21},"evolucao":{"contratados":40,"retencao":16},"interacao":{"contratados":25,"retencao":12},"expansao":{"contratados":0,"retencao":0}},"2025-06-04":{"conexao":{"contratados":49,"retencao":14},"retencao_cat":{"contratados":138,"retencao":56},"introducao":{"contratados":54,"retencao":16},"evolucao":{"contratados":28,"retencao":13},"interacao":{"contratados":18,"retencao":4},"expansao":{"contratados":0,"retencao":0}},"2025-06-05":{"conexao":{"contratados":96,"retencao":35},"retencao_cat":{"contratados":41,"retencao":15},"introducao":{"contratados":28,"retencao":12},"evolucao":{"contratados":47,"retencao":20},"interacao":{"contratados":46,"retencao":21},"expansao":{"contratados":0,"retencao":0}},"2025-06-06":{"conexao":{"contratados":73,"retencao":17},"retencao_cat":{"contratados":42,"retencao":11},"introducao":{"contratados":42,"retencao":17},"evolucao":{"contratados":35,"retencao":12},"interacao":{"contratados":51,"retencao":13},"expansao":{"contratados":0,"retencao":0}},"2025-06-07":{"conexao":{"contratados":28,"retencao":8},"retencao_cat":{"contratados":28,"retencao":9},"introducao":{"contratados":65,"retencao":23},"evolucao":{"contratados":47,"retencao":17},"interacao":{"contratados":75,"retencao":24},"expansao":{"contratados":0,"retencao":0}},"2025-06-08":{"conexao":{"contratados":83,"retencao":26},"retencao_cat":{"contratados":113,"retencao":41},"introducao":{"contratados":71,"retencao":26},"evolucao":{"contratados":78,"retencao":21},"interacao":{"contratados":38,"retencao":14},"expansao":{"contratados":0,"retencao":0}},"2025-06-09":{"conexao":{"contratados":62,"retencao":28},"retencao_cat":{"contratados":106,"retencao":31},"introducao":{"contratados":93,"retencao":25},"evolucao":{"contratados":88,"retencao":18},"interacao":{"contratados":0,"retencao":0},"expansao":{"contratados":36,"retencao":16}},"2025-06-10":{"conexao":{"contratados":17,"retencao":4},"retencao_cat":{"contratados":80,"retencao":30},"introducao":{"contratados":82,"retencao":25},"evolucao":{"contratados":88,"retencao":26},"interacao":{"contratados":0,"retencao":0},"expansao":{"contratados":55,"retencao":23}},"2025-06-11":{"conexao":{"contratados":23,"retencao":11},"retencao_cat":{"contratados":59,"retencao":21},"introducao":{"contratados":38,"retencao":16},"evolucao":{"contratados":100,"retencao":30},"interacao":{"contratados":0,"retencao":0},"expansao":{"contratados":120,"retencao":49}},"2025-06-12":{"conexao":{"contratados":34,"retencao":12},"retencao_cat":{"contratados":125,"retencao":44},"introducao":{"contratados":142,"retencao":51},"evolucao":{"contratados":216,"retencao":60},"interacao":{"contratados":0,"retencao":0},"expansao":{"contratados":92,"retencao":39}},"2025-06-13":{"conexao":{"contratados":22,"retencao":5},"retencao_cat":{"contratados":107,"retencao":30},"introducao":{"contratados":55,"retencao":16},"evolucao":{"contratados":153,"retencao":53},"interacao":{"contratados":0,"retencao":0},"expansao":{"contratados":120,"retencao":48}},"2025-06-14":{"conexao":{"contratados":83,"retencao":28},"retencao_cat":{"contratados":168,"retencao":65},"introducao":{"contratados":67,"retencao":27},"evolucao":{"contratados":127,"retencao":39},"interacao":{"contratados":0,"retencao":0},"expansao":{"contratados":9,"retencao":2}},"2025-06-15":{"conexao":{"contratados":106,"retencao":38},"retencao_cat":{"contratados":187,"retencao":59},"introducao":{"contratados":128,"retencao":41},"evolucao":{"contratados":138,"retencao":47},"interacao":{"contratados":0,"retencao":0},"expansao":{"contratados":47,"retencao":14}}},"premios":[{"date":"2025-05-16","pessoa":"Grazy 158","pasta":"Evolução","premio":"VIP OURO"},{"date":"2025-05-16","pessoa":"Soares 8088","pasta":"Introdução","premio":"VIP PRATA"},{"date":"2025-05-16","pessoa":"N& legit 2162","pasta":"Conexão","premio":"BATTLEPASS"},{"date":"2025-04-17","pessoa":"Grazy 158","pasta":"Evolução","premio":"VIP OURO"},{"date":"2025-04-17","pessoa":"Dygeras 2607","pasta":"Conexão","premio":"VIP PRATA"},{"date":"2025-04-17","pessoa":"Leo 710","pasta":"Introdução","premio":"BATTLEPASS"},{"date":"2025-05-17","pessoa":"grazy 158","pasta":"Evolução","premio":"VIP OURO"},{"date":"2025-05-17","pessoa":"DYGERAS 2607","pasta":"Conexão","premio":"VIP PRATA"},{"date":"2025-05-17","pessoa":"LEO 710","pasta":"Introdução","premio":"BATTLEPASS"},{"date":"2025-06-18","pessoa":"ANDRAE 8447","pasta":"Introdução","premio":"VIP OURO"},{"date":"2025-06-18","pessoa":"JOTINHA 1094","pasta":"Conexão","premio":"VIP PRATA"},{"date":"2025-06-18","pessoa":"GRAZY 158","pasta":"Evolução","premio":"BATTLEPASS"},{"date":"2025-05-19","pessoa":"JOTINHA 1094","pasta":"Conexão","premio":"VIP OURO"},{"date":"2025-05-19","pessoa":"LEO 710","pasta":"Introdução","premio":"VIP PRATA"},{"date":"2025-05-19","pessoa":"PETER  1103","pasta":"Introdução","premio":"BATTLEPASS"},{"date":"2025-05-20","pessoa":"LEO 710","pasta":"Conexão","premio":"VIP OURO"},{"date":"2025-05-20","pessoa":"YGÃO 8940","pasta":"Introdução","premio":"VIP PRATA"},{"date":"2025-05-20","pessoa":"ANDRADE 8447","pasta":"Introdução","premio":"BATTLEPASS"},{"date":"2025-05-21","pessoa":"NERD 100","pasta":"Evolução","premio":"VIP OURO"},{"date":"2025-05-21","pessoa":"LUA 6499","pasta":"Evolução","premio":"VIP PRATA"},{"date":"2025-05-21","pessoa":"LULIRIAL 10858","pasta":"Introdução","premio":"BATTLEPASS"},{"date":"2025-05-22","pessoa":"LEO 710","pasta":"Introdução","premio":"VIP OURO"},{"date":"2025-05-22","pessoa":"LULIRAL 10858","pasta":"Introdução","premio":"VIP PRATA"},{"date":"2025-05-22","pessoa":"NEGO","pasta":"Retenção","premio":"BATTLEPASS"},{"date":"2025-05-23","pessoa":"LULIRAL 10858","pasta":"Introdução","premio":"VIP OURO"},{"date":"2025-05-23","pessoa":"LUA 6499","pasta":"Evolução","premio":"VIP PRATA"},{"date":"2025-05-23","pessoa":"RIBEIRO 8460","pasta":"Introdução","premio":"BATTLEPASS"},{"date":"2025-05-24","pessoa":"ANDERSON 17018","pasta":"Introdução","premio":"VIP OURO"},{"date":"2025-05-24","pessoa":"STEFANY 16528","pasta":"Conexão","premio":"VIP PRATA"},{"date":"2025-05-24","pessoa":"MARCOS 9591","pasta":"Retenção","premio":"BATTLEPASS"},{"date":"2025-05-25","pessoa":"NEGO","pasta":"Retenção","premio":"VIP OURO"},{"date":"2025-05-25","pessoa":"PETER 1103","pasta":"Introdução","premio":"VIP PRATA"},{"date":"2025-05-25","pessoa":"LUCAS 16266","pasta":"Conexão","premio":"BATTLEPASS"},{"date":"2025-05-26","pessoa":"DENTINHO 19402","pasta":"Retenção","premio":"VIP PLATINA"},{"date":"2025-05-26","pessoa":"SCOTT 14064","pasta":"Conexão","premio":"VIP LANÇAMENTO"},{"date":"2025-05-26","pessoa":"LORDY 501","pasta":"Conexão","premio":"VIP LANÇAMENTO"},{"date":"2025-05-27","pessoa":"DENTINHO 19402","pasta":"Retenção","premio":"VIP OURO"},{"date":"2025-05-27","pessoa":"MARCOS 9591","pasta":"Conexão","premio":"VIP PRATA"},{"date":"2025-05-27","pessoa":"LUA 6499","pasta":"Evolução","premio":"BATTLEPASS"},{"date":"2025-05-28","pessoa":"ANDERSON 17018","pasta":"Introdução","premio":"VIP OURO"},{"date":"2025-05-28","pessoa":"ALEXANDRE","pasta":"Interação","premio":"VIP PRATA"},{"date":"2025-05-28","pessoa":"BAIANINHO","pasta":"Conexão","premio":"BATTLEPASS"},{"date":"2025-05-29","pessoa":"ANDERSON 17018","pasta":"Conexão","premio":"VIP OURO"},{"date":"2025-05-29","pessoa":"SHINO 22234","pasta":"Conexão","premio":"VIP PRATA"},{"date":"2025-05-29","pessoa":"ZERO  404","pasta":"Conexão","premio":"BATTLEPASS"},{"date":"2025-05-30","pessoa":"SHINO 22234","pasta":"Evolução","premio":"VIP OURO"},{"date":"2025-05-30","pessoa":"ANGOLANO 21653","pasta":"Retenção","premio":"VIP PRATA"},{"date":"2025-05-30","pessoa":"MARCOS 9591","pasta":"Retenção","premio":"BATTLEPASS"},{"date":"2025-05-31","pessoa":"WZIN 120","pasta":"Conexão","premio":"VIP OURO"},{"date":"2025-05-31","pessoa":"BOSS RICO 9465","pasta":"Retenção","premio":"VIP PRATA"},{"date":"2025-05-31","pessoa":"LEO 710","pasta":"Introdução","premio":"BATTLEPASS"},{"date":"2025-06-01","pessoa":"GRAZY 158","pasta":"Evolução","premio":"VIP PLATINA"},{"date":"2025-06-01","pessoa":"ZERO 404","pasta":"Retenção","premio":"VIP PLATINA"},{"date":"2025-06-01","pessoa":"ANGOLANO 21653","pasta":"Retenção","premio":"VIP LANÇAMENTO"},{"date":"2025-06-02","pessoa":"INER 100","pasta":"Evolução","premio":"VIP OURO"},{"date":"2025-06-02","pessoa":"LEVI 15656","pasta":"Conexão","premio":"VIP PRATA"},{"date":"2025-06-02","pessoa":"FANTASMA 23580","pasta":"Introdução","premio":"BATTLEPASS"},{"date":"2025-06-03","pessoa":"ZERO 404","pasta":"Retenção","premio":"VIP OURO"},{"date":"2025-06-03","pessoa":"LORDY 501","pasta":"Conexão","premio":"VIP PRATA"},{"date":"2025-06-03","pessoa":"RAFA 23544","pasta":"Introdução","premio":"BATTLEPASS"},{"date":"2025-06-04","pessoa":"ZERO 404","pasta":"Retenção","premio":"VIP OURO"},{"date":"2025-06-04","pessoa":"FANTASMA 23580","pasta":"Introdução","premio":"VIP PRATA"},{"date":"2025-06-04","pessoa":"ROMEU 27279","pasta":"Retenção","premio":"BATTLEPASS"},{"date":"2025-06-05","pessoa":"TEXEIRA 22152","pasta":"Conexão","premio":"VIP OURO"},{"date":"2025-06-05","pessoa":"MARCOS 9591","pasta":"Retenção","premio":"VIP PRATA"},{"date":"2025-06-05","pessoa":"BOSS RICO 9465","pasta":"Retenção","premio":"BATTLEPASS"},{"date":"2025-06-06","pessoa":"WZIN 120","pasta":"Conexão","premio":"VIP OURO"},{"date":"2025-06-06","pessoa":"VICKY 20266","pasta":"Interação","premio":"VIP PRATA"},{"date":"2025-06-06","pessoa":"LEO 710","pasta":"Introdução","premio":"BATTLEPASS"},{"date":"2025-06-07","pessoa":"ORUAM 21879","pasta":"Evolução","premio":"VIP OURO"},{"date":"2025-06-07","pessoa":"RAFAEL 13549","pasta":"Interação","premio":"VIP PRATA"},{"date":"2025-06-07","pessoa":"GHH","pasta":"Evolução","premio":"BATTLEPASS"},{"date":"2025-06-10","pessoa":"CABULA 27804","pasta":"Conexão","premio":"VIP PRATA"},{"date":"2025-06-10","pessoa":"CONNOR 21561","pasta":"Conexão","premio":"BATTLEPASS"},{"date":"2025-06-11","pessoa":"ANDERSON 17018","pasta":"Introdução","premio":"VIP OURO"},{"date":"2025-06-11","pessoa":"LEO 33477","pasta":"Conexão","premio":"VIP PRATA"},{"date":"2025-06-11","pessoa":"CABULA 27804","pasta":"Conexão","premio":"BATTLEPASS"},{"date":"2025-06-12","pessoa":"LUCAS 16266","pasta":"Conexão","premio":"VIP OURO"},{"date":"2025-06-12","pessoa":"TWZIN 25341","pasta":"Conexão","premio":"VIP PRATA"},{"date":"2025-06-12","pessoa":"GABRIEL 33534","pasta":"Retenção","premio":"BATTLEPASS"},{"date":"2025-06-13","pessoa":"ANGOLANO 21653","pasta":"Retenção","premio":"VIP OURO"},{"date":"2025-06-13","pessoa":"TWZIN 25341","pasta":"Conexão","premio":"VIP PRATA"},{"date":"2025-06-13","pessoa":"JOAO 20078","pasta":"Retenção","premio":"BATTLEPASS"},{"date":"2025-06-14","pessoa":"TWZIN 25341","pasta":"Conexão","premio":"VIP OURO"},{"date":"2025-06-14","pessoa":"ARTHUR 4101","pasta":"Conexão","premio":"VIP PRATA"},{"date":"2025-06-14","pessoa":"ANDERSON 19955","pasta":"Retenção","premio":"BATTLEPASS"},{"date":"2025-06-15","pessoa":"KAIO 28870","pasta":"Retenção","premio":"VIP OURO"},{"date":"2025-06-15","pessoa":"TWZIN 25341","pasta":"Conexão","premio":"VIP PRATA"},{"date":"2025-06-15","pessoa":"SUPER CHOQUE 52","pasta":"Introdução","premio":"BATTLEPASS"}],"facData":{"2025-05-09":[],"2025-05-10":[],"2025-05-11":[],"2025-05-12":[],"2025-05-13":[],"2025-05-14":[],"2025-05-15":[],"2025-05-16":[],"2025-05-17":[],"2025-05-18":[],"2025-05-19":[],"2025-04-17":[],"2025-06-18":[],"2025-05-20":[],"2025-05-21":[],"2025-05-22":[],"2025-05-23":[],"2025-05-24":[],"2025-05-25":[],"2025-05-26":[],"2025-05-27":[],"2025-05-28":[],"2025-05-29":[],"2025-05-30":[],"2025-05-31":[],"2025-06-01":[],"2025-06-02":[],"2025-06-03":[],"2025-06-04":[],"2025-06-05":[],"2025-06-06":[],"2025-06-07":[],"2025-06-08":[],"2025-06-09":[],"2025-06-10":[],"2025-06-11":[],"2025-06-12":[],"2025-06-13":[],"2025-06-14":[],"2025-06-15":[]},"notes":{"contratados":{},"retencao":{},"fac":{}}};
                 if (fbAuth.currentUser.email === ADMIN_EMAIL) {
                     await dbRef.set(backupData);
@@ -260,7 +255,6 @@
             }
         }
         
-        // --- GERENCIAMENTO DE ACESSOS ---
         const accessModal = document.getElementById('access-modal');
         const accessListContainer = document.getElementById('access-list-container');
         const addEmailBtn = document.getElementById('add-email-btn');
@@ -331,7 +325,6 @@
         });
         
         closeAccessModalBtn.addEventListener('click', () => closeModal(accessModal));
-        // --- FIM GERENCIAMENTO DE ACESSOS ---
 
         async function initializeApp() {
             db = await loadDb();
@@ -342,7 +335,6 @@
             document.getElementById('weekly-status-date').value = today;
             document.getElementById('weekly-status-fac-date').value = today;
             setupFillModal(); 
-            // AS FUNÇÕES NOVAS SÃO CHAMADAS AQUI, NA ORDEM CORRETA
             setupDayButtons();
             if (!chartInstances.contratadosRetencaoBarChart) {
                 chartInstances.contratadosRetencaoBarChart = createContratadosRetencaoChart();
@@ -371,11 +363,7 @@
         const openModal = (modal) => { modal.classList.remove('hidden'); modal.classList.add('flex'); }
         const closeModal = (modal) => { modal.classList.add('hidden'); modal.classList.remove('flex'); }
 
-
-        // --- CÓDIGO MODIFICADO PARA AS NOVAS FUNCIONALIDADES ---
-
         const resetFillModal = () => {
-            // Esta função agora APENAS limpa os campos, sem resetar a data
             document.getElementById('fill-modal-content').querySelectorAll('input[type="number"], input[type="text"], select').forEach(el => {
                 if (el.type === 'text' || el.type === 'number') {
                     el.value = '';
@@ -387,9 +375,8 @@
         };
 
         const populateFillModal = (date) => {
-            resetFillModal(); // Limpa o formulário antes de preencher com novos dados
+            resetFillModal();
             if (!date) return;
-
             const dayData = db.dailyData?.[date];
             if (dayData) {
                 document.querySelectorAll('#fill-categories input[type="number"]').forEach(input => {
@@ -400,7 +387,6 @@
                     }
                 });
             }
-
             const premiosDoDia = db.premios?.filter(p => p.date === date) || [];
             const premioEntries = document.querySelectorAll('.premio-entry');
             premioEntries.forEach((entry, index) => {
@@ -410,7 +396,6 @@
                     entry.querySelector('.premio-nome').value = premiosDoDia[index].premio || '';
                 }
             });
-
             const facDoDia = db.facData?.[date] || [];
             const facEntries = document.querySelectorAll('.fac-entry');
             facEntries.forEach((entry, index) => {
@@ -464,7 +449,6 @@
                 Object.keys(db.notes).forEach(key => {
                     if (db.notes[key]?.[date]) delete db.notes[key][date];
                 });
-
                 await saveDb();
                 alert(`Dados do dia ${date} foram removidos com sucesso.`);
                 handleCloseModal();
@@ -479,28 +463,24 @@
                 alert('Por favor, selecione uma data.');
                 return;
             }
-        
             if(!db.dailyData) db.dailyData = {};
-            if(!db.dailyData[date]) db.dailyData[date] = {}; // Cria o objeto do dia apenas se não existir
-        
+            if(!db.dailyData[date]) db.dailyData[date] = {};
             document.querySelectorAll('#fill-categories input[type="number"]').forEach(input => {
                 const id = input.dataset.id;
                 const type = input.dataset.type;
                 if (!db.dailyData[date][id]) db.dailyData[date][id] = {};
                 db.dailyData[date][id][type] = parseInt(input.value) || 0;
             });
-        
             if(!db.premios) db.premios = [];
-            db.premios = db.premios.filter(p => p.date !== date); // Remove prêmios antigos do dia
+            db.premios = db.premios.filter(p => p.date !== date);
             document.querySelectorAll('.premio-entry').forEach(entry => {
                 const pessoa = entry.querySelector('.premio-pessoa').value.trim();
                 const pasta = entry.querySelector('.premio-pasta').value;
                 const premio = entry.querySelector('.premio-nome').value;
                 if(pessoa && pasta && premio) db.premios.push({ date, pessoa, pasta, premio });
             });
-        
             if(!db.facData) db.facData = {};
-            db.facData[date] = []; // Remove FACs antigas do dia
+            db.facData[date] = [];
             document.querySelectorAll('.fac-entry').forEach(entry => {
                 const fac = entry.querySelector('.fac-foco-nome').value.trim();
                 if(fac) {
@@ -514,16 +494,12 @@
                     });
                 }
             });
-        
             await saveDb();
             alert('Dados salvos com sucesso na nuvem!');
             handleCloseModal();
             updateAllCharts();
             setupDayButtons();
         });
-
-        // --- FIM DO CÓDIGO MODIFICADO ---
-
 
         document.getElementById('open-consult-modal-btn').addEventListener('click', () => { document.getElementById('consult-date').value = getTodayString(); openModal(consultModal);});
         document.getElementById('close-consult-modal-btn').addEventListener('click', () => closeModal(consultModal));
@@ -552,6 +528,9 @@
         const createChart = (ctx, type, data, options) => new Chart(ctx, { type, data, options });
         const renderCustomLegends = () => { ['contratados', 'retencao', 'fac'].forEach(key => { const legendId = `timeline-${key}-legend`; const chartKey = `${key}TimelineChart`; const legendEl = document.getElementById(legendId); if (legendEl && chartInstances[chartKey]) { const chart = chartInstances[chartKey]; legendEl.innerHTML = categories.map((cat, index) => { const isHidden = !chart.isDatasetVisible(index); return `<div class="legend-item ${isHidden ? 'hidden-dataset' : ''}" data-chart="${chartKey}" data-dataset-index="${index}"><div class="legend-dot" style="background-color: ${cat.hex};"></div><span>${cat.name.toUpperCase()}</span></div>` }).join(''); } }); };
         
+        // ===================================================================
+        // A ÚNICA FUNÇÃO MODIFICADA ESTÁ AQUI
+        // ===================================================================
         const externalTooltipHandler = (context) => { 
             const {chart, tooltip} = context;
             const tooltipEl = document.getElementById('chartjs-tooltip');
@@ -559,13 +538,40 @@
                 tooltipEl.style.opacity = 0;
                 return;
             }
+
+            const canvasId = chart.canvas.id;
+            let chartKey = '';
+            if (canvasId.includes('contratados')) chartKey = 'contratados';
+            else if (canvasId.includes('retencao')) chartKey = 'retencao';
+            else if (canvasId.includes('fac')) chartKey = 'fac';
+
             const pointDate = tooltip.dataPoints[0].raw.x;
             let innerHtml = `<thead><tr><th colspan="2">${new Date(pointDate).toLocaleDateString('pt-BR', {timeZone: 'UTC'})}</th></tr></thead><tbody>`;
+            
             tooltip.dataPoints.forEach(point => {
                 const dataset = chart.data.datasets[point.datasetIndex];
                 if (dataset.isVerticalLine) return;
                 innerHtml += `<tr><td><span class="tooltip-dot" style="background-color: ${dataset.borderColor};"></span>${dataset.label}</td><td class="text-right font-bold">${point.raw.y}</td></tr>`;
             });
+
+            if (chartKey) {
+                const notesForDay = db.notes?.[chartKey]?.[pointDate] || [];
+                const noteCount = notesForDay.length;
+
+                if (noteCount > 0) {
+                    const noteText = noteCount === 1 ? 'Anotação' : 'Anotações';
+                    innerHtml += `<tr><td colspan="2"><hr class="border-gray-600 my-1"></td></tr>`;
+                    innerHtml += `
+                        <tr>
+                            <td>
+                                <span class="tooltip-dot" style="background-color: #a855f7;"></span>${noteText}
+                            </td>
+                            <td class="text-right font-bold">${noteCount}</td>
+                        </tr>
+                    `;
+                }
+            }
+
             innerHtml += `</tbody>`;
             tooltipEl.innerHTML = `<table>${innerHtml}</table>`;
             tooltipEl.style.opacity = 1;
@@ -580,7 +586,6 @@
                 tooltipEl.style.opacity = 0;
                 return;
             }
-
             let innerHtml = '';
             if (tooltip.title.length > 0) {
                 innerHtml += `<thead><tr><th colspan="2">${tooltip.title[0]}</th></tr></thead>`;
@@ -594,7 +599,6 @@
                 innerHtml += `<tr><td><span class="tooltip-dot" style="background-color: ${color};"></span>${label}</td><td class="text-right font-bold">${value}</td></tr>`;
             });
             innerHtml += '</tbody>';
-
             tooltipEl.innerHTML = `<table>${innerHtml}</table>`;
             tooltipEl.style.opacity = 1;
             tooltipEl.style.left = chart.canvas.getBoundingClientRect().left + window.scrollX + tooltip.caretX + 'px';
@@ -661,16 +665,12 @@
                 if (e.target.classList.contains('day-btn')) {
                     const mainDateVal = document.getElementById('main-date-filter').value;
                     if (!mainDateVal) return;
-                    
                     const mainDate = new Date(`${mainDateVal}T12:00:00`);
                     const mainDayIndex = mainDate.getDay();
                     const targetDayIndex = parseInt(e.target.dataset.dayIndex, 10);
-                    
                     const dateDiff = targetDayIndex - mainDayIndex;
-                    
                     const targetDate = new Date(mainDate);
                     targetDate.setDate(mainDate.getDate() + dateDiff);
-
                     const targetDateString = targetDate.toISOString().split('T')[0];
                     updateContratadosRetencaoChart(targetDateString);
                 }
@@ -716,7 +716,7 @@
         const aiChatSend = document.getElementById('ai-chat-send');
         let chatHistory = [];
         const addChatMessage = (message, sender) => { const bubble = document.createElement('div'); bubble.className = `ai-chat-bubble ${sender === 'user' ? 'ai-chat-user' : 'ai-chat-gemini'}`; message = message.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>').replace(/\n/g, '<br>'); bubble.innerHTML = message; aiChatMessages.appendChild(bubble); aiChatMessages.scrollTop = aiChatMessages.scrollHeight; return bubble; };
-        const getFullDashboardDataAsString = () => { /* ... (função completa aqui) ... */ let fullDataString = "## Contexto Completo do Painel Wallstreet\n\n"; fullDataString += `Data de hoje: ${getTodayString()}\n\n`; fullDataString += "### Dados Diários (Contratados e Retenção):\n"; const sortedDates = Object.keys(db.dailyData).sort().reverse(); for(const date of sortedDates.slice(0, 30)){ fullDataString += `Data: ${date}: `; let dailyEntries = []; for(const cat of categories){ const entry = db.dailyData[date][cat.id]; if(entry && (entry.contratados > 0 || entry.retencao > 0)){ dailyEntries.push(`${cat.name}: C${entry.contratados}/R${entry.retencao}`); } } fullDataString += dailyEntries.join(', ') + '\n'; } fullDataString += "\n### Registros de Prêmios (últimos 20):\n"; if(db.premios) { db.premios.slice(-20).forEach(p => { fullDataString += `- ${p.date}: ${p.pessoa} (${p.pasta}) - ${p.premio}\n`; }); } fullDataString += "\n### Anotações Recentes:\n"; if(db.notes) { Object.keys(db.notes).forEach(key => { if(db.notes[key]) { Object.keys(db.notes[key]).slice(-5).forEach(date => { fullDataString += `- ${date} (${key}): ${db.notes[key][date].join('; ')}\n`; }); } }); } return fullDataString; }
+        const getFullDashboardDataAsString = () => { let fullDataString = "## Contexto Completo do Painel Wallstreet\n\n"; fullDataString += `Data de hoje: ${getTodayString()}\n\n`; fullDataString += "### Dados Diários (Contratados e Retenção):\n"; const sortedDates = Object.keys(db.dailyData).sort().reverse(); for(const date of sortedDates.slice(0, 30)){ fullDataString += `Data: ${date}: `; let dailyEntries = []; for(const cat of categories){ const entry = db.dailyData[date][cat.id]; if(entry && (entry.contratados > 0 || entry.retencao > 0)){ dailyEntries.push(`${cat.name}: C${entry.contratados}/R${entry.retencao}`); } } fullDataString += dailyEntries.join(', ') + '\n'; } fullDataString += "\n### Registros de Prêmios (últimos 20):\n"; if(db.premios) { db.premios.slice(-20).forEach(p => { fullDataString += `- ${p.date}: ${p.pessoa} (${p.pasta}) - ${p.premio}\n`; }); } fullDataString += "\n### Anotações Recentes:\n"; if(db.notes) { Object.keys(db.notes).forEach(key => { if(db.notes[key]) { Object.keys(db.notes[key]).slice(-5).forEach(date => { fullDataString += `- ${date} (${key}): ${db.notes[key][date].join('; ')}\n`; }); } }); } return fullDataString; }
         const setupAIChat = () => { aiChatMessages.innerHTML = ''; chatHistory = []; const apiKey = localStorage.getItem('geminiApiKey'); if (!apiKey) { addChatMessage("Bem-vindo! Para começar, insira sua Chave de API do Google AI Studio clicando em 'Configurar Chave' no canto superior direito.", 'gemini'); return; } const systemInstruction = `Você é um assistente de IA multifuncional. Sua principal função é ser um assistente geral, capaz de conversar sobre qualquer assunto. No entanto, você também tem acesso a um conjunto de dados de um painel de controle chamado "Wallstreet". Se o usuário fizer uma pergunta que pareça relacionada a dados, performance, pastas, contratações, retenção, prêmios ou qualquer termo do painel, use os dados fornecidos abaixo para formular sua resposta. Para todas as outras perguntas, responda usando seu conhecimento geral. Seja prestativo e amigável.\n---\nDADOS DO PAINEL:\n${getFullDashboardDataAsString()}\n---\nAgora, comece a conversa com o usuário.`; chatHistory.push({ role: 'user', parts: [{ text: systemInstruction }] }); addChatMessage("Olá! Sou sua assistente IA. Posso analisar os dados do seu painel ou conversar sobre qualquer outro assunto. O que você gostaria de fazer?", 'gemini'); chatHistory.push({ role: 'model', parts: [{ text: "Olá! Sou sua assistente IA. Posso analisar os dados do seu painel ou conversar sobre qualquer outro assunto. O que você gostaria de fazer?" }] }); };
         const handleAIChat = async () => { const userMessage = aiChatInput.value.trim(); if (!userMessage) return; const apiKey = localStorage.getItem('geminiApiKey'); if (!apiKey) { addChatMessage("Por favor, configure sua chave de API primeiro.", 'gemini'); return; } addChatMessage(userMessage, 'user'); aiChatInput.value = ''; const thinkingBubble = addChatMessage('Pensando...', 'gemini'); chatHistory.push({ role: 'user', parts: [{ text: userMessage }] }); const payload = { contents: chatHistory }; const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${apiKey}`; try { const response = await fetch(apiUrl, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) }); if (!response.ok) { const errorBody = await response.json(); console.error("API Error Response:", errorBody); throw new Error(`A API retornou um erro ${response.status}: ${errorBody.error?.message || 'Erro desconhecido'}`); } const result = await response.json(); if (result.candidates && result.candidates[0]?.content?.parts[0]?.text) { const aiResponse = result.candidates[0].content.parts[0].text; thinkingBubble.innerHTML = aiResponse.replace(/\n/g, '<br>'); chatHistory.push({ role: 'model', parts: [{ text: aiResponse }] }); } else { thinkingBubble.textContent = "Desculpe, não consegui obter uma resposta válida da IA."; console.error("Invalid API response structure:", result); } } catch (error) { thinkingBubble.textContent = "Ocorreu um erro ao conectar com a IA. Verifique o console para detalhes."; console.error("Fetch Error:", error); } };
         aiChatSend.addEventListener('click', handleAIChat);
