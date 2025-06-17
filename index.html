@@ -612,29 +612,15 @@
         // --- INITIALIZATION --- //
         const setupApp = () => {
             try {
-// Import the functions you need from the SDKs you need
-import { initializeApp } from "firebase/app";
-// TODO: Add SDKs for Firebase products that you want to use
-// https://firebase.google.com/docs/web/setup#available-libraries
-
-// Your web app's Firebase configuration
-const firebaseConfig = {
-  apiKey: "AIzaSyCONofXx4NlCP34PZrs4pV-gDRJ_Uasw3c",
-  authDomain: "wswallstreet-3ab24.firebaseapp.com",
-  projectId: "wswallstreet-3ab24",
-  storageBucket: "wswallstreet-3ab24.firebasestorage.app",
-  messagingSenderId: "255776848131",
-  appId: "1:255776848131:web:17af511729c29eb2569136"
-};
-
-// Initialize Firebase
-const app = initializeApp(firebaseConfig);
+                // ** IMPORTANTE: COLE AQUI A CONFIGURAÇÃO DO SEU FIREBASE         **
+                const firebaseConfig = {
+                    apiKey: "AIzaSyCONofXx4NlCP34PZrs4pV-gDRJ_Uasw3c",
+                    authDomain: "wswallstreet-3ab24.firebaseapp.com",
+                    projectId: "wswallstreet-3ab24",
+                    storageBucket: "wswallstreet-3ab24.appspot.com",
+                    messagingSenderId: "255776848131",
+                    appId: "1:255776848131:web:17af511729c29eb2569136"
                 };
-
-                if (firebaseConfig.apiKey === "AIzaSyCONofXx4NlCP34PZrs4pV-gDRJ_Uasw3c") {
-                    document.body.innerHTML = `<div class="h-screen flex items-center justify-center text-center text-white"><p class="text-lg">Erro de Configuração: A chave do Firebase não foi adicionada.<br>Edite o arquivo HTML para configurar o painel.</p></div>`;
-                    return;
-                }
 
                 const app = initializeApp(firebaseConfig);
                 firestore = getFirestore(app);
@@ -697,4 +683,4 @@ const app = initializeApp(firebaseConfig);
         setupApp();
     </script>
 </body>
-</html>
+</html>" which is the same as the "Dashboard Wallstreet V34 - Login Corrigido" immersi
