@@ -612,14 +612,23 @@
         // --- INITIALIZATION --- //
         const setupApp = () => {
             try {
-                // ** IMPORTANTE: COLE AQUI A CONFIGURAÇÃO DO SEU FIREBASE         **
-                const firebaseConfig = {
-                    apiKey: "AIzaSyCONofXx4NlCP34PZrs4pV-gDRJ_Uasw3c",
-                    authDomain: "wswallstreet-3ab24.firebaseapp.com",
-                    projectId: "wswallstreet-3ab24",
-                    storageBucket: "wswallstreet-3ab24.firebasestorage.app",
-                    messagingSenderId: "255776848131",
-                    appId: "1:255776848131:web:17af511729c29eb2569136"
+// Import the functions you need from the SDKs you need
+import { initializeApp } from "firebase/app";
+// TODO: Add SDKs for Firebase products that you want to use
+// https://firebase.google.com/docs/web/setup#available-libraries
+
+// Your web app's Firebase configuration
+const firebaseConfig = {
+  apiKey: "AIzaSyCONofXx4NlCP34PZrs4pV-gDRJ_Uasw3c",
+  authDomain: "wswallstreet-3ab24.firebaseapp.com",
+  projectId: "wswallstreet-3ab24",
+  storageBucket: "wswallstreet-3ab24.firebasestorage.app",
+  messagingSenderId: "255776848131",
+  appId: "1:255776848131:web:17af511729c29eb2569136"
+};
+
+// Initialize Firebase
+const app = initializeApp(firebaseConfig);
                 };
 
                 if (firebaseConfig.apiKey === "AIzaSyCONofXx4NlCP34PZrs4pV-gDRJ_Uasw3c") {
