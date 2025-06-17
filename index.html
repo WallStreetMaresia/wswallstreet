@@ -167,7 +167,7 @@
         <div class="modal-content rounded-xl p-6 w-full max-w-2xl h-[80vh] flex flex-col">
             <div class="flex justify-between items-center mb-4">
                 <h2 class="text-xl font-bold text-white">Análise com IA</h2>
-                <button id="configure-api-key-btn" class="text-xs text-gray-400 hover:text-white">Configurar </button>
+                <button id="configure-api-key-btn" class="text-xs text-gray-400 hover:text-white">Configurar Chave</button>
             </div>
             <div id="ai-chat-messages" class="flex-grow overflow-y-auto space-y-4 p-4 bg-black/20 rounded-lg flex flex-col">
                 <!-- Chat messages will appear here -->
@@ -477,7 +477,7 @@
             aiChatMessages.innerHTML = ''; // Clear previous messages
             const apiKey = localStorage.getItem('geminiApiKey');
             if (!apiKey) {
-                addChatMessage("Bem-vindo à Análise IA! Para começar, clique em 'Configurar ' no canto superior direito e insira sua  de API do Google AI Studio. Você pode obtê-la gratuitamente.", 'gemini');
+                addChatMessage("Bem-vindo à Análise IA! Para começar, clique em 'Configurar Chave' no canto superior direito e insira sua chave de API do Google AI Studio. Você pode obtê-la gratuitamente.", 'gemini');
             } else {
                 addChatMessage("Olá! Sou sua assistente de IA. Pergunte-me algo sobre os dados do seu painel.", 'gemini');
             }
@@ -612,9 +612,17 @@
         // --- INITIALIZATION --- //
         const setupApp = () => {
             try {
-                const firebaseConfig = JSON.parse(atob(typeof __firebase_config !== 'undefined' ? __firebase_config : 'e30='));
-                
-                if (firebaseConfig.apiKey === "AIzaSyCONofXx4NlCP34PZrs4pV-gDRJ_Uasw3c" || !firebaseConfig.apiKey) {
+                // ** IMPORTANTE: COLE AQUI A CONFIGURAÇÃO DO SEU FIREBASE         **
+                const firebaseConfig = {
+                    apiKey: "COLE_SUA_API_KEY_AQUI",
+                    authDomain: "SEU_AUTH_DOMAIN.firebaseapp.com",
+                    projectId: "SEU_PROJECT_ID",
+                    storageBucket: "SEU_STORAGE_BUCKET.appspot.com",
+                    messagingSenderId: "SEU_MESSAGING_SENDER_ID",
+                    appId: "SEU_APP_ID"
+                };
+
+                if (firebaseConfig.apiKey === "COLE_SUA_API_KEY_AQUI") {
                     document.body.innerHTML = `<div class="h-screen flex items-center justify-center text-center text-white"><p class="text-lg">Erro de Configuração: A chave do Firebase não foi adicionada.<br>Edite o arquivo HTML para configurar o painel.</p></div>`;
                     return;
                 }
@@ -680,4 +688,4 @@
         setupApp();
     </script>
 </body>
-</ht
+</html>
