@@ -1,0 +1,674 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Controle de Pastas Wallstreet</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom/dist/chartjs-plugin-zoom.min.js"></script>
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #000000; color: #E0E0E0; }
+        .chart-border { border-color: rgba(255, 255, 255, 0.2); }
+        .btn-action { background-color: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 255, 255, 0.2); transition: background-color 0.3s; }
+        .btn-action:hover { background-color: rgba(255, 255, 255, 0.2); }
+        .modal-bg { background-color: rgba(0, 0, 0, 0.8); backdrop-filter: blur(4px); }
+        .modal-content { background-color: #111; border: 1px solid rgba(255, 255, 255, 0.2); }
+        .input-field, .select-field { background-color: #222; border: 1px solid rgba(255, 255, 255, 0.3); color: #E0E0E0; border-radius: 0.375rem; }
+        .select-field { -webkit-appearance: none; -moz-appearance: none; appearance: none; background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e"); background-position: right 0.5rem center; background-repeat: no-repeat; background-size: 1.5em 1.5em; padding-right: 2.5rem; }
+        .custom-legend { display: flex; justify-content: center; align-items: center; gap: 1.5rem; margin-top: 1rem; flex-wrap: wrap; }
+        .legend-item { display: flex; align-items: center; gap: 0.5rem; font-size: 0.75rem; cursor: pointer; transition: opacity 0.2s; }
+        .legend-item.hidden-dataset { opacity: 0.5; text-decoration: line-through; }
+        .legend-dot { width: 0.625rem; height: 0.625rem; border-radius: 9999px; }
+        #chartjs-tooltip { opacity: 0; position: absolute; background: rgba(30, 30, 30, 0.9); color: white; border-radius: 8px; padding: 10px 15px; pointer-events: none; transition: all .1s ease; transform: translate(-50%, -110%); font-size: 12px; border: 1px solid rgba(255, 255, 255, 0.2); z-index: 100; }
+        #chartjs-tooltip table { margin: 0; border-collapse: collapse; width: 100%;}
+        #chartjs-tooltip th, #chartjs-tooltip td { border: none; padding: 4px 0; text-align: left;}
+        #chartjs-tooltip .tooltip-dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 8px; }
+        .ai-chat-bubble { max-width: 80%; padding: 10px 15px; border-radius: 15px; word-wrap: break-word; }
+        .ai-chat-user { background-color: #007bff; color: white; align-self: flex-end; border-bottom-right-radius: 0; }
+        .ai-chat-gemini { background-color: #333; color: white; align-self: flex-start; border-bottom-left-radius: 0;}
+    </style>
+</head>
+<body class="bg-black">
+    <div id="login-view" class="h-screen flex items-center justify-center">
+        <div class="w-full max-w-md p-8 space-y-8 bg-[#111] rounded-xl shadow-lg border border-gray-700">
+            <div>
+                <h2 class="mt-6 text-center text-3xl font-extrabold text-white">Acesse sua conta</h2>
+            </div>
+            <form id="login-form" class="mt-8 space-y-6">
+                <div class="rounded-md shadow-sm -space-y-px">
+                    <div><input id="login-email" name="email" type="email" required class="input-field appearance-none rounded-none relative block w-full px-3 py-2 border-gray-700 placeholder-gray-500 text-white rounded-t-md focus:outline-none focus:ring-purple-500 focus:border-purple-500 focus:z-10 sm:text-sm" placeholder="Email"></div>
+                    <div><input id="login-password" name="password" type="password" required class="input-field appearance-none rounded-none relative block w-full px-3 py-2 border-gray-700 placeholder-gray-500 text-white rounded-b-md focus:outline-none focus:ring-purple-500 focus:border-purple-500 focus:z-10 sm:text-sm" placeholder="Senha"></div>
+                </div>
+                <div><button type="submit" class="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-purple-600 hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500">Entrar</button></div>
+            </form>
+            <p class="text-center text-sm text-gray-400">Não tem uma conta? <button id="show-register-btn" class="font-medium text-purple-400 hover:text-purple-300">Registre-se</button></p>
+        </div>
+    </div>
+
+    <div id="register-view" class="h-screen flex items-center justify-center hidden">
+         <div class="w-full max-w-md p-8 space-y-8 bg-[#111] rounded-xl shadow-lg border border-gray-700">
+            <div>
+                <h2 class="mt-6 text-center text-3xl font-extrabold text-white">Crie sua conta</h2>
+            </div>
+            <form id="register-form" class="mt-8 space-y-6">
+                <div class="rounded-md shadow-sm -space-y-px">
+                     <div><input id="register-email" name="email" type="email" required class="input-field appearance-none rounded-none relative block w-full px-3 py-2 border-gray-700 placeholder-gray-500 text-white rounded-t-md focus:outline-none focus:ring-purple-500 focus:border-purple-500 focus:z-10 sm:text-sm" placeholder="Email"></div>
+                    <div><input id="register-password" name="password" type="password" required class="input-field appearance-none rounded-none relative block w-full px-3 py-2 border-gray-700 placeholder-gray-500 text-white rounded-b-md focus:outline-none focus:ring-purple-500 focus:border-purple-500 focus:z-10 sm:text-sm" placeholder="Senha"></div>
+                </div>
+                <div><button type="submit" class="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-purple-600 hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500">Registrar</button></div>
+            </form>
+            <p class="text-center text-sm text-gray-400">Já tem uma conta? <button id="show-login-btn" class="font-medium text-purple-400 hover:text-purple-300">Faça login</button></p>
+        </div>
+    </div>
+    
+    <div id="dashboard-view" class="hidden p-4 sm:p-6 md:p-8">
+        <div class="max-w-7xl mx-auto">
+            <header class="flex flex-col sm:flex-row justify-between items-center mb-8">
+                <h1 class="text-2xl md:text-3xl font-bold text-white mb-4 sm:mb-0">CONTROLE DE PASTAS WALLSTREET</h1>
+                <div class="flex items-center space-x-4">
+                     <button id="open-ai-chat-btn" class="text-white font-semibold py-2 px-6 rounded-lg bg-purple-600 hover:bg-purple-700 transition-colors">Análise IA</button>
+                    <button id="open-fill-modal-btn" class="text-white font-semibold py-2 px-6 rounded-lg btn-action hidden">PREENCHER</button>
+                    <input type="date" id="main-date-filter" class="bg-yellow-400 text-black font-bold py-2 px-4 rounded-lg cursor-pointer">
+                    <button id="logout-btn" class="text-white font-semibold py-2 px-6 rounded-lg btn-action">Sair</button>
+                </div>
+            </header>
+
+            <main class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <div class="border chart-border rounded-xl p-6 flex flex-col">
+                    <div class="flex flex-wrap justify-between items-center mb-4 gap-4" id="controls-contratados"><h2 class="text-lg font-semibold text-white">LINHA DO TEMPO - CONTRATADOS</h2><div class="flex items-center space-x-2"><input type="date" class="input-field p-1 text-sm compare-start-date" title="Data Início"><input type="date" class="input-field p-1 text-sm compare-end-date" title="Data Fim"><button class="text-yellow-400 border border-yellow-400 rounded-lg py-1 px-3 text-sm font-semibold hover:bg-yellow-400 hover:text-black transition-colors btn-compare">COMPARAR</button><button class="text-purple-400 border border-purple-400 rounded-lg py-1 px-3 text-sm font-semibold hover:bg-purple-400 hover:text-black transition-colors btn-anotacao" data-key="contratados">ANOTAÇÃO</button><button class="text-white border border-gray-500 rounded-lg py-1 px-3 text-sm font-semibold btn-action btn-reset-chart">RESET</button></div></div>
+                    <div class="relative flex-grow h-64"><canvas id="contratados-timeline-chart"></canvas></div><div id="timeline-contratados-legend" class="custom-legend"></div>
+                </div>
+                <div class="border chart-border rounded-xl p-6 flex flex-col">
+                    <div class="flex flex-wrap justify-between items-center mb-4 gap-4" id="controls-retencao"><h2 class="text-lg font-semibold text-white">LINHA DO TEMPO - RETENÇÃO</h2><div class="flex items-center space-x-2"><input type="date" class="input-field p-1 text-sm compare-start-date" title="Data Início"><input type="date" class="input-field p-1 text-sm compare-end-date" title="Data Fim"><button class="text-yellow-400 border border-yellow-400 rounded-lg py-1 px-3 text-sm font-semibold hover:bg-yellow-400 hover:text-black transition-colors btn-compare">COMPARAR</button><button class="text-purple-400 border border-purple-400 rounded-lg py-1 px-3 text-sm font-semibold hover:bg-purple-400 hover:text-black transition-colors btn-anotacao" data-key="retencao">ANOTAÇÃO</button><button class="text-white border border-gray-500 rounded-lg py-1 px-3 text-sm font-semibold btn-action btn-reset-chart">RESET</button></div></div>
+                    <div class="relative flex-grow h-64"><canvas id="retencao-timeline-chart"></canvas></div><div id="timeline-retencao-legend" class="custom-legend"></div>
+                </div>
+                
+                <div class="lg:col-span-2 border chart-border rounded-xl p-6 flex flex-col">
+                     <h2 class="text-lg font-semibold text-white mb-4 text-center">CONTRATADOS X RETENÇÃO</h2>
+                     <div class="relative flex-grow h-64"><canvas id="contratados-retencao-bar-chart"></canvas></div>
+                </div>
+
+                 <div class="border chart-border rounded-xl p-6 flex flex-col">
+                    <div class="flex flex-wrap justify-between items-center mb-4 gap-4" id="controls-fac"><h2 class="text-lg font-semibold text-white">FACÇÕES EM FOCO</h2><div class="flex items-center space-x-2"><input type="date" class="input-field p-1 text-sm compare-start-date" title="Data Início"><input type="date" class="input-field p-1 text-sm compare-end-date" title="Data Fim"><button class="text-yellow-400 border border-yellow-400 rounded-lg py-1 px-3 text-sm font-semibold hover:bg-yellow-400 hover:text-black transition-colors btn-compare">COMPARAR</button><button class="text-purple-400 border border-purple-400 rounded-lg py-1 px-3 text-sm font-semibold hover:bg-purple-400 hover:text-black transition-colors btn-anotacao" data-key="fac">ANOTAÇÃO</button><button class="text-white border border-gray-500 rounded-lg py-1 px-3 text-sm font-semibold btn-action btn-reset-chart">RESET</button></div></div>
+                    <div class="relative flex-grow h-64"><canvas id="fac-timeline-chart"></canvas></div><div id="timeline-fac-legend" class="custom-legend"></div>
+                </div>
+                <div id="status-semanal-fac" class="border chart-border rounded-xl p-6">
+                    <div class="flex flex-wrap justify-between items-center mb-6 gap-4"><h2 class="text-lg font-semibold text-white">STATUS SEMANAL FACS FOCO</h2><div class="flex items-center space-x-2"><input type="date" id="weekly-status-fac-date" class="input-field p-1 text-sm" title="Selecione um dia da semana"><button id="weekly-status-fac-reset" class="text-white border border-gray-500 rounded-lg py-1 px-3 text-sm font-semibold btn-action">RESET</button></div></div>
+                    <div class="space-y-3"></div>
+                </div>
+                <div id="status-semanal" class="border chart-border rounded-xl p-6">
+                    <div class="flex flex-wrap justify-between items-center mb-6 gap-4"><h2 class="text-lg font-semibold text-white">STATUS SEMANAL DAS PASTAS</h2><div class="flex items-center space-x-2"><input type="date" id="weekly-status-date" class="input-field p-1 text-sm" title="Selecione um dia da semana"><button id="weekly-status-reset" class="text-white border border-gray-500 rounded-lg py-1 px-3 text-sm font-semibold btn-action">RESET</button></div></div>
+                    <div class="space-y-3"></div>
+                </div>
+                <div class="border chart-border rounded-xl p-6 flex flex-col justify-between">
+                    <div><h2 class="text-lg font-semibold text-white mb-6">RANK DE PRÊMIOS (GERAL POR PASTA)</h2><div class="relative h-48 w-full"><canvas id="premios-pie-chart"></canvas></div></div>
+                    <button id="open-consult-modal-btn" class="w-full mt-6 bg-yellow-400 text-black font-bold py-3 rounded-lg hover:bg-yellow-500 transition-colors">CONSULTAR RANK DIÁRIO</button>
+                </div>
+            </main>
+            <div class="mt-12 flex justify-center items-center gap-4">
+                <button id="export-data-btn" class="text-white font-semibold py-2 px-6 rounded-lg btn-action">Exportar Dados</button>
+                <button id="import-data-btn" class="text-white font-semibold py-2 px-6 rounded-lg btn-action">Importar Dados</button>
+                <input type="file" id="import-file-input" class="hidden" accept=".json">
+            </div>
+            <footer class="text-center mt-8 text-gray-500 text-sm">
+                <p>TODOS DIREITOS RESERVADOS - SHEMIAH #S3LO - 2025</p>
+            </footer>
+        </div>
+    </div>
+    <div id="chartjs-tooltip"></div>
+    <div id="fill-modal" class="fixed inset-0 modal-bg items-center justify-center hidden z-50">
+        <div id="fill-modal-content" class="modal-content rounded-xl p-8 w-full max-w-6xl max-h-[90vh] overflow-y-auto">
+            <h2 class="text-xl font-bold text-white mb-6">Preencher Dados</h2>
+             <div class="mb-6"><label for="fill-date" class="block text-sm font-medium text-gray-300 mb-2">Data do Registro</label><input type="date" id="fill-date" class="w-full p-2 input-field"></div>
+            <div id="fill-categories" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4 mb-8"></div>
+            <h3 class="text-lg font-bold text-white mb-4 mt-6">Adicionar Prêmios (3)</h3>
+            <div id="premios-container" class="space-y-4 mb-8"></div>
+            <h3 class="text-lg font-bold text-white mb-4 mt-6">FAC em Foco (6)</h3>
+            <div id="fac-container" class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4"></div>
+            <div class="flex justify-end space-x-4 mt-8"><button id="cancel-fill-btn" class="py-2 px-6 rounded-lg btn-action">Cancelar</button><button id="save-fill-btn" class="bg-green-500 text-white font-bold py-2 px-8 rounded-lg hover:bg-green-600">Salvar</button></div>
+        </div>
+    </div>
+    <div id="consult-modal" class="fixed inset-0 modal-bg items-center justify-center hidden z-50">
+        <div class="modal-content rounded-xl p-8 w-full max-w-md">
+            <h2 class="text-xl font-bold text-white mb-6">Consultar Prêmios do Dia</h2>
+            <div class="space-y-4">
+                <div><label for="consult-date" class="block text-sm font-medium text-gray-300 mb-2">Selecione a Data</label><input type="date" id="consult-date" class="w-full p-2 input-field"></div>
+                <button id="consult-rank-btn" class="w-full bg-yellow-400 text-black font-bold py-3 rounded-lg hover:bg-yellow-500">Consultar</button>
+                <div id="consult-results" class="mt-6 text-gray-300"></div>
+            </div>
+            <div class="flex justify-end mt-6"><button id="close-consult-modal-btn" class="py-2 px-6 rounded-lg btn-action">Fechar</button></div>
+        </div>
+    </div>
+    <div id="anotacao-modal" class="fixed inset-0 modal-bg items-center justify-center hidden z-50">
+        <div class="modal-content rounded-xl p-8 w-full max-w-2xl h-[70vh] flex flex-col">
+            <h2 id="anotacao-modal-title" class="text-xl font-bold text-white mb-4">Anotações</h2>
+            <div class="flex items-center gap-4 mb-4">
+                 <label for="anotacao-date" class="text-sm">Data:</label>
+                 <input type="date" id="anotacao-date" class="input-field p-2">
+            </div>
+            <div id="anotacao-card-container" class="flex-grow overflow-y-auto space-y-4 pr-2">
+                <!-- Note cards will be injected here -->
+            </div>
+            <div class="mt-4">
+                <textarea id="new-anotacao-text" class="w-full input-field p-2" rows="3" placeholder="Escreva sua anotação..."></textarea>
+                <button id="add-anotacao-btn" class="w-full mt-2 bg-green-500 text-white font-bold py-2 rounded-lg hover:bg-green-600">Adicionar Anotação</button>
+            </div>
+             <div class="flex justify-end mt-6">
+                <button id="close-anotacao-modal-btn" class="py-2 px-6 rounded-lg btn-action">Fechar</button>
+            </div>
+        </div>
+    </div>
+    <div id="ai-chat-modal" class="fixed inset-0 modal-bg items-center justify-center hidden z-50">
+        <div class="modal-content rounded-xl p-6 w-full max-w-2xl h-[80vh] flex flex-col">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-xl font-bold text-white">Análise com IA</h2>
+                <button id="configure-api-key-btn" class="text-xs text-gray-400 hover:text-white">Configurar Chave</button>
+            </div>
+            <div id="ai-chat-messages" class="flex-grow overflow-y-auto space-y-4 p-4 bg-black/20 rounded-lg flex flex-col">
+                <!-- Chat messages will appear here -->
+            </div>
+            <div class="mt-4 flex gap-2">
+                <input type="text" id="ai-chat-input" class="w-full p-2 input-field" placeholder="Pergunte algo sobre seus dados...">
+                <button id="ai-chat-send" class="bg-purple-600 text-white font-bold py-2 px-6 rounded-lg hover:bg-purple-700">Enviar</button>
+            </div>
+            <div class="flex justify-end mt-4">
+                <button id="close-ai-chat-modal-btn" class="py-2 px-6 rounded-lg btn-action">Fechar</button>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        // --- Firebase SDK Imports ---
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, onSnapshot, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // --- SCRIPT START --- //
+        let db;
+        let firestore, auth, dbDocRef; // Firebase variables
+        let isAdmin = false;
+        const ADMIN_EMAIL = "kraznelofc@gmail.com";
+
+        const categories = [ { id: 'conexao', name: 'Conexão', color: 'cyan', hex: '#22d3ee' }, { id: 'retencao_cat', name: 'Retenção', color: 'orange', hex: '#f97316' }, { id: 'introducao', name: 'Introdução', color: 'green', hex: '#22c55e' }, { id: 'evolucao', name: 'Evolução', color: 'red', hex: '#ef4444' }, { id: 'interacao', name: 'Interação', color: 'purple', hex: '#a855f7' }, { id: 'expansao', name: 'Expansão', color: 'yellow', hex: '#eab308' }];
+        const pastas = categories.map(c => c.name);
+        const premiosList = ['VIP PLATINA', 'VIP LANÇAMENTO', 'VIP OURO', 'VIP PRATA', 'VIP BRONZE', 'BATTLEPASS'];
+        
+        let chartInstances = {}; // Holds all chart instances
+
+        // --- UTILITY FUNCTIONS --- //
+        const getTodayString = () => new Date().toISOString().split('T')[0];
+        
+        const saveDb = async () => {
+            if (dbDocRef && isAdmin) {
+                try {
+                    await setDoc(dbDocRef, db, { merge: true });
+                } catch (error) {
+                    console.error("Error saving data to Firestore:", error);
+                    alert("Não foi possível salvar os dados na nuvem.");
+                }
+            }
+        };
+        
+        const getWeekRange = (dateString) => {
+            if (!dateString) return { start: null, end: null };
+            const parts = dateString.split('-').map(part => parseInt(part, 10));
+            const d = new Date(Date.UTC(parts[0], parts[1] - 1, parts[2]));
+            const day = d.getUTCDay();
+            const diff = d.getUTCDate() - day + (day === 0 ? -6 : 1);
+            const monday = new Date(d.setUTCDate(diff));
+            const sunday = new Date(new Date(monday).setUTCDate(monday.getUTCDate() + 6));
+            return {
+                start: monday.toISOString().split('T')[0],
+                end: sunday.toISOString().split('T')[0]
+            };
+        };
+
+        // --- MODAL HANDLING & DYNAMIC CONTENT --- //
+        const loginView = document.getElementById('login-view');
+        const registerView = document.getElementById('register-view');
+        const dashboardView = document.getElementById('dashboard-view');
+        const fillModal = document.getElementById('fill-modal'), consultModal = document.getElementById('consult-modal'), anotacaoModal = document.getElementById('anotacao-modal'), aiChatModal = document.getElementById('ai-chat-modal');
+        const openModal = (modal) => { modal.classList.remove('hidden'); modal.classList.add('flex'); }
+        const closeModal = (modal) => { modal.classList.add('hidden'); modal.classList.remove('flex'); }
+        document.getElementById('open-fill-modal-btn').addEventListener('click', () => { document.getElementById('fill-date').value = getTodayString(); openModal(fillModal); });
+        const handleCloseModal = () => { resetFillModal(); closeModal(fillModal); }
+        document.getElementById('cancel-fill-btn').addEventListener('click', handleCloseModal);
+        document.getElementById('open-consult-modal-btn').addEventListener('click', () => { document.getElementById('consult-date').value = getTodayString(); openModal(consultModal);});
+        document.getElementById('close-consult-modal-btn').addEventListener('click', () => closeModal(consultModal));
+        document.querySelectorAll('.btn-anotacao').forEach(btn => btn.addEventListener('click', (e) => {
+            const key = e.target.dataset.key;
+            const date = document.getElementById('main-date-filter').value || getTodayString();
+            document.getElementById('anotacao-date').value = date;
+            anotacaoModal.dataset.currentKey = key;
+            const title = `Anotações - ${key.charAt(0).toUpperCase() + key.slice(1)}`;
+            document.getElementById('anotacao-modal-title').textContent = title;
+            renderAnotacoes(date, key);
+            openModal(anotacaoModal);
+        }));
+        document.getElementById('close-anotacao-modal-btn').addEventListener('click', () => closeModal(anotacaoModal));
+        document.getElementById('open-ai-chat-btn').addEventListener('click', () => {
+             setupAIChat();
+             openModal(aiChatModal);
+        });
+        document.getElementById('close-ai-chat-modal-btn').addEventListener('click', () => closeModal(aiChatModal));
+
+        const resetFillModal = () => { document.getElementById('fill-modal-content').querySelectorAll('input, select').forEach(el => { if (el.type === 'text' || el.type === 'number') el.value = ''; else if (el.tagName === 'SELECT') el.selectedIndex = 0; }); document.getElementById('fill-date').value = getTodayString(); };
+        const setupFillModal = () => {
+            document.getElementById('fill-categories').innerHTML = categories.map(cat => `<div class="p-3 rounded-lg modal-content text-center"><h4 class="font-semibold text-sm text-${cat.color}-400 mb-2">${cat.name}</h4><div class="space-y-2"><input type="number" data-id="${cat.id}" data-type="contratados" placeholder="Cont." class="w-full p-2 text-xs input-field"><input type="number" data-id="${cat.id}" data-type="retencao" placeholder="Ret." class="w-full p-2 text-xs input-field"></div></div>`).join('');
+            const pastaOptions = pastas.map(p => `<option value="${p}">${p}</option>`).join('');
+            const premioOptions = premiosList.map(p => `<option value="${p}">${p}</option>`).join('');
+            document.getElementById('premios-container').innerHTML = Array(3).fill(0).map(() => `<div class="grid grid-cols-1 md:grid-cols-3 gap-2 items-center premio-entry"><input type="text" placeholder="Nome da Pessoa" class="p-2 text-sm input-field premio-pessoa"><select class="p-2 text-sm select-field premio-pasta">${pastaOptions}</select><select class="p-2 text-sm select-field premio-nome">${premioOptions}</select></div>`).join('');
+            document.getElementById('fac-container').innerHTML = Array(6).fill(0).map(() => `<div class="grid grid-cols-2 md:grid-cols-3 gap-2 items-center fac-entry border border-gray-700 p-3 rounded-lg"><div class="col-span-2 md:col-span-3"><input type="text" placeholder="Nome FAC" class="w-full p-2 text-sm input-field fac-foco-nome"></div><div><select class="w-full p-2 text-sm select-field fac-foco-pasta">${pastaOptions}</select></div><div><input type="text" placeholder="Meta" class="w-full p-2 text-sm input-field fac-foco-meta"></div><div><input type="text" placeholder="Resp." class="w-full p-2 text-sm input-field fac-foco-resp"></div><div><select class="w-full p-2 text-sm select-field fac-foco-meta-batida"><option value="Não">Não</option><option value="Sim">Sim</option></select></div><div class="col-span-2 md:col-span-1"><input type="number" placeholder="Qtd. Levada" class="w-full p-2 text-sm input-field fac-foco-qtd"></div></div>`).join('');
+        };
+
+        // --- DATA SAVING --- //
+        document.getElementById('save-fill-btn').addEventListener('click', () => {
+            const date = document.getElementById('fill-date').value; if (!date) { alert('Por favor, selecione uma data.'); return; }
+            db.dailyData[date] = {};
+            document.querySelectorAll('#fill-categories input[type="number"]').forEach(input => { const id = input.dataset.id; const type = input.dataset.type; if (!db.dailyData[date][id]) db.dailyData[date][id] = {}; db.dailyData[date][id][type] = parseInt(input.value) || 0; });
+            db.premios = db.premios.filter(p => p.date !== date); 
+            document.querySelectorAll('.premio-entry').forEach(entry => { const pessoa = entry.querySelector('.premio-pessoa').value.trim(); const pasta = entry.querySelector('.premio-pasta').value; const premio = entry.querySelector('.premio-nome').value; if(pessoa && pasta && premio) db.premios.push({ date, pessoa, pasta, premio }); });
+            db.facData[date] = [];
+            document.querySelectorAll('.fac-entry').forEach(entry => { const fac = entry.querySelector('.fac-foco-nome').value.trim(); if(fac) { db.facData[date].push({ fac, pasta: entry.querySelector('.fac-foco-pasta').value, meta: entry.querySelector('.fac-foco-meta').value, resp: entry.querySelector('.fac-foco-resp').value, metaBatida: entry.querySelector('.fac-foco-meta-batida').value, quantidade: parseInt(entry.querySelector('.fac-foco-qtd').value) || 0 }); }});
+            saveDb(); alert('Dados salvos com sucesso!'); handleCloseModal();
+        });
+
+
+        // --- CHART & LEGEND RENDERING --- //
+        const createChart = (ctx, type, data, options) => new Chart(ctx, { type, data, options });
+        const renderCustomLegends = () => {
+            ['contratados', 'retencao', 'fac'].forEach(key => {
+                const legendId = `timeline-${key}-legend`;
+                const chartKey = `${key}TimelineChart`;
+                const legendEl = document.getElementById(legendId);
+                if (legendEl) {
+                    const chart = chartInstances[chartKey];
+                    legendEl.innerHTML = categories.map((cat, index) => {
+                        const isHidden = chart ? !chart.isDatasetVisible(index) : false;
+                        return `<div class="legend-item ${isHidden ? 'hidden-dataset' : ''}" data-chart="${chartKey}" data-dataset-index="${index}"><div class="legend-dot" style="background-color: ${cat.hex};"></div><span>${cat.name.toUpperCase()}</span></div>`
+                    }).join('');
+                }
+            });
+        };
+        const externalTooltipHandler = (context) => {
+            const {chart, tooltip} = context; const tooltipEl = document.getElementById('chartjs-tooltip'); if (tooltip.opacity === 0) { tooltipEl.style.opacity = 0; return; }
+            const pointDate = tooltip.dataPoints[0].raw.x;
+            let innerHtml = `<thead><tr><th colspan="2">${new Date(pointDate).toLocaleDateString('pt-BR', {timeZone: 'UTC'})}</th></tr></thead><tbody>`;
+            tooltip.dataPoints.forEach(point => {
+                const dataset = chart.data.datasets[point.datasetIndex];
+                if (dataset.isVerticalLine) return;
+                innerHtml += `<tr><td><span class="tooltip-dot" style="background-color: ${dataset.borderColor};"></span>${dataset.label}</td><td class="text-right font-bold">${point.raw.y}</td></tr>`;
+            });
+            innerHtml += `</tbody>`;
+            tooltipEl.innerHTML = `<table>${innerHtml}</table>`; tooltipEl.style.opacity = 1; tooltipEl.style.left = chart.canvas.getBoundingClientRect().left + window.scrollX + tooltip.caretX + 'px'; tooltipEl.style.top = chart.canvas.getBoundingClientRect().top + window.scrollY + tooltip.caretY + 'px';
+        };
+        const timelineOptions = () => ({ maintainAspectRatio: false, interaction: { mode: 'index', intersect: false }, plugins: { legend: { display: false }, zoom: { pan: { enabled: true, mode: 'x' }, zoom: { wheel: { enabled: true }, pinch: { enabled: true }, mode: 'x' } }, tooltip: { enabled: false, external: externalTooltipHandler } }, scales: { x: { type: 'time', time: { unit: 'day', tooltipFormat: 'dd/MM/yyyy', displayFormats: { day: 'MMM dd' } }, grid: { color: 'rgba(255, 255, 255, 0.1)' }, ticks: { color: '#9CA3AF' } }, y: { beginAtZero: true, grid: { color: 'rgba(255, 255, 255, 0.1)' }, ticks: { color: '#9CA3AF' } } } });
+        const createTimelineChart = (canvasId, dataKey) => {
+            const ctx = document.getElementById(canvasId).getContext('2d'); const sortedDates = Object.keys(db.dailyData).sort();
+            let datasets = categories.map(cat => ({ label: cat.name, data: sortedDates.map(date => ({ x: date, y: db.dailyData[date]?.[cat.id]?.[dataKey] || 0 })), borderColor: cat.hex, fill: false, tension: 0.1 }));
+            return createChart(ctx, 'line', { datasets }, timelineOptions());
+        };
+        const createFacTimelineChart = () => {
+            const ctx = document.getElementById('fac-timeline-chart').getContext('2d'); const sortedDates = [...new Set([...Object.keys(db.dailyData), ...Object.keys(db.facData)])].sort();
+            let datasets = categories.map(cat => ({ label: cat.name, data: sortedDates.map(date => ({ x: date, y: (db.facData[date] || []).filter(f => f.pasta === cat.name).reduce((sum, f) => sum + f.quantidade, 0) })), borderColor: cat.hex, fill: false, tension: 0.1 }));
+            return createChart(ctx, 'line', { datasets }, timelineOptions());
+        };
+        const createContratadosRetencaoChart = () => {
+            const ctx = document.getElementById('contratados-retencao-bar-chart').getContext('2d');
+            return createChart(ctx, 'bar', {
+                labels: categories.map(c => c.name),
+                datasets: [
+                    {
+                        label: 'Contratados',
+                        data: [],
+                        backgroundColor: '#22d3ee', // Cyan
+                    },
+                    {
+                        label: 'Retenção',
+                        data: [],
+                        backgroundColor: '#f97316', // Orange
+                    }
+                ]
+            }, {
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: true,
+                        position: 'bottom',
+                        labels: {
+                            color: '#E0E0E0'
+                        }
+                    }
+                },
+                scales: {
+                    x: { ticks: { color: '#9CA3AF' }, grid: { display: false } },
+                    y: { grid: { color: 'rgba(255, 255, 255, 0.1)'}, ticks: { color: '#9CA3AF' } }
+                }
+            });
+        };
+        const createPieChart = () => { const ctx = document.getElementById('premios-pie-chart').getContext('2d'); const pastaCounts = db.premios.reduce((acc, p) => { acc[p.pasta] = (acc[p.pasta] || 0) + 1; return acc; }, {}); const sortedPastas = Object.entries(pastaCounts).sort(([,a],[,b]) => b-a); return createChart(ctx, 'pie', { labels: sortedPastas.map(p => p[0]), datasets: [{ data: sortedPastas.map(p => p[1]), backgroundColor: ['#F472B6', '#38BDF8', '#8B5CF6'].concat(categories.map(c=>c.hex)), hoverOffset: 4 }] }, { maintainAspectRatio: false, plugins: { legend: { position: 'right', labels: { color: '#E0E0E0' } } } }); };
+
+        // --- UPDATE & FILTER LOGIC --- //
+        const updateAllCharts = () => { updateTimelineCharts(); updateContratadosRetencaoChart(document.getElementById('main-date-filter').value); updateWeeklyStatus(document.getElementById('weekly-status-date').value); updateFacWeeklyStatus(document.getElementById('weekly-status-fac-date').value); updatePieChart(); renderCustomLegends(); };
+        const updateTimelineCharts = () => {
+             ['contratados', 'retencao', 'fac'].forEach(key => {
+                const chartKey = `${key}TimelineChart`; if (chartInstances[chartKey]) chartInstances[chartKey].destroy();
+                if (key === 'fac') { chartInstances[chartKey] = createFacTimelineChart(); } 
+                else { chartInstances[chartKey] = createTimelineChart(`${key}-timeline-chart`, key); }
+            });
+        };
+        const updateContratadosRetencaoChart = (date) => {
+            const dataForDay = db.dailyData[date] || {};
+            if (chartInstances.contratadosRetencaoBarChart) {
+                const chart = chartInstances.contratadosRetencaoBarChart;
+                chart.data.datasets[0].data = categories.map(cat => dataForDay[cat.id]?.contratados || 0);
+                chart.data.datasets[1].data = categories.map(cat => dataForDay[cat.id]?.retencao || 0);
+                chart.update();
+            }
+        };
+        const updatePieChart = () => { if (chartInstances.premiosPieChart) chartInstances.premiosPieChart.destroy(); chartInstances.premiosPieChart = createPieChart(); }
+        const updateWeeklyStatus = (dateString) => { const container = document.querySelector('#status-semanal .space-y-3'); container.innerHTML = ''; const { start, end } = getWeekRange(dateString); categories.forEach(cat => { let totalContratados = 0; let totalRetencao = 0; for (const date in db.dailyData) { if(date >= start && date <= end && db.dailyData[date]?.[cat.id]) { totalContratados += db.dailyData[date][cat.id].contratados || 0; totalRetencao += db.dailyData[date][cat.id].retencao || 0; } } const retencaoPercent = totalContratados > 0 ? (totalRetencao / totalContratados) * 100 : 0; let status, color; const minRec = 400, maxRec = 1100, minRet = 20, maxRet = 45; const recScore = totalContratados <= minRec ? 0 : Math.min(1, (totalContratados - minRec) / (maxRec - minRec)); const retScore = retencaoPercent <= minRet ? 0 : Math.min(1, (retencaoPercent - minRet) / (maxRet - minRet)); const finalScore = totalContratados > 0 ? (recScore + retScore) / 2 : 0; if (finalScore >= 0.9) { status = 'EXCELENTE'; color = 'text-emerald-400'; } else if (finalScore >= 0.7) { status = 'ÓTIMO'; color = 'text-green-400'; } else if (finalScore >= 0.5) { status = 'BOM'; color = 'text-cyan-400'; } else if (finalScore > 0) { status = 'SATISFATÓRIO'; color = 'text-green-500'; } else { status = 'RUIM'; color = 'text-red-500'; } container.innerHTML += `<div class="flex justify-between items-center text-sm"><span class="font-semibold text-${cat.color}-400">${cat.name}</span><span class="font-bold ${color}">${status}</span></div>`; });};
+        const updateFacWeeklyStatus = (dateString) => { const container = document.querySelector('#status-semanal-fac .space-y-3'); container.innerHTML = ''; const { start, end } = getWeekRange(dateString); categories.forEach(cat => { let metasBatidas = 0; for(const date in db.facData) { if(date >= start && date <= end) { metasBatidas += (db.facData[date] || []).filter(f => f.pasta === cat.name && f.metaBatida === 'Sim' && (parseInt(f.quantidade, 10) >= parseInt(f.meta, 10))).length; }} let status, color; if (metasBatidas >= 7) { status = 'EXCELENTE'; color = 'text-emerald-400';} else if (metasBatidas === 6) { status = 'ÓTIMO'; color = 'text-green-400';} else if (metasBatidas === 5) { status = 'BOM'; color = 'text-cyan-400';} else if (metasBatidas === 4) { status = 'SATISFATÓRIO'; color = 'text-green-500';} else if (metasBatidas === 3) { status = 'MÉDIO'; color = 'text-yellow-500';} else { status = 'RUIM'; color = 'text-red-500'; } container.innerHTML += `<div class="flex justify-between items-center text-sm"><span class="font-semibold text-${cat.color}-400">${cat.name}</span><span class="font-bold ${color}">${status} (${metasBatidas})</span></div>`; });};
+
+        // --- ANOTACOES LOGIC --- //
+        const renderAnotacoes = (date, key) => {
+            const container = document.getElementById('anotacao-card-container');
+            container.innerHTML = '';
+            const notesForDay = db.notes[key]?.[date] || [];
+            if (notesForDay.length === 0) {
+                container.innerHTML = `<p class="text-gray-500 text-center">Nenhuma anotação para este dia.</p>`;
+                return;
+            }
+            notesForDay.forEach((note, index) => {
+                const card = document.createElement('div');
+                card.className = 'bg-gray-800 p-4 rounded-lg flex justify-between items-start';
+                card.innerHTML = `<p class="text-gray-300 whitespace-pre-wrap">${note}</p>
+                                  <button class="text-red-500 hover:text-red-400 font-bold delete-anotacao-btn" data-key="${key}" data-date="${date}" data-index="${index}">&times;</button>`;
+                container.appendChild(card);
+            });
+        };
+        document.getElementById('anotacao-date').addEventListener('change', (e) => {
+            const key = anotacaoModal.dataset.currentKey;
+            renderAnotacoes(e.target.value, key);
+        });
+        document.getElementById('add-anotacao-btn').addEventListener('click', () => {
+            const key = anotacaoModal.dataset.currentKey;
+            const date = document.getElementById('anotacao-date').value;
+            const text = document.getElementById('new-anotacao-text').value.trim();
+            if (!text || !key) return;
+            if (!db.notes[key]) db.notes[key] = {};
+            if (!db.notes[key][date]) db.notes[key][date] = [];
+            db.notes[key][date].push(text);
+            saveDb();
+            renderAnotacoes(date, key);
+            document.getElementById('new-anotacao-text').value = '';
+        });
+        document.getElementById('anotacao-card-container').addEventListener('click', (e) => {
+            if (e.target.classList.contains('delete-anotacao-btn')) {
+                const key = e.target.dataset.key;
+                const date = e.target.dataset.date;
+                const index = parseInt(e.target.dataset.index);
+                db.notes[key][date].splice(index, 1);
+                if (db.notes[key][date].length === 0) delete db.notes[key][date];
+                saveDb();
+                renderAnotacoes(date, key);
+            }
+        });
+
+
+        // --- EVENT LISTENERS --- //
+        document.getElementById('main-date-filter').addEventListener('change', (e) => {
+            const newDate = e.target.value;
+            updateContratadosRetencaoChart(newDate);
+            document.getElementById('weekly-status-date').value = newDate;
+            document.getElementById('weekly-status-fac-date').value = newDate;
+            updateWeeklyStatus(newDate);
+            updateFacWeeklyStatus(newDate);
+        });
+        ['weekly-status-date', 'weekly-status-fac-date'].forEach(id => document.getElementById(id).addEventListener('change', (e) => id.includes('fac') ? updateFacWeeklyStatus(e.target.value) : updateWeeklyStatus(e.target.value)));
+        ['weekly-status-reset', 'weekly-status-fac-reset'].forEach(id => document.getElementById(id).addEventListener('click', () => { const today = getTodayString(); const dateInputId = id.replace('reset', 'date'); document.getElementById(dateInputId).value = today; id.includes('fac') ? updateFacWeeklyStatus(today) : updateWeeklyStatus(today); }));
+        document.addEventListener('click', e => {
+            if (e.target.closest('.legend-item')) {
+                const legendItem = e.target.closest('.legend-item');
+                const chartKey = legendItem.dataset.chart; const datasetIndex = parseInt(legendItem.dataset.datasetIndex);
+                if (chartInstances[chartKey]) { const chart = chartInstances[chartKey]; chart.setDatasetVisibility(datasetIndex, !chart.isDatasetVisible(datasetIndex)); legendItem.classList.toggle('hidden-dataset'); chart.update(); }
+            }
+        });
+        document.querySelectorAll('.btn-reset-chart').forEach(btn => btn.addEventListener('click', (e) => {
+            const controlsDiv = e.target.closest('[id^="controls-"]');
+            controlsDiv.querySelector('.compare-start-date').value = '';
+            controlsDiv.querySelector('.compare-end-date').value = '';
+            const key = controlsDiv.id.split('-')[1];
+            const chart = chartInstances[`${key}TimelineChart`]; resetZoomAndFilter(chart);
+        }));
+        document.querySelectorAll('.btn-compare').forEach(btn => btn.addEventListener('click', e => {
+            const controlsDiv = e.target.closest('[id^="controls-"]'); const key = controlsDiv.id.split('-')[1];
+            const chart = chartInstances[`${key}TimelineChart`]; const start = controlsDiv.querySelector('.compare-start-date').value; const end = controlsDiv.querySelector('.compare-end-date').value;
+            applyDateFilter(chart, start, end);
+        }));
+        const applyDateFilter = (chart, start, end) => { if (chart && start && end) { chart.options.scales.x.min = start; chart.options.scales.x.max = end; chart.update(); } };
+        const resetZoomAndFilter = (chart) => { if (chart) { delete chart.options.scales.x.min; delete chart.options.scales.x.max; chart.resetZoom(); } };
+        document.getElementById('consult-rank-btn').addEventListener('click', () => { const date = document.getElementById('consult-date').value; const resultsContainer = document.getElementById('consult-results'); if (!date) { resultsContainer.innerHTML = '<p class="text-red-500">Selecione uma data.</p>'; return; } const premiosDoDia = db.premios.filter(p => p.date === date); if(premiosDoDia.length === 0) { resultsContainer.innerHTML = '<p>Nenhum prêmio registrado.</p>'; return; } resultsContainer.innerHTML = '<h3 class="font-bold mb-2">Ganhadores do Dia</h3>' + premiosDoDia.map((p, i) => `<p><strong>${i+1}º:</strong> ${p.pessoa} (${p.pasta}) - <span class="text-yellow-400">${p.premio}</span></p>`).join(''); });
+
+        // --- DATA MANAGEMENT --- //
+        document.getElementById('export-data-btn').addEventListener('click', () => { const dataStr = JSON.stringify(db); const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr); const exportFileDefaultName = `wallstreet_data_${getTodayString()}.json`; const linkElement = document.createElement('a'); linkElement.setAttribute('href', dataUri); linkElement.setAttribute('download', exportFileDefaultName); linkElement.click(); });
+        document.getElementById('import-data-btn').addEventListener('click', () => document.getElementById('import-file-input').click());
+        document.getElementById('import-file-input').addEventListener('change', (event) => { const file = event.target.files[0]; if (!file) return; const reader = new FileReader(); reader.onload = (e) => { try { const importedDb = JSON.parse(e.target.result); if(importedDb.dailyData && importedDb.premios && importedDb.facData) { if(confirm('Isso irá substituir todos os dados atuais. Deseja continuar?')) { db = importedDb; if (!db.notes) { db.notes = {contratados: {}, retencao: {}, fac: {}}; } saveDb(); initializeApp(); } } else { alert('Arquivo de dados inválido ou corrompido.'); } } catch (err) { alert('Erro ao ler o arquivo.'); console.error(err); } finally { event.target.value = null; } }; reader.readAsText(file); });
+
+        // --- AI CHAT LOGIC --- //
+        const aiChatMessages = document.getElementById('ai-chat-messages');
+        const aiChatInput = document.getElementById('ai-chat-input');
+        const aiChatSend = document.getElementById('ai-chat-send');
+
+        const addChatMessage = (message, sender) => {
+            const bubble = document.createElement('div');
+            bubble.className = `ai-chat-bubble ${sender === 'user' ? 'ai-chat-user' : 'ai-chat-gemini'}`;
+            bubble.textContent = message;
+            aiChatMessages.appendChild(bubble);
+            aiChatMessages.scrollTop = aiChatMessages.scrollHeight;
+        };
+
+        const setupAIChat = () => {
+            aiChatMessages.innerHTML = ''; // Clear previous messages
+            const apiKey = localStorage.getItem('geminiApiKey');
+            if (!apiKey) {
+                addChatMessage("Bem-vindo à Análise IA! Para começar, clique em 'Configurar Chave' no canto superior direito e insira sua chave de API do Google AI Studio. Você pode obtê-la gratuitamente.", 'gemini');
+            } else {
+                addChatMessage("Olá! Sou sua assistente de IA. Pergunte-me algo sobre os dados do seu painel.", 'gemini');
+            }
+        };
+        
+        const getDashboardSummary = () => {
+            const today = getTodayString();
+            const week = getWeekRange(today);
+            let summary = `Resumo do Painel para ${today}:\n\n`;
+            
+            summary += "Status Semanal (Pastas):\n";
+            const statusPastaContainer = document.querySelector('#status-semanal .space-y-3');
+            summary += statusPastaContainer.innerText + "\n\n";
+
+            summary += "Status Semanal (FACs em Foco):\n";
+            const statusFacContainer = document.querySelector('#status-semanal-fac .space-y-3');
+            summary += statusFacContainer.innerText + "\n\n";
+            
+            summary += "Dados de Hoje:\n";
+            const todayData = db.dailyData[today];
+            if(todayData){
+                for(const catId in todayData){
+                    const catName = categories.find(c => c.id === catId)?.name || catId;
+                    summary += `- ${catName}: ${todayData[catId].contratados} contratados, ${todayData[catId].retencao} retenção.\n`;
+                }
+            } else {
+                summary += "Nenhum dado preenchido para hoje.\n";
+            }
+            
+            return summary;
+        }
+
+        const handleAIChat = async () => {
+            const userMessage = aiChatInput.value.trim();
+            if (!userMessage) return;
+
+            let apiKey = localStorage.getItem('geminiApiKey');
+
+            if (!apiKey) {
+                 addChatMessage("Por favor, clique em 'Configurar Chave' no canto superior direito e insira sua chave de API do Google AI Studio.", 'gemini');
+                return;
+            }
+
+            addChatMessage(userMessage, 'user');
+            aiChatInput.value = '';
+            addChatMessage('Pensando...', 'gemini');
+
+            const summary = getDashboardSummary();
+            const prompt = `Com base no seguinte resumo de dados do painel, responda à pergunta do usuário.\n\nContexto:\n${summary}\n\nPergunta: ${userMessage}`;
+            
+            let chatHistory = [{ role: "user", parts: [{ text: prompt }] }];
+            const payload = { contents: chatHistory };
+            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+
+            try {
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                const result = await response.json();
+                
+                const aiMessageEl = aiChatMessages.lastChild;
+                if (result.candidates && result.candidates.length > 0 &&
+                    result.candidates[0].content && result.candidates[0].content.parts &&
+                    result.candidates[0].content.parts.length > 0) {
+                    const text = result.candidates[0].content.parts[0].text;
+                    aiMessageEl.textContent = text;
+                } else {
+                    aiMessageEl.textContent = "Desculpe, não consegui processar a resposta. Verifique se sua chave de API é válida e tente novamente.";
+                    console.error("API Response Error:", result);
+                }
+            } catch (error) {
+                const aiMessageEl = aiChatMessages.lastChild;
+                aiMessageEl.textContent = "Ocorreu um erro ao conectar com a IA. Verifique o console para mais detalhes.";
+                console.error("Fetch Error:", error);
+            }
+        };
+
+        aiChatSend.addEventListener('click', handleAIChat);
+        aiChatInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') handleAIChat();
+        });
+        
+        document.getElementById('configure-api-key-btn').addEventListener('click', () => {
+            const newApiKey = prompt("Insira sua chave de API do Google AI Studio. Deixe em branco para limpar a chave atual.");
+            if (newApiKey !== null) { // User didn't click cancel
+                localStorage.setItem('geminiApiKey', newApiKey);
+                alert(newApiKey ? 'Chave de API atualizada!' : 'Chave de API removida.');
+                setupAIChat();
+            }
+        });
+
+        // --- AUTHENTICATION --- //
+        const loginForm = document.getElementById('login-form');
+        const registerForm = document.getElementById('register-form');
+        const showRegisterBtn = document.getElementById('show-register-btn');
+        const showLoginBtn = document.getElementById('show-login-btn');
+        const logoutBtn = document.getElementById('logout-btn');
+
+        showRegisterBtn.addEventListener('click', () => {
+            loginView.classList.add('hidden');
+            registerView.classList.remove('hidden');
+        });
+
+        showLoginBtn.addEventListener('click', () => {
+            registerView.classList.add('hidden');
+            loginView.classList.remove('hidden');
+        });
+
+        loginForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const email = loginForm['email'].value;
+            const password = loginForm['password'].value;
+            signInWithEmailAndPassword(auth, email, password)
+                .catch(error => alert(error.message));
+        });
+
+        registerForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const email = registerForm['email'].value;
+            const password = registerForm['password'].value;
+            createUserWithEmailAndPassword(auth, email, password)
+                .catch(error => alert(error.message));
+        });
+
+        logoutBtn.addEventListener('click', () => {
+            signOut(auth);
+        });
+
+
+        // --- INITIALIZATION --- //
+        const initializeApp = () => {
+            try {
+                const firebaseConfig = JSON.parse(atob(typeof __firebase_config !== 'undefined' ? __firebase_config : 'e30='));
+                const app = initializeApp(firebaseConfig, 'wallstreet-dashboard');
+                firestore = getFirestore(app);
+                auth = getAuth(app);
+
+                onAuthStateChanged(auth, user => {
+                    if (user) {
+                        isAdmin = user.email === ADMIN_EMAIL;
+                        loginView.classList.add('hidden');
+                        registerView.classList.add('hidden');
+                        dashboardView.classList.remove('hidden');
+
+                        document.getElementById('open-fill-modal-btn').classList.toggle('hidden', !isAdmin);
+
+                        const appId = 'wallstreet-dashboard-data'; 
+                        dbDocRef = doc(firestore, 'artifacts', appId, 'public', 'dashboardData');
+
+                        onSnapshot(dbDocRef, (docSnap) => {
+                            if (docSnap.exists()) {
+                                db = docSnap.data();
+                            } else {
+                                 db = { dailyData: {}, premios: [], facData: {}, notes: {contratados: {}, retencao: {}, fac: {}} };
+                                 if (isAdmin) saveDb(); // Create initial doc if admin is first
+                            }
+                            loadUI();
+                        });
+
+                    } else {
+                        isAdmin = false;
+                        loginView.classList.remove('hidden');
+                        registerView.classList.add('hidden');
+                        dashboardView.classList.add('hidden');
+                    }
+                });
+            } catch (error) {
+                console.error("Falha ao inicializar o Firebase. Usando modo offline.", error);
+                alert("Não foi possível conectar à nuvem. O aplicativo funcionará no modo offline.");
+                db = loadDb();
+                loadUI();
+            }
+        };
+        
+        const loadUI = () => {
+            if (!db) db = { dailyData: {}, premios: [], facData: {}, notes: {contratados: {}, retencao: {}, fac: {}} };
+            if (!db.notes) { db.notes = {contratados: {}, retencao: {}, fac: {}}; }
+            const today = getTodayString();
+            document.getElementById('main-date-filter').value = today; 
+            document.getElementById('consult-date').value = today;
+            document.getElementById('weekly-status-date').value = today; 
+            document.getElementById('weekly-status-fac-date').value = today;
+            setupFillModal(); 
+            Object.values(chartInstances).forEach(chart => chart.destroy());
+            chartInstances.contratadosRetencaoBarChart = createContratadosRetencaoChart();
+            updateAllCharts();
+        };
+
+        initializeApp();
+    </script>
+</body>
+</html>
