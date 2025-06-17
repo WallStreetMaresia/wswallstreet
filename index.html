@@ -612,8 +612,27 @@
         // --- INITIALIZATION --- //
         const initializeApp = () => {
             try {
-                const firebaseConfig = JSON.parse(atob(typeof __firebase_config !== 'undefined' ? __firebase_config : 'e30='));
-                const app = initializeApp(firebaseConfig, 'wallstreet-dashboard');
+                // *****************************************************************
+                // ** IMPORTANTE: COLE AQUI A CONFIGURAÇÃO DO SEU FIREBASE         **
+                // ** 1. Vá para https://firebase.google.com/ e crie um projeto.  **
+                // ** 2. Adicione um "Aplicativo da Web".                         **
+                // ** 3. Copie o objeto 'firebaseConfig' e cole abaixo.           **
+                // *****************************************************************
+                const firebaseConfig = {
+                    apiKey: "AIzaSyCONofXx4NlCP34PZrs4pV-gDRJ_Uasw3c",
+                    authDomain: "wswallstreet-3ab24.firebaseapp.com",
+                    projectId: "wswallstreet-3ab24",
+                    storageBucket: "wswallstreet-3ab24.firebasestorage.app",
+                    messagingSenderId: "255776848131",
+                    appId: "1:255776848131:web:17af511729c29eb2569136"
+                };
+
+                if (firebaseConfig.apiKey === "COLE_SUA_API_KEY_AQUI") {
+                    document.body.innerHTML = `<div class="h-screen flex items-center justify-center text-center text-white"><p class="text-lg">Erro de Configuração: A chave do Firebase não foi adicionada.<br>Edite o arquivo HTML para configurar o painel.</p></div>`;
+                    return;
+                }
+
+                const app = initializeApp(firebaseConfig);
                 firestore = getFirestore(app);
                 auth = getAuth(app);
 
@@ -622,11 +641,11 @@
                         isAdmin = user.email === ADMIN_EMAIL;
                         loginView.classList.add('hidden');
                         registerView.classList.add('hidden');
-                        dashboardView.classList.remove('hidden');
+                        dashboardView.style.display = 'block';
 
                         document.getElementById('open-fill-modal-btn').classList.toggle('hidden', !isAdmin);
 
-                        const appId = 'wallstreet-dashboard-data'; 
+                        const appId = firebaseConfig.projectId || 'wallstreet-dashboard-data'; 
                         dbDocRef = doc(firestore, 'artifacts', appId, 'public', 'dashboardData');
 
                         onSnapshot(dbDocRef, (docSnap) => {
@@ -642,8 +661,7 @@
                     } else {
                         isAdmin = false;
                         loginView.classList.remove('hidden');
-                        registerView.classList.add('hidden');
-                        dashboardView.classList.add('hidden');
+                        dashboardView.style.display = 'none';
                     }
                 });
             } catch (error) {
@@ -671,4 +689,4 @@
         initializeApp();
     </script>
 </body>
-</html>
+</ht
