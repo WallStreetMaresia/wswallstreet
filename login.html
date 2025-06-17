@@ -28,7 +28,7 @@
                     <label for="login-password" class="block text-sm font-medium text-gray-300">Senha</label>
                     <input type="password" id="login-password" required class="w-full p-3 mt-1 input-field" placeholder="••••••••">
                 </div>
-                <button type="submit" class="w-full bg-purple-600 text-white font-bold py-3 rounded-lg hover:bg-purple-700 transition-colors">Entrar</button>
+                <button type="submit" id="login-btn" class="w-full bg-purple-600 text-white font-bold py-3 rounded-lg hover:bg-purple-700 transition-colors">Entrar</button>
             </form>
 
             <form id="register-form" class="space-y-6 hidden">
@@ -48,14 +48,14 @@
             <a href="#" id="toggle-form" class="text-sm text-yellow-400 hover:text-yellow-300">Não tem uma conta? Cadastre-se</a>
         </div>
         
-        <p id="error-message" class="mt-4 text-center text-red-500 text-sm"></p>
+        <p id="error-message" class="mt-4 text-center text-red-500 text-sm h-4"></p>
     </div>
 
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
 
     <script>
-        // Your web app's Firebase configuration
         const firebaseConfig = {
           apiKey: "AIzaSyCONofXx4NlCP34PZrs4pV-gDRJ_Uasw3c",
           authDomain: "wswallstreet-3ab24.firebaseapp.com",
@@ -65,39 +65,63 @@
           appId: "1:255776848131:web:17af511729c29eb2569136"
         };
 
-        // Initialize Firebase
         const app = firebase.initializeApp(firebaseConfig);
         const auth = firebase.auth();
+        const db = firebase.firestore(); // Inicializa o Firestore
+        const ADMIN_EMAIL = 'kraznelofc@gmail.com';
 
         const loginForm = document.getElementById('login-form');
         const registerForm = document.getElementById('register-form');
         const toggleLink = document.getElementById('toggle-form');
         const errorMessage = document.getElementById('error-message');
+        const loginBtn = document.getElementById('login-btn');
 
-        // Toggle between login and register forms
+
         toggleLink.addEventListener('click', (e) => {
             e.preventDefault();
             loginForm.classList.toggle('hidden');
             registerForm.classList.toggle('hidden');
-            if (loginForm.classList.contains('hidden')) {
-                toggleLink.textContent = 'Já tem uma conta? Entre';
-            } else {
-                toggleLink.textContent = 'Não tem uma conta? Cadastre-se';
-            }
+            toggleLink.textContent = loginForm.classList.contains('hidden') ? 'Já tem uma conta? Entre' : 'Não tem uma conta? Cadastre-se';
             errorMessage.textContent = '';
         });
 
-        // Login Handler
+        // Login Handler com verificação de permissão
         loginForm.addEventListener('submit', (e) => {
             e.preventDefault();
+            loginBtn.disabled = true;
+            loginBtn.textContent = 'Verificando...';
+            errorMessage.textContent = '';
+
             const email = loginForm['login-email'].value;
             const password = loginForm['login-password'].value;
+
             auth.signInWithEmailAndPassword(email, password)
-                .then(userCredential => {
-                    window.location.href = 'index.html'; // Or your main dashboard file
+                .then(async (userCredential) => {
+                    const userEmail = userCredential.user.email;
+                    
+                    // Se for o admin, libera o acesso direto.
+                    if (userEmail === ADMIN_EMAIL) {
+                        window.location.href = 'index.html';
+                        return;
+                    }
+
+                    // Se for membro, verifica a permissão na lista.
+                    const docRef = db.collection('permissions').doc('allowed_users');
+                    const docSnap = await docRef.get();
+
+                    if (docSnap.exists && docSnap.data().emails.includes(userEmail)) {
+                        window.location.href = 'index.html';
+                    } else {
+                        errorMessage.textContent = 'Acesso não liberado. Fale com o administrador.';
+                        auth.signOut(); // Desloga o usuário se não tiver permissão
+                        loginBtn.disabled = false;
+                        loginBtn.textContent = 'Entrar';
+                    }
                 })
                 .catch(error => {
                     errorMessage.textContent = 'Email ou senha inválidos.';
+                    loginBtn.disabled = false;
+                    loginBtn.textContent = 'Entrar';
                 });
         });
 
@@ -108,32 +132,23 @@
             const password = registerForm['register-password'].value;
             auth.createUserWithEmailAndPassword(email, password)
                 .then(userCredential => {
-                    // This is where you could set user roles (e.g., in Firestore/Realtime Database)
-                    const role = (email.toLowerCase() === 'kraznelofc@gmail.com') ? 'admin' : 'member';
-                    console.log(`User registered as ${role}`);
-                    alert('Cadastro realizado com sucesso! Você será redirecionado para a tela de login.');
-                    // Toggle back to login form
+                    alert('Cadastro realizado! Peça para o administrador liberar seu acesso.');
                     toggleLink.click();
-                    loginForm['login-email'].value = email; // Pre-fill email
+                    loginForm['login-email'].value = email;
                 })
                 .catch(error => {
-                     if (error.code == 'auth/email-already-in-use') {
-                        errorMessage.textContent = 'Este e-mail já está em uso.';
-                    } else if (error.code == 'auth/weak-password') {
-                        errorMessage.textContent = 'A senha deve ter pelo menos 6 caracteres.';
-                    } else {
-                        errorMessage.textContent = 'Ocorreu um erro ao cadastrar.';
-                    }
+                    if (error.code == 'auth/email-already-in-use') errorMessage.textContent = 'Este e-mail já está em uso.';
+                    else if (error.code == 'auth/weak-password') errorMessage.textContent = 'A senha deve ter no mínimo 6 caracteres.';
+                    else errorMessage.textContent = 'Ocorreu um erro ao cadastrar.';
                 });
         });
 
-         // Check if user is already logged in
-         auth.onAuthStateChanged(user => {
+        // Redireciona se já estiver logado
+        auth.onAuthStateChanged(user => {
             if (user) {
-                window.location.href = 'index.html'; // Redirect to dashboard if logged in
+                // Não redireciona mais automaticamente, a verificação é feita no ato do login
             }
         });
     </script>
-
 </body>
 </html>
