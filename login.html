@@ -98,7 +98,7 @@
                     const userEmail = userCredential.user.email;
                     
                     if (userEmail === ADMIN_EMAIL) {
-                        window.location.href = './'; // Redireciona para o index.html
+                        window.location.href = './';
                         return;
                     }
 
@@ -106,7 +106,7 @@
                     const docSnap = await docRef.get();
 
                     if (docSnap.exists && docSnap.data().emails && docSnap.data().emails.includes(userEmail)) {
-                        window.location.href = './'; // Redireciona para o index.html
+                        window.location.href = './';
                     } else {
                         errorMessage.textContent = 'Acesso não liberado. Fale com o administrador.';
                         auth.signOut();
