@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Controle Wallstreet</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #000000; color: #E0E0E0; }
+        .form-container { background-color: #111; border: 1px solid rgba(255, 255, 255, 0.2); }
+        .input-field { background-color: #222; border: 1px solid rgba(255, 255, 255, 0.3); color: #E0E0E0; border-radius: 0.375rem; }
+    </style>
+</head>
+<body class="flex items-center justify-center min-h-screen">
+
+    <div class="form-container w-full max-w-sm p-8 rounded-xl shadow-lg">
+        <h1 class="text-3xl font-bold text-center text-white mb-2">WALLSTREET</h1>
+        <p class="text-center text-gray-400 mb-8">Controle de Pastas</p>
+
+        <div id="auth-container">
+            <form id="login-form" class="space-y-6">
+                <div>
+                    <label for="login-email" class="block text-sm font-medium text-gray-300">Email</label>
+                    <input type="email" id="login-email" required class="w-full p-3 mt-1 input-field" placeholder="seu@email.com">
+                </div>
+                <div>
+                    <label for="login-password" class="block text-sm font-medium text-gray-300">Senha</label>
+                    <input type="password" id="login-password" required class="w-full p-3 mt-1 input-field" placeholder="••••••••">
+                </div>
+                <button type="submit" class="w-full bg-purple-600 text-white font-bold py-3 rounded-lg hover:bg-purple-700 transition-colors">Entrar</button>
+            </form>
+
+            <form id="register-form" class="space-y-6 hidden">
+                <div>
+                    <label for="register-email" class="block text-sm font-medium text-gray-300">Email</label>
+                    <input type="email" id="register-email" required class="w-full p-3 mt-1 input-field" placeholder="seu@email.com">
+                </div>
+                <div>
+                    <label for="register-password" class="block text-sm font-medium text-gray-300">Senha</label>
+                    <input type="password" id="register-password" required class="w-full p-3 mt-1 input-field" placeholder="Crie uma senha forte">
+                </div>
+                <button type="submit" class="w-full bg-green-500 text-white font-bold py-3 rounded-lg hover:bg-green-600 transition-colors">Cadastrar</button>
+            </form>
+        </div>
+
+        <div class="mt-6 text-center">
+            <a href="#" id="toggle-form" class="text-sm text-yellow-400 hover:text-yellow-300">Não tem uma conta? Cadastre-se</a>
+        </div>
+        
+        <p id="error-message" class="mt-4 text-center text-red-500 text-sm"></p>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+
+    <script>
+        // Your web app's Firebase configuration
+        const firebaseConfig = {
+          apiKey: "AIzaSyCONofXx4NlCP34PZrs4pV-gDRJ_Uasw3c",
+          authDomain: "wswallstreet-3ab24.firebaseapp.com",
+          projectId: "wswallstreet-3ab24",
+          storageBucket: "wswallstreet-3ab24.firebasestorage.app",
+          messagingSenderId: "255776848131",
+          appId: "1:255776848131:web:17af511729c29eb2569136"
+        };
+
+        // Initialize Firebase
+        const app = firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+
+        const loginForm = document.getElementById('login-form');
+        const registerForm = document.getElementById('register-form');
+        const toggleLink = document.getElementById('toggle-form');
+        const errorMessage = document.getElementById('error-message');
+
+        // Toggle between login and register forms
+        toggleLink.addEventListener('click', (e) => {
+            e.preventDefault();
+            loginForm.classList.toggle('hidden');
+            registerForm.classList.toggle('hidden');
+            if (loginForm.classList.contains('hidden')) {
+                toggleLink.textContent = 'Já tem uma conta? Entre';
+            } else {
+                toggleLink.textContent = 'Não tem uma conta? Cadastre-se';
+            }
+            errorMessage.textContent = '';
+        });
+
+        // Login Handler
+        loginForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const email = loginForm['login-email'].value;
+            const password = loginForm['login-password'].value;
+            auth.signInWithEmailAndPassword(email, password)
+                .then(userCredential => {
+                    window.location.href = 'index.html'; // Or your main dashboard file
+                })
+                .catch(error => {
+                    errorMessage.textContent = 'Email ou senha inválidos.';
+                });
+        });
+
+        // Register Handler
+        registerForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const email = registerForm['register-email'].value;
+            const password = registerForm['register-password'].value;
+            auth.createUserWithEmailAndPassword(email, password)
+                .then(userCredential => {
+                    // This is where you could set user roles (e.g., in Firestore/Realtime Database)
+                    const role = (email.toLowerCase() === 'kraznelofc@gmail.com') ? 'admin' : 'member';
+                    console.log(`User registered as ${role}`);
+                    alert('Cadastro realizado com sucesso! Você será redirecionado para a tela de login.');
+                    // Toggle back to login form
+                    toggleLink.click();
+                    loginForm['login-email'].value = email; // Pre-fill email
+                })
+                .catch(error => {
+                     if (error.code == 'auth/email-already-in-use') {
+                        errorMessage.textContent = 'Este e-mail já está em uso.';
+                    } else if (error.code == 'auth/weak-password') {
+                        errorMessage.textContent = 'A senha deve ter pelo menos 6 caracteres.';
+                    } else {
+                        errorMessage.textContent = 'Ocorreu um erro ao cadastrar.';
+                    }
+                });
+        });
+
+         // Check if user is already logged in
+         auth.onAuthStateChanged(user => {
+            if (user) {
+                window.location.href = 'index.html'; // Redirect to dashboard if logged in
+            }
+        });
+    </script>
+
+</body>
+</html>
