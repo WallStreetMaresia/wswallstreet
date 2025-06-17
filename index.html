@@ -610,24 +610,11 @@
 
 
         // --- INITIALIZATION --- //
-        const initializeApp = () => {
+        const setupApp = () => {
             try {
-                // *****************************************************************
-                // ** IMPORTANTE: COLE AQUI A CONFIGURAÇÃO DO SEU FIREBASE         **
-                // ** 1. Vá para https://firebase.google.com/ e crie um projeto.  **
-                // ** 2. Adicione um "Aplicativo da Web".                         **
-                // ** 3. Copie o objeto 'firebaseConfig' e cole abaixo.           **
-                // *****************************************************************
-                const firebaseConfig = {
-                    apiKey: "AIzaSyCONofXx4NlCP34PZrs4pV-gDRJ_Uasw3c",
-                    authDomain: "wswallstreet-3ab24.firebaseapp.com",
-                    projectId: "wswallstreet-3ab24",
-                    storageBucket: "wswallstreet-3ab24.firebasestorage.app",
-                    messagingSenderId: "255776848131",
-                    appId: "1:255776848131:web:17af511729c29eb2569136"
-                };
-
-                if (firebaseConfig.apiKey === "COLE_SUA_API_KEY_AQUI") {
+                const firebaseConfig = JSON.parse(atob(typeof __firebase_config !== 'undefined' ? __firebase_config : 'e30='));
+                
+                if (firebaseConfig.apiKey === "COLE_SUA_API_KEY_AQUI" || !firebaseConfig.apiKey) {
                     document.body.innerHTML = `<div class="h-screen flex items-center justify-center text-center text-white"><p class="text-lg">Erro de Configuração: A chave do Firebase não foi adicionada.<br>Edite o arquivo HTML para configurar o painel.</p></div>`;
                     return;
                 }
@@ -656,19 +643,23 @@
                                  if (isAdmin) saveDb(); // Create initial doc if admin is first
                             }
                             loadUI();
+                        }, error => {
+                           console.error("Erro ao carregar dados do Firestore:", error);
+                           alert("Erro ao carregar dados. Usando modo offline.");
+                           db = JSON.parse(localStorage.getItem('backupDb')) || { dailyData: {}, premios: [], facData: {}, notes: {contratados: {}, retencao: {}, fac: {}} };
+                           loadUI();
                         });
 
                     } else {
                         isAdmin = false;
                         loginView.classList.remove('hidden');
+                        registerView.classList.add('hidden');
                         dashboardView.style.display = 'none';
                     }
                 });
             } catch (error) {
-                console.error("Falha ao inicializar o Firebase. Usando modo offline.", error);
-                alert("Não foi possível conectar à nuvem. O aplicativo funcionará no modo offline.");
-                db = loadDb();
-                loadUI();
+                console.error("Falha ao inicializar o Firebase. Verifique a configuração.", error);
+                document.body.innerHTML = `<div class="h-screen flex items-center justify-center text-center text-white"><p class="text-lg">Falha na Inicialização.<br>Verifique a configuração do Firebase e atualize a página.</p></div>`;
             }
         };
         
@@ -681,12 +672,12 @@
             document.getElementById('weekly-status-date').value = today; 
             document.getElementById('weekly-status-fac-date').value = today;
             setupFillModal(); 
-            Object.values(chartInstances).forEach(chart => chart.destroy());
+            Object.values(chartInstances).forEach(chart => { if(chart) chart.destroy() });
             chartInstances.contratadosRetencaoBarChart = createContratadosRetencaoChart();
             updateAllCharts();
         };
 
-        initializeApp();
+        setupApp();
     </script>
 </body>
 </ht
