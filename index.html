@@ -346,7 +346,15 @@
         const pastas = categories.map(c => c.name);
         const premiosList = ['VIP PLATINA', 'VIP LANÇAMENTO', 'VIP OURO', 'VIP PRATA', 'VIP BRONZE', 'BATTLEPASS'];
         
-        const getTodayString = () => new Date().toISOString().split('T')[0];
+        // --- FUNÇÃO CORRIGIDA ---
+        const getTodayString = () => {
+            const today = new Date();
+            const year = today.getFullYear();
+            const month = String(today.getMonth() + 1).padStart(2, '0'); // Meses são de 0 a 11, então +1
+            const day = String(today.getDate()).padStart(2, '0');
+            return `${year}-${month}-${day}`;
+        };
+
         const getWeekRange = (dateString) => {
             if (!dateString) return { start: null, end: null };
             const parts = dateString.split('-').map(part => parseInt(part, 10));
