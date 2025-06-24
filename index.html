@@ -346,7 +346,6 @@
         const pastas = categories.map(c => c.name);
         const premiosList = ['VIP PLATINA', 'VIP LANÇAMENTO', 'VIP OURO', 'VIP PRATA', 'VIP BRONZE', 'BATTLEPASS'];
         
-        // --- FUNÇÃO CORRIGIDA ---
         const getTodayString = () => {
             const today = new Date();
             const year = today.getFullYear();
@@ -675,7 +674,57 @@
         };
 
         const updatePieChart = () => { if (chartInstances.premiosPieChart) chartInstances.premiosPieChart.destroy(); chartInstances.premiosPieChart = createPieChart(); }
-        const updateWeeklyStatus = (dateString) => { const container = document.querySelector('#status-semanal .space-y-3'); container.innerHTML = ''; const { start, end } = getWeekRange(dateString); if(!start || !end) return; categories.forEach(cat => { let totalContratados = 0; let totalRetencao = 0; for (const date in db.dailyData) { if(date >= start && date <= end && db.dailyData[date]?.[cat.id]) { totalContratados += db.dailyData[date][cat.id].contratados || 0; totalRetencao += db.dailyData[date][cat.id].retencao || 0; } } const retencaoPercent = totalContratados > 0 ? (totalRetencao / totalContratados) * 100 : 0; let status, color; const minRec = 400, maxRec = 1100, minRet = 20, maxRet = 45; const recScore = totalContratados <= minRec ? 0 : Math.min(1, (totalContratados - minRec) / (maxRec - minRec)); const retScore = retencaoPercent <= minRet ? 0 : Math.min(1, (retencaoPercent - minRet) / (maxRet - minRet)); const finalScore = totalContratados > 0 ? (recScore + retScore) / 2 : 0; if (finalScore >= 0.9) { status = 'EXCELENTE'; color = 'text-emerald-400'; } else if (finalScore >= 0.7) { status = 'ÓTIMO'; color = 'text-green-400'; } else if (finalScore >= 0.5) { status = 'BOM'; color = 'text-cyan-400'; } else if (finalScore > 0) { status = 'SATISFATÓRIO'; color = 'text-green-500'; } else { status = 'RUIM'; color = 'text-red-500'; } container.innerHTML += `<div class="flex justify-between items-center text-sm"><span class="font-semibold text-${cat.color}-400">${cat.name}</span><span class="font-bold ${color}">${status}</span></div>`; });};
+        
+        // --- FUNÇÃO MODIFICADA ---
+        const updateWeeklyStatus = (dateString) => {
+            const container = document.querySelector('#status-semanal .space-y-3');
+            container.innerHTML = '';
+            const { start, end } = getWeekRange(dateString);
+            if (!start || !end) return;
+            categories.forEach(cat => {
+                let totalContratados = 0;
+                let totalRetencao = 0;
+                for (const date in db.dailyData) {
+                    if (date >= start && date <= end && db.dailyData[date]?.[cat.id]) {
+                        totalContratados += db.dailyData[date][cat.id].contratados || 0;
+                        totalRetencao += db.dailyData[date][cat.id].retencao || 0;
+                    }
+                }
+                const retencaoPercent = totalContratados > 0 ? (totalRetencao / totalContratados) * 100 : 0;
+                
+                let status, color;
+                const retencaoMinima = 45;
+
+                if (totalContratados >= 1000 && retencaoPercent >= 50) { // Adicionado um nível acima do ótimo
+                    status = 'EXCELENTE';
+                    color = 'text-emerald-400';
+                } else if (totalContratados >= 850 && retencaoPercent >= retencaoMinima) {
+                    status = 'ÓTIMO';
+                    color = 'text-green-400';
+                } else if (totalContratados >= 700 && retencaoPercent >= retencaoMinima) {
+                    status = 'BOM';
+                    color = 'text-cyan-400';
+                } else if (totalContratados >= 500 && retencaoPercent >= retencaoMinima) {
+                    status = 'SATISFATÓRIO';
+                    color = 'text-blue-400';
+                } else if (totalContratados >= 350 && retencaoPercent >= retencaoMinima) {
+                    status = 'MÉDIO';
+                    color = 'text-yellow-500';
+                } else if (totalContratados >= 200 && retencaoPercent >= retencaoMinima) {
+                    status = 'RUIM';
+                    color = 'text-orange-500';
+                } else if (totalContratados >= 100 && retencaoPercent >= retencaoMinima) {
+                    status = 'HORRÍVEL';
+                    color = 'text-red-500';
+                } else {
+                    status = 'INSUFICIENTE';
+                    color = 'text-gray-500';
+                }
+
+                container.innerHTML += `<div class="flex justify-between items-center text-sm"><span class="font-semibold text-${cat.color}-400">${cat.name}</span><span class="font-bold ${color}">${status}</span></div>`;
+            });
+        };
+
         const updateFacWeeklyStatus = (dateString) => { const container = document.querySelector('#status-semanal-fac .space-y-3'); container.innerHTML = ''; const { start, end } = getWeekRange(dateString); if(!start || !end) return; if(!db.facData) db.facData={}; categories.forEach(cat => { let metasBatidas = 0; for(const date in db.facData) { if(date >= start && date <= end) { metasBatidas += (db.facData[date] || []).filter(f => f.pasta === cat.name && f.metaBatida === 'Sim' && (parseInt(f.quantidade, 10) >= parseInt(f.meta, 10))).length; }} let status, color; if (metasBatidas >= 7) { status = 'EXCELENTE'; color = 'text-emerald-400';} else if (metasBatidas === 6) { status = 'ÓTIMO'; color = 'text-green-400';} else if (metasBatidas === 5) { status = 'BOM'; color = 'text-cyan-400';} else if (metasBatidas === 4) { status = 'SATISFATÓRIO'; color = 'text-green-500';} else if (metasBatidas === 3) { status = 'MÉDIO'; color = 'text-yellow-500';} else { status = 'RUIM'; color = 'text-red-500'; } container.innerHTML += `<div class="flex justify-between items-center text-sm"><span class="font-semibold text-${cat.color}-400">${cat.name}</span><span class="font-bold ${color}">${status} (${metasBatidas})</span></div>`; });};
         const renderAnotacoes = (date, key) => { if(!db.notes) db.notes={contratados:{}, retencao:{}, fac:{}}; const container = document.getElementById('anotacao-card-container'); container.innerHTML = ''; const notesForDay = db.notes[key]?.[date] || []; if (notesForDay.length === 0) { container.innerHTML = `<p class="text-gray-500 text-center">Nenhuma anotação para este dia.</p>`; return; } notesForDay.forEach((note, index) => { const card = document.createElement('div'); card.className = 'bg-gray-800 p-4 rounded-lg flex justify-between items-start'; card.innerHTML = `<p class="text-gray-300 whitespace-pre-wrap">${note}</p><button class="text-red-500 hover:text-red-400 font-bold delete-anotacao-btn" data-key="${key}" data-date="${date}" data-index="${index}">&times;</button>`; container.appendChild(card); }); };
         
