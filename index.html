@@ -11,6 +11,8 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom/dist/chartjs-plugin-zoom.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/litepicker/dist/litepicker.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/litepicker/dist/css/litepicker.css"/>
     <style>
         body { font-family: 'Inter', sans-serif; background-color: #000000; color: #E0E0E0; }
         .chart-border { border-color: rgba(255, 255, 255, 0.2); }
@@ -18,7 +20,7 @@
         .btn-action:hover { background-color: rgba(255, 255, 255, 0.2); }
         .modal-bg { background-color: rgba(0, 0, 0, 0.8); backdrop-filter: blur(4px); }
         .modal-content { background-color: #111; border: 1px solid rgba(255, 255, 255, 0.2); }
-        .input-field, .select-field { background-color: #222; border: 1px solid rgba(255, 255, 255, 0.3); color: #E0E0E0; border-radius: 0.375rem; }
+        .input-field, .select-field, .date-range-picker { background-color: #222; border: 1px solid rgba(255, 255, 255, 0.3); color: #E0E0E0; border-radius: 0.375rem; padding: 0.25rem 0.5rem; }
         .select-field { -webkit-appearance: none; -moz-appearance: none; appearance: none; background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e"); background-position: right 0.5rem center; background-repeat: no-repeat; background-size: 1.5em 1.5em; padding-right: 2.5rem; }
         .custom-legend { display: flex; justify-content: center; align-items: center; gap: 1.5rem; margin-top: 1rem; flex-wrap: wrap; }
         .legend-item { display: flex; align-items: center; gap: 0.5rem; font-size: 0.75rem; cursor: pointer; transition: opacity 0.2s; }
@@ -32,6 +34,17 @@
         .ai-chat-user { background-color: #007bff; color: white; align-self: flex-end; border-bottom-right-radius: 0; }
         .ai-chat-gemini { background-color: #333; color: white; align-self: flex-start; border-bottom-left-radius: 0;}
         .day-btn.active { background-color: #facc15; color: #111827; font-weight: bold; }
+        /* Estilos customizados para o Litepicker */
+        .litepicker { background-color: #111111; border: 1px solid rgba(255, 255, 255, 0.2); box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3), 0 4px 6px -2px rgba(0, 0, 0, 0.2); }
+        .litepicker .container__months { background-color: #111111; }
+        .litepicker .month-item-header, .litepicker .month-item-weekdays-row { color: #E0E0E0; }
+        .litepicker .month-item, .litepicker .day-item { color: #d1d5db; }
+        .litepicker .day-item:hover { background-color: #374151; border-radius: 0.375rem; }
+        .litepicker .day-item.is-start-date, .litepicker .day-item.is-end-date { background-color: #facc15; color: #111827; border-radius: 0.375rem; }
+        .litepicker .day-item.is-in-range { background-color: rgba(250, 204, 21, 0.2); border-radius: 0; }
+        .litepicker .button-previous-month, .litepicker .button-next-month { color: #facc15; }
+        .litepicker .button-apply, .litepicker .button-cancel { background-color: #222; color: #E0E0E0; }
+        .date-range-picker { text-align: center; }
     </style>
 </head>
 <body class="p-4 sm:p-6 md:p-8" style="display: none;">
@@ -58,8 +71,7 @@
                         <span class="status-trend-label text-xs italic text-gray-400"></span>
                     </div>
                     <div class="flex items-center space-x-2">
-                        <input type="date" class="input-field p-1 text-sm compare-start-date" title="Data Início">
-                        <input type="date" class="input-field p-1 text-sm compare-end-date" title="Data Fim">
+                        <input type="text" class="input-field p-1 text-sm date-range-picker" placeholder="Comparar período...">
                         <button class="text-purple-400 border border-purple-400 rounded-lg py-1 px-3 text-sm font-semibold hover:bg-purple-400 hover:text-black transition-colors btn-anotacao" data-key="contratados">ANOTAÇÃO</button>
                         <button class="text-white border border-gray-500 rounded-lg py-1 px-3 text-sm font-semibold btn-action btn-reset-chart">RESET</button>
                     </div>
@@ -75,8 +87,7 @@
                         <span class="status-trend-label text-xs italic text-gray-400"></span>
                      </div>
                      <div class="flex items-center space-x-2">
-                         <input type="date" class="input-field p-1 text-sm compare-start-date" title="Data Início">
-                         <input type="date" class="input-field p-1 text-sm compare-end-date" title="Data Fim">
+                         <input type="text" class="input-field p-1 text-sm date-range-picker" placeholder="Comparar período...">
                          <button class="text-purple-400 border border-purple-400 rounded-lg py-1 px-3 text-sm font-semibold hover:bg-purple-400 hover:text-black transition-colors btn-anotacao" data-key="retencao">ANOTAÇÃO</button>
                          <button class="text-white border border-gray-500 rounded-lg py-1 px-3 text-sm font-semibold btn-action btn-reset-chart">RESET</button>
                      </div>
@@ -84,9 +95,10 @@
                 <div class="relative flex-grow h-64"><canvas id="retencao-timeline-chart"></canvas></div><div id="timeline-retencao-legend" class="custom-legend"></div>
             </div>
             <div class="lg:col-span-2 border chart-border rounded-xl p-6 flex flex-col">
-                <h2 class="text-lg font-semibold text-white mb-2 text-center">CONTRATADOS X RETENÇÃO</h2>
-                <div class="relative w-full h-8 mb-4">
-                    <div id="daily-stats-container" class="absolute inset-x-0 top-0 flex justify-center gap-4"></div>
+                <h2 class="text-lg font-semibold text-white mb-1 text-center">CONTRATADOS X RETENÇÃO</h2>
+                <div class="w-full text-center mb-3">
+                    <p id="comparison-label" class="text-xs text-gray-500">Comparado a 7 dias atrás</p>
+                    <div id="daily-stats-container" class="flex justify-center items-center gap-3 mt-1"></div>
                 </div>
                 <div id="bar-chart-day-buttons" class="flex justify-center items-center flex-wrap gap-2 mb-4"></div>
                 <div class="relative flex-grow h-64"><canvas id="contratados-retencao-bar-chart"></canvas></div>
@@ -100,8 +112,7 @@
                         <span class="status-trend-label text-xs italic text-gray-400"></span>
                      </div>
                      <div class="flex items-center space-x-2">
-                         <input type="date" class="input-field p-1 text-sm compare-start-date" title="Data Início">
-                         <input type="date" class="input-field p-1 text-sm compare-end-date" title="Data Fim">
+                         <input type="text" class="input-field p-1 text-sm date-range-picker" placeholder="Comparar período...">
                          <button class="text-purple-400 border border-purple-400 rounded-lg py-1 px-3 text-sm font-semibold hover:bg-purple-400 hover:text-black transition-colors btn-anotacao" data-key="fac">ANOTAÇÃO</button>
                          <button class="text-white border border-gray-500 rounded-lg py-1 px-3 text-sm font-semibold btn-action btn-reset-chart">RESET</button>
                      </div>
@@ -319,6 +330,7 @@
             document.getElementById('weekly-status-fac-date').value = today;
             setupFillModal(); 
             setupDayButtons();
+            initLitepickers();
             if (!chartInstances.contratadosRetencaoBarChart) {
                 chartInstances.contratadosRetencaoBarChart = createContratadosRetencaoChart();
             }
@@ -394,7 +406,7 @@
                 plugins: {
                     legend: { display: true, position: 'bottom', labels: { color: '#E0E0E0' }},
                     tooltip: { enabled: false, external: barChartTooltipHandler },
-                    noDataPlugin // Adiciona o plugin aqui
+                    noDataPlugin
                 },
                 scales: {
                     x: { ticks: { color: '#9CA3AF' }, grid: { display: false } },
@@ -429,48 +441,65 @@
 
         const updateDailyComparisonStats = (currentDateStr) => {
             const container = document.getElementById('daily-stats-container');
+            const comparisonLabel = document.getElementById('comparison-label');
+            container.innerHTML = '';
+            comparisonLabel.classList.remove('hidden');
+
+            const createStatBox = (label, value, isPositive) => {
+                const borderColor = isPositive ? 'border-green-500' : 'border-red-500';
+                const iconColor = isPositive ? 'text-green-400' : 'text-red-400';
+                const icon = isPositive ? '↑' : '↓';
+                return `<div class="rounded-md border ${borderColor} px-3 py-1 bg-black/30"><p class="text-sm font-semibold text-white text-center flex items-center gap-1.5"><span class="${iconColor} text-md">${icon}</span> ${value} <span class="text-gray-300 font-normal text-xs"> ${label}</span></p></div>`;
+            };
+
+            const createWaitingBox = () => {
+                container.innerHTML = `<div class="col-span-2 text-center text-xs text-gray-500">Aguardando dados para comparação</div>`;
+                comparisonLabel.classList.add('hidden');
+            };
+            
             if (!currentDateStr || !db.dailyData) {
-                container.innerHTML = `<p class="text-gray-500 col-span-full text-center py-4">Sem dados para comparação.</p>`;
+                createWaitingBox();
                 return;
             }
+
             const prevDate = new Date(`${currentDateStr}T12:00:00Z`);
             prevDate.setUTCDate(prevDate.getUTCDate() - 7);
             const prevDateStr = prevDate.toISOString().split('T')[0];
 
             const getTotalsForDate = (date) => {
                 const data = db.dailyData[date];
+                if (!data) return null;
                 let totalContratados = 0, totalRetencao = 0;
-                if (data) {
-                    Object.values(data).forEach(catData => {
-                        totalContratados += catData.contratados || 0;
-                        totalRetencao += catData.retencao || 0;
-                    });
-                }
+                Object.values(data).forEach(catData => {
+                    totalContratados += catData.contratados || 0;
+                    totalRetencao += catData.retencao || 0;
+                });
                 return { totalContratados, totalRetencao };
             };
 
             const todayTotals = getTotalsForDate(currentDateStr);
             const prevTotals = getTotalsForDate(prevDateStr);
 
+            if (!todayTotals || !prevTotals) {
+                createWaitingBox();
+                return;
+            }
+            
             const calculatePercentageChange = (current, previous) => {
-                if (previous === 0) return current > 0 ? { value: Infinity } : { value: 0 };
-                return { value: Math.round(((current - previous) / previous) * 100) };
+                if (previous === 0) return current > 0 ? Infinity : 0;
+                return Math.round(((current - previous) / previous) * 100);
             };
 
-            const createStatBox = (label, change) => {
-                const isPositive = change.value >= 0;
-                const isInfinite = change.value === Infinity;
-                const bgColor = isPositive ? 'bg-green-900/50' : 'bg-red-900/50';
-                const borderColor = isPositive ? 'border-green-700' : 'border-red-700';
-                const iconColor = isPositive ? 'text-green-400' : 'text-red-400';
-                const icon = isPositive ? '↑' : '↓';
-                let valueText = isInfinite ? 'Novo' : `${Math.abs(change.value)}%`;
-
-                return `<div class="p-2 rounded-lg ${bgColor} border ${borderColor}"><p class="text-sm font-semibold text-white text-center flex items-center justify-center gap-1.5"><span class="${iconColor} text-lg">${icon}</span> ${valueText} <span class="text-gray-300 font-normal"> ${label}</span></p></div>`;
-            };
             const contratadosChange = calculatePercentageChange(todayTotals.totalContratados, prevTotals.totalContratados);
             const retencaoChange = calculatePercentageChange(todayTotals.totalRetencao, prevTotals.totalRetencao);
-            container.innerHTML = `${createStatBox('Contratados', contratadosChange)} ${createStatBox('Retenção', retencaoChange)}`;
+
+            let contratadosValue = contratadosChange === Infinity ? 'Novo' : `${Math.abs(contratadosChange)}%`;
+            let retencaoValue = retencaoChange === Infinity ? 'Novo' : `${Math.abs(retencaoChange)}%`;
+            
+            container.innerHTML = `
+                ${createStatBox('Contratados', contratadosValue, contratadosChange >= 0)}
+                ${createStatBox('Retenção', retencaoValue, retencaoChange >= 0)}
+            `;
         };
         
         const setupDayButtons = () => {
@@ -509,10 +538,14 @@
         };
 
         const updateTimelineStatusDots = () => {
-            if (!db || !db.dailyData || Object.keys(db.dailyData).length < 6) {
-                document.querySelectorAll('.status-dot-label').forEach(label => label.textContent = 'Insuficiente');
+            const insufficientData = () => {
+                document.querySelectorAll('.status-dot-label').forEach(label => label.textContent = 'Dados insuf.');
                 document.querySelectorAll('.status-dot').forEach(dot => dot.className = 'status-dot w-4 h-4 rounded-full bg-gray-600');
                 document.querySelectorAll('.status-trend-label').forEach(label => label.textContent = '');
+            };
+
+            if (!db || !db.dailyData || Object.keys(db.dailyData).length < 6) {
+                insufficientData();
                 return;
             }
             const allDates = Object.keys(db.dailyData).sort((a, b) => new Date(b) - new Date(a));
@@ -521,45 +554,53 @@
                 let totalContratados = 0, totalRetencao = 0;
                 days.forEach(date => {
                     const dayData = db.dailyData[date];
-                    if (dayData) {
-                        Object.values(dayData).forEach(cat => {
-                            totalContratados += cat.contratados || 0;
-                            totalRetencao += cat.retencao || 0;
-                        });
-                    }
-                });
-                return { totalContratados, totalRetencao };
+                    if (dayData) Object.values(dayData).forEach(cat => { totalContratados += cat.contratados || 0; totalRetencao += cat.retencao || 0; });
+                }
+                return { totalContratados, totalRetencao, score: (totalContratados + totalRetencao) };
             };
 
             const currentPeriodSum = getSumForDays(allDates.slice(0, 3));
             const previousPeriodSum = getSumForDays(allDates.slice(3, 6));
+            
+            if (previousPeriodSum.score === 0 && currentPeriodSum.score === 0) {
+                 insufficientData();
+                 return;
+            }
 
             let status = { text: 'Ruim', color: 'bg-red-500', textColor: 'text-red-300' };
-            if (currentPeriodSum.totalContratados >= 900 && currentPeriodSum.totalRetencao >= 450) {
-                status = { text: 'Excelente', color: 'bg-emerald-500', textColor: 'text-emerald-300' };
-            } else if (currentPeriodSum.totalContratados >= 700 && currentPeriodSum.totalRetencao >= 350) {
-                status = { text: 'Bom', color: 'bg-green-500', textColor: 'text-green-300' };
-            } else if (currentPeriodSum.totalContratados >= 400 && currentPeriodSum.totalRetencao >= 250) {
-                 status = { text: 'Médio', color: 'bg-yellow-500', textColor: 'text-yellow-300' };
-            }
+            if (currentPeriodSum.totalContratados >= 900 && currentPeriodSum.totalRetencao >= 450) { status = { text: 'Excelente', color: 'bg-emerald-500', textColor: 'text-emerald-300' };
+            } else if (currentPeriodSum.totalContratados >= 700 && currentPeriodSum.totalRetencao >= 350) { status = { text: 'Bom', color: 'bg-green-500', textColor: 'text-green-300' };
+            } else if (currentPeriodSum.totalContratados >= 400 && currentPeriodSum.totalRetencao >= 250) { status = { text: 'Médio', color: 'bg-yellow-500', textColor: 'text-yellow-300' }; }
 
-            const currentScore = currentPeriodSum.totalContratados + currentPeriodSum.totalRetencao;
-            const previousScore = previousPeriodSum.totalContratados + previousPeriodSum.totalRetencao;
-            let trend = { text: ' (Estável)', icon: '' };
-            if (currentScore > previousScore) {
-                trend = { text: ' (Subindo)', icon: '↑' };
-            } else if (currentScore < previousScore) {
-                trend = { text: ' (Descendo)', icon: '↓' };
-            }
+            let trend = { text: '(Estável)', color: 'text-gray-400' };
+            if (currentPeriodSum.score > previousPeriodSum.score) { trend = { text: '(Subindo)', color: 'text-green-400' };
+            } else if (currentPeriodSum.score < previousPeriodSum.score) { trend = { text: '(Descendo)', color: 'text-red-400' }; }
 
             document.querySelectorAll('.status-dot').forEach(dot => dot.className = `status-dot w-4 h-4 rounded-full ${status.color}`);
-            document.querySelectorAll('.status-dot-label').forEach(label => {
-                label.textContent = status.text;
-                label.className = `status-dot-label text-xs font-medium ${status.textColor}`;
-            });
-            document.querySelectorAll('.status-trend-label').forEach(label => {
-                label.textContent = trend.text;
-                label.className = trend.icon === '↑' ? 'text-green-400 text-xs' : trend.icon === '↓' ? 'text-red-400 text-xs' : 'text-gray-400 text-xs';
+            document.querySelectorAll('.status-dot-label').forEach(label => { label.textContent = status.text; label.className = `status-dot-label text-xs font-medium ${status.textColor}`; });
+            document.querySelectorAll('.status-trend-label').forEach(label => { label.textContent = trend.text; label.className = `status-trend-label text-xs italic ${trend.color}`; });
+        };
+
+        const initLitepickers = () => {
+            document.querySelectorAll('.date-range-picker').forEach(pickerEl => {
+                const controlsDiv = pickerEl.closest('[id^="controls-"]');
+                const key = controlsDiv.id.split('-')[1];
+                const chart = chartInstances[`${key}TimelineChart`];
+                
+                const picker = new Litepicker({
+                    element: pickerEl,
+                    singleMode: false,
+                    autoApply: true,
+                    numberOfMonths: 2,
+                    numberOfColumns: 2,
+                    format: 'YYYY-MM-DD',
+                    setup: (pickerInstance) => {
+                        pickerInstance.on('selected', (date1, date2) => {
+                            applyDateFilter(chart, date1.format('YYYY-MM-DD'), date2.format('YYYY-MM-DD'));
+                        });
+                    }
+                });
+                pickerEl.litepickerInstance = picker;
             });
         };
 
@@ -587,21 +628,17 @@
         ['weekly-status-reset', 'weekly-status-fac-reset'].forEach(id => document.getElementById(id).addEventListener('click', () => { const today = getTodayString(); const dateInputId = id.replace('reset', 'date'); document.getElementById(dateInputId).value = today; id.includes('fac') ? updateFacWeeklyStatus(today) : updateWeeklyStatus(today); }));
         document.addEventListener('click', e => { if (e.target.closest('.legend-item')) { const legendItem = e.target.closest('.legend-item'); const chartKey = legendItem.dataset.chart; const datasetIndex = parseInt(legendItem.dataset.datasetIndex); if (chartInstances[chartKey]) { const chart = chartInstances[chartKey]; chart.setDatasetVisibility(datasetIndex, !chart.isDatasetVisible(datasetIndex)); legendItem.classList.toggle('hidden-dataset'); chart.update(); } } });
         
-        document.querySelectorAll('.btn-reset-chart').forEach(btn => btn.addEventListener('click', (e) => { const controlsDiv = e.target.closest('[id^="controls-"]'); controlsDiv.querySelector('.compare-start-date').value = ''; controlsDiv.querySelector('.compare-end-date').value = ''; const key = controlsDiv.id.split('-')[1]; const chart = chartInstances[`${key}TimelineChart`]; resetZoomAndFilter(chart); }));
+        document.querySelectorAll('.btn-reset-chart').forEach(btn => btn.addEventListener('click', (e) => {
+            const controlsDiv = e.target.closest('[id^="controls-"]');
+            const pickerInput = controlsDiv.querySelector('.date-range-picker');
+            if (pickerInput && pickerInput.litepickerInstance) {
+                pickerInput.litepickerInstance.clearSelection();
+            }
+            const key = controlsDiv.id.split('-')[1];
+            const chart = chartInstances[`${key}TimelineChart`];
+            resetZoomAndFilter(chart);
+        }));
         
-        document.querySelectorAll('.compare-start-date, .compare-end-date').forEach(input => {
-            input.addEventListener('change', e => {
-                const controlsDiv = e.target.closest('[id^="controls-"]');
-                const key = controlsDiv.id.split('-')[1];
-                const chart = chartInstances[`${key}TimelineChart`];
-                const start = controlsDiv.querySelector('.compare-start-date').value;
-                const end = controlsDiv.querySelector('.compare-end-date').value;
-                if (start && end) {
-                    applyDateFilter(chart, start, end);
-                }
-            });
-        });
-
         const applyDateFilter = (chart, start, end) => { if (chart && start && end) { chart.options.scales.x.min = start; chart.options.scales.x.max = end; chart.update(); } };
         const resetZoomAndFilter = (chart) => { if (chart) { delete chart.options.scales.x.min; delete chart.options.scales.x.max; chart.resetZoom(); } };
         document.getElementById('consult-rank-btn').addEventListener('click', () => { const date = document.getElementById('consult-date').value; const resultsContainer = document.getElementById('consult-results'); if (!date) { resultsContainer.innerHTML = '<p class="text-red-500">Selecione uma data.</p>'; return; } if(!db.premios) db.premios = []; const premiosDoDia = db.premios.filter(p => p.date === date); if(premiosDoDia.length === 0) { resultsContainer.innerHTML = '<p>Nenhum prêmio registrado.</p>'; return; } resultsContainer.innerHTML = '<h3 class="font-bold mb-2">Ganhadores do Dia</h3>' + premiosDoDia.map((p, i) => `<p><strong>${i+1}º:</strong> ${p.pessoa} (${p.pasta}) - <span class="text-yellow-400">${p.premio}</span></p>`).join(''); });
