@@ -11,8 +11,6 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom/dist/chartjs-plugin-zoom.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/litepicker/dist/litepicker.js"></script>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/litepicker/dist/css/litepicker.css"/>
     <style>
         body { font-family: 'Inter', sans-serif; background-color: #000000; color: #E0E0E0; }
         .chart-border { border-color: rgba(255, 255, 255, 0.2); }
@@ -26,17 +24,7 @@
         .legend-item { display: flex; align-items: center; gap: 0.5rem; font-size: 0.75rem; cursor: pointer; transition: opacity 0.2s; }
         .legend-item.hidden-dataset { opacity: 0.5; text-decoration: line-through; }
         .legend-dot { width: 0.625rem; height: 0.625rem; border-radius: 9999px; }
-        #chartjs-tooltip { opacity: 0; position: absolute; background: rgba(30, 30, 30, 0.9); color: white; border-radius: 8px; padding: 10px 15px; pointer-events: none; transition: all .1s ease; transform: translate(-50%, -110%); font-size: 12px; border: 1px solid rgba(255, 255, 255, 0.2); z-index: 100; }
-        #chartjs-tooltip table { margin: 0; border-collapse: collapse; width: 100%;}
-        #chartjs-tooltip th, #chartjs-tooltip td { border: none; padding: 4px 0; text-align: left;}
-        #chartjs-tooltip .tooltip-dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 8px; }
         .day-btn.active { background-color: #facc15; color: #111827; font-weight: bold; }
-        /* Estilos para o Litepicker */
-        .litepicker{ background-color: #1a1a1a; border: 1px solid rgba(255, 255, 255, 0.3); color: #E0E0E0; z-index: 1000 !important; }
-        .litepicker .container__months .month-item .month-item-header, .litepicker .container__months .month-item .day-item{ color: #E0E0E0; }
-        .litepicker .container__months .month-item .day-item.is-today{ color: #facc15; border: 1px solid #facc15; }
-        .litepicker .container__months .month-item .day-item.is-start-date, .litepicker .container__months .month-item .day-item.is-end-date { background-color: #facc15; color: #111827; border-radius: 50%; }
-        .litepicker .container__months .month-item .day-item.in-range { background-color: rgba(250, 204, 21, 0.2); border-radius: 0; }
     </style>
 </head>
 <body class="p-4 sm:p-6 md:p-8" style="display: none;">
@@ -48,19 +36,18 @@
                 <span id="user-email" class="text-sm text-gray-400 hidden sm:inline"></span>
                 <button id="logout-btn" class="text-red-500 font-semibold py-2 px-4 rounded-lg hover:bg-red-500 hover:text-white transition-colors text-sm">Sair</button>
                 <div id="permissioned-controls" class="flex items-center space-x-2 sm:space-x-4"></div>
-                <button id="open-ai-chat-btn" class="text-white font-semibold py-2 px-6 rounded-lg bg-purple-600 hover:bg-purple-700 transition-colors">Análise IA</button>
                 <input type="date" id="main-date-filter" class="bg-yellow-400 text-black font-bold py-2 px-4 rounded-lg cursor-pointer">
             </div>
         </header>
         
         <main class="grid grid-cols-1 lg:grid-cols-2 gap-8">
             <div class="border chart-border rounded-xl p-6 flex flex-col">
-                <div class="flex flex-wrap justify-between items-center mb-4 gap-4" id="controls-contratados"><h2 class="text-lg font-semibold text-white">LINHA DO TEMPO - CONTRATADOS</h2><div class="flex items-center space-x-2"><input type="text" readonly class="input-field p-1 text-sm text-center cursor-pointer litepicker-trigger" placeholder="Selecionar Período" style="width: 240px;"><button class="text-purple-400 border border-purple-400 rounded-lg py-1 px-3 text-sm font-semibold hover:bg-purple-400 hover:text-black transition-colors btn-anotacao" data-key="contratados">ANOTAÇÃO</button><button class="text-white border border-gray-500 rounded-lg py-1 px-3 text-sm font-semibold btn-action btn-reset-chart">RESET</button></div></div>
-                <div class="relative flex-grow h-64"><canvas id="contratados-timeline-chart"></canvas></div><div id="timeline-contratados-legend" class="custom-legend"></div>
+                <div class="flex flex-wrap justify-between items-center mb-4 gap-4" id="controls-contratados"><h2 class="text-lg font-semibold text-white">LINHA DO TEMPO - CONTRATADOS</h2><div class="flex items-center space-x-2"><input type="date" class="input-field p-1 text-sm compare-start-date" title="Data Início"><input type="date" class="input-field p-1 text-sm compare-end-date" title="Data Fim"><button class="text-white border border-gray-500 rounded-lg py-1 px-3 text-sm font-semibold btn-action btn-reset-chart">RESET</button></div></div>
+                <div class="relative flex-grow h-64"><canvas id="contratados-timeline-chart"></canvas></div>
             </div>
             <div class="border chart-border rounded-xl p-6 flex flex-col">
-                <div class="flex flex-wrap justify-between items-center mb-4 gap-4" id="controls-retencao"><h2 class="text-lg font-semibold text-white">LINHA DO TEMPO - RETENÇÃO</h2><div class="flex items-center space-x-2"><input type="text" readonly class="input-field p-1 text-sm text-center cursor-pointer litepicker-trigger" placeholder="Selecionar Período" style="width: 240px;"><button class="text-purple-400 border border-purple-400 rounded-lg py-1 px-3 text-sm font-semibold hover:bg-purple-400 hover:text-black transition-colors btn-anotacao" data-key="retencao">ANOTAÇÃO</button><button class="text-white border border-gray-500 rounded-lg py-1 px-3 text-sm font-semibold btn-action btn-reset-chart">RESET</button></div></div>
-                <div class="relative flex-grow h-64"><canvas id="retencao-timeline-chart"></canvas></div><div id="timeline-retencao-legend" class="custom-legend"></div>
+                <div class="flex flex-wrap justify-between items-center mb-4 gap-4" id="controls-retencao"><h2 class="text-lg font-semibold text-white">LINHA DO TEMPO - RETENÇÃO</h2><div class="flex items-center space-x-2"><input type="date" class="input-field p-1 text-sm compare-start-date" title="Data Início"><input type="date" class="input-field p-1 text-sm compare-end-date" title="Data Fim"><button class="text-white border border-gray-500 rounded-lg py-1 px-3 text-sm font-semibold btn-action btn-reset-chart">RESET</button></div></div>
+                <div class="relative flex-grow h-64"><canvas id="retencao-timeline-chart"></canvas></div>
             </div>
             <div class="lg:col-span-2 border chart-border rounded-xl p-6 flex flex-col">
                 <h2 class="text-lg font-semibold text-white mb-2 text-center">CONTRATADOS X RETENÇÃO</h2>
@@ -68,11 +55,7 @@
                 <div id="comparison-indicators" class="flex justify-center flex-wrap gap-4 mb-4"></div>
                 <div class="relative flex-grow h-64"><canvas id="contratados-retencao-bar-chart"></canvas></div>
             </div>
-            <div class="border chart-border rounded-xl p-6 flex flex-col">
-                <div class="flex flex-wrap justify-between items-center mb-4 gap-4" id="controls-fac"><h2 class="text-lg font-semibold text-white">FACÇÕES EM FOCO</h2><div class="flex items-center space-x-2"><input type="text" readonly class="input-field p-1 text-sm text-center cursor-pointer litepicker-trigger" placeholder="Selecionar Período" style="width: 240px;"><button class="text-purple-400 border border-purple-400 rounded-lg py-1 px-3 text-sm font-semibold hover:bg-purple-400 hover:text-black transition-colors btn-anotacao" data-key="fac">ANOTAÇÃO</button><button class="text-white border border-gray-500 rounded-lg py-1 px-3 text-sm font-semibold btn-action btn-reset-chart">RESET</button></div></div>
-                <div class="relative flex-grow h-64"><canvas id="fac-timeline-chart"></canvas></div><div id="timeline-fac-legend" class="custom-legend"></div>
-            </div>
-            </main>
+        </main>
     </div>
 
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
@@ -81,7 +64,6 @@
     
     <script>
         document.addEventListener('DOMContentLoaded', () => {
-            // --- CONFIGURAÇÃO E AUTENTICAÇÃO ---
             const firebaseConfig = {
               apiKey: "AIzaSyCONofXx4NlCP34PZrs4pV-gDRJ_Uasw3c",
               authDomain: "wswallstreet-3ab24.firebaseapp.com",
@@ -95,71 +77,94 @@
             const fbAuth = firebase.auth();
             const fbDb = firebase.firestore();
             const ADMIN_EMAIL = 'kraznelofc@gmail.com';
-    
+
             fbAuth.onAuthStateChanged(async (user) => {
                 if (user) {
                     document.body.style.display = 'block';
-                    // ... (resto do código de verificação de admin, etc.)
+                    const controlsContainer = document.getElementById('permissioned-controls');
+                    if (user.email === ADMIN_EMAIL) {
+                        controlsContainer.innerHTML = `<button id="open-fill-modal-btn" class="text-white font-semibold py-2 px-6 rounded-lg btn-action">PREENCHER</button>`;
+                    } else {
+                        controlsContainer.innerHTML = '';
+                    }
                     await initializeApp();
                 } else {
                     window.location.href = 'login.html';
                 }
             });
-            
+
             let db;
             const dbRef = fbDb.collection('application_data').doc('main');
-    
+
             async function loadDb() {
                 try {
                     const doc = await dbRef.get();
                     if (doc.exists && doc.data().dailyData) {
                         return doc.data();
                     }
-                    // Retorna um objeto vazio seguro se não houver dados
-                    return { dailyData: {}, premios: [], facData: {}, notes: {contratados: {}, retencao: {}, fac: {}} };
+                    return { dailyData: {}, premios: [], facData: {}, notes: {} };
                 } catch (error) {
                     console.error("Erro fatal ao carregar dados do Firestore:", error);
-                    return { dailyData: {}, premios: [], facData: {}, notes: {contratados: {}, retencao: {}, fac: {}} };
+                    document.body.innerHTML = '<div style="color:white; text-align:center; padding-top: 50px;"><h1>Erro Crítico</h1><p>Não foi possível carregar os dados do painel. Verifique sua conexão e o console de erros.</p></div>';
+                    document.body.style.display = 'block';
+                    return null;
                 }
             }
-            
-            // --- INICIALIZAÇÃO DA APLICAÇÃO ---
+
             async function initializeApp() {
                 db = await loadDb();
-                if (!db) {
-                    console.error("Banco de dados não carregado. Interrompendo a inicialização.");
-                    return;
-                }
-                
+                if (!db) return;
+
                 const today = new Date().toISOString().split('T')[0];
                 document.getElementById('main-date-filter').value = today;
-                
-                // ... (outras inicializações de modais e componentes)
-                setupDayButtons();
-                setupDateRangePickers(); // Inicia o Litepicker
-                
-                // Criação e atualização dos gráficos
-                if (!chartInstances.contratadosRetencaoBarChart) {
-                    chartInstances.contratadosRetencaoBarChart = createContratadosRetencaoChart();
-                }
-                updateAllCharts();
-            }
-    
-            let chartInstances = {};
-            const categories = [ { id: 'conexao', name: 'Conexão', color: 'cyan', hex: '#22d3ee' }, { id: 'retencao_cat', name: 'Retenção', color: 'orange', hex: '#f97316' }, { id: 'introducao', name: 'Introdução', color: 'green', hex: '#22c55e' }, { id: 'evolucao', name: 'Evolução', color: 'red', hex: '#ef4444' }, { id: 'interacao', name: 'Interação', color: 'purple', hex: '#a855f7' }, { id: 'expansao', name: 'Expansão', color: 'yellow', hex: '#eab308' }];
 
-            // --- FUNÇÕES DE GRÁFICOS (Criação e Atualização) ---
-            const createChart = (ctx, type, data, options) => new Chart(ctx, { type, data, options });
-            const createContratadosRetencaoChart = () => { /* ... (código existente, sem alterações) ... */ };
-            const updateAllCharts = () => { /* ... (código existente, sem alterações) ... */ };
-            const updateTimelineCharts = () => { /* ... (código existente, sem alterações) ... */ };
-    
-            // ATUALIZADO: Lógica do gráfico de barras "Contratados x Retenção"
+                setupDayButtons();
+                setupAutoCompareInputs();
+                
+                chartInstances.contratadosTimelineChart = createTimelineChart('contratados-timeline-chart', 'contratados');
+                chartInstances.retencaoTimelineChart = createTimelineChart('retencao-timeline-chart', 'retencao');
+                chartInstances.contratadosRetencaoBarChart = createContratadosRetencaoChart();
+                
+                updateContratadosRetencaoChart(today);
+            }
+
+            let chartInstances = {};
+            const categories = [ { id: 'conexao', name: 'Conexão'}, { id: 'retencao_cat', name: 'Retenção' }, { id: 'introducao', name: 'Introdução'}, { id: 'evolucao', name: 'Evolução' }, { id: 'interacao', name: 'Interação' }, { id: 'expansao', name: 'Expansão' }];
+            const categoryColors = { 'Conexão': '#22d3ee', 'Retenção': '#f97316', 'Introdução': '#22c55e', 'Evolução': '#ef4444', 'Interação': '#a855f7', 'Expansão': '#eab308' };
+
+            const createTimelineChart = (canvasId, dataKey) => {
+                const ctx = document.getElementById(canvasId).getContext('2d');
+                const sortedDates = Object.keys(db.dailyData || {}).sort();
+                const datasets = categories.map(cat => ({
+                    label: cat.name,
+                    data: sortedDates.map(date => ({ x: date, y: db.dailyData[date]?.[cat.id]?.[dataKey] || 0 })),
+                    borderColor: categoryColors[cat.name],
+                    backgroundColor: categoryColors[cat.name],
+                    fill: false,
+                    tension: 0.1
+                }));
+                return new Chart(ctx, { type: 'line', data: { datasets }, options: { maintainAspectRatio: false, scales: { x: { type: 'time', time: { unit: 'day' } } } } });
+            };
+
+            const createContratadosRetencaoChart = () => {
+                const ctx = document.getElementById('contratados-retencao-bar-chart').getContext('2d');
+                return new Chart(ctx, 'bar', {
+                    data: {
+                        labels: categories.map(c => c.name),
+                        datasets: [
+                            { label: 'Contratados', data: [], backgroundColor: '#22d3ee' },
+                            { label: 'Retenção', data: [], backgroundColor: '#f97316' }
+                        ]
+                    },
+                    options: { maintainAspectRatio: false }
+                });
+            };
+
             const updateContratadosRetencaoChart = (date) => {
                 updateComparisonIndicators(date); 
                 const dataForDay = db.dailyData?.[date] || {};
-                if (chartInstances.contratadosRetencaoBarChart) {
-                    const chart = chartInstances.contratadosRetencaoBarChart;
+                const chart = chartInstances.contratadosRetencaoBarChart;
+                if (chart) {
                     chart.data.datasets[0].data = categories.map(cat => dataForDay[cat.id]?.contratados || 0);
                     chart.data.datasets[1].data = categories.map(cat => dataForDay[cat.id]?.retencao || 0);
                     chart.update();
@@ -167,25 +172,36 @@
                 updateActiveDayButton(date);
             };
             
-            // ATUALIZADO: Indicadores com "Aguardando dados"
             const updateComparisonIndicators = (dateString) => {
                 const container = document.getElementById('comparison-indicators');
                 container.innerHTML = '';
                 if (!dateString || !db.dailyData) return;
+
                 const currentDataForDay = db.dailyData[dateString];
                 if (!currentDataForDay) {
                     container.innerHTML = `<div class="text-sm text-gray-500 italic">Aguardando dados para o cálculo.</div>`;
                     return;
                 }
-                // ... (o restante da função para calcular e criar o indicador continua o mesmo)
-                const createIndicator = (label, currentValue, previousValue) => { /* ... */ };
+                const currentDate = new Date(`${dateString}T12:00:00`);
+                const previousWeekDate = new Date(currentDate);
+                previousWeekDate.setDate(currentDate.getDate() - 7);
+                const previousWeekDateString = previousWeekDate.toISOString().split('T')[0];
+                const previousData = db.dailyData[previousWeekDateString] || {};
+                const totals = { current: { contratados: 0, retencao: 0 }, previous: { contratados: 0, retencao: 0 }};
+                categories.forEach(cat => {
+                    totals.current.contratados += currentDataForDay[cat.id]?.contratados || 0;
+                    totals.current.retencao += currentDataForDay[cat.id]?.retencao || 0;
+                    totals.previous.contratados += previousData[cat.id]?.contratados || 0;
+                    totals.previous.retencao += previousData[cat.id]?.retencao || 0;
+                });
+                const createIndicator = (label, currentValue, previousValue) => { let percentage = 0; if (previousValue > 0) { percentage = ((currentValue - previousValue) / previousValue) * 100; } else if (currentValue > 0) { percentage = 100; } const roundedPercentage = Math.round(percentage); const color = roundedPercentage >= 0 ? 'green' : 'red'; const arrow = roundedPercentage >= 0 ? '↑' : '↓'; return `<div class="flex items-center gap-2 p-2 px-3 rounded-md text-white text-xs font-semibold bg-${color}-900/50 border border-${color}-500"><span>${label}:</span><span class="font-bold text-${color}-400">${arrow} ${Math.abs(roundedPercentage)}% referente a 7 dias atrás</span></div>`; };
+                container.innerHTML = createIndicator('Contratados', totals.current.contratados, totals.previous.contratados) + createIndicator('Retenção', totals.current.retencao, totals.previous.retencao);
             };
             
-            // ATUALIZADO: Lógica definitiva para os botões de dia da semana
             const setupDayButtons = () => {
                 const container = document.getElementById('bar-chart-day-buttons');
                 const days = ['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb', 'Dom'];
-                const dayIndices = [1, 2, 3, 4, 5, 6, 0]; 
+                const dayIndices = [1, 2, 3, 4, 5, 6, 0];
                 container.innerHTML = days.map((day, index) => `<button class="day-btn px-3 py-1 text-xs rounded-md btn-action" data-day-index="${dayIndices[index]}">${day}</button>`).join('');
                 
                 container.addEventListener('click', (e) => {
@@ -193,84 +209,77 @@
                         const mainDateVal = document.getElementById('main-date-filter').value;
                         if (!mainDateVal) return;
                         
-                        const mainDate = new Date(`${mainDateVal}T12:00:00`);
+                        const mainDate = new Date(`${mainDateVal}T12:00:00Z`);
                         const targetDayIndex = parseInt(e.target.dataset.dayIndex, 10);
                         
-                        // Encontra a segunda-feira da semana da data principal
-                        const dayOfWeek = mainDate.getUTCDay(); // Dom=0, Seg=1...
-                        const diffToMonday = 1 - dayOfWeek;
+                        // Lógica Definitiva: Acha a segunda-feira da semana e calcula a partir dela
+                        const dayOfWeek = mainDate.getUTCDay();
+                        const daysToMonday = (dayOfWeek === 0) ? 6 : dayOfWeek - 1;
+                        
                         const mondayOfRelevantWeek = new Date(mainDate);
-                        if (dayOfWeek === 0) { // Se for domingo, volta 6 dias
-                             mondayOfRelevantWeek.setUTCDate(mainDate.getUTCDate() - 6);
-                        } else {
-                             mondayOfRelevantWeek.setUTCDate(mainDate.getUTCDate() + diffToMonday);
-                        }
-
-                        // Calcula o dia de destino a partir daquela segunda-feira
-                        const targetOffset = dayIndices.indexOf(targetDayIndex);
+                        mondayOfRelevantWeek.setUTCDate(mondayOfRelevantWeek.getUTCDate() - daysToMonday);
+                        
+                        const dayOffset = dayIndices.indexOf(targetDayIndex);
+                        
                         const targetDate = new Date(mondayOfRelevantWeek);
-                        targetDate.setUTCDate(mondayOfRelevantWeek.getUTCDate() + targetOffset);
+                        targetDate.setUTCDate(targetDate.getUTCDate() + dayOffset);
 
                         const targetDateString = targetDate.toISOString().split('T')[0];
                         updateContratadosRetencaoChart(targetDateString);
                     }
                 });
             };
-            const updateActiveDayButton = (dateString) => { /* ... (código existente, sem alterações) ... */ };
 
-            // ATUALIZADO: Lógica para o seletor de datas Litepicker
-            const applyDateFilter = (chart, start, end) => { if (chart && start && end) { chart.options.scales.x.min = start; chart.options.scales.x.max = end; chart.update(); } };
-            const resetZoomAndFilter = (chart) => { if (chart) { delete chart.options.scales.x.min; delete chart.options.scales.x.max; chart.resetZoom(); } };
-
-            const setupDateRangePickers = () => {
-                document.querySelectorAll('.litepicker-trigger').forEach(el => {
-                    const picker = new Litepicker({
-                        element: el,
-                        singleMode: false,
-                        format: 'DD/MM/YYYY',
-                        lang: 'pt-BR',
-                        numberOfMonths: 2,
-                        plugins: ['ranges'],
-                        ranges: {
-                            'Últimos 7 dias': [new Date(new Date().setDate(new Date().getDate() - 6)), new Date()],
-                            'Últimos 30 dias': [new Date(new Date().setDate(new Date().getDate() - 29)), new Date()],
-                            'Este Mês': [new Date(new Date().getFullYear(), new Date().getMonth(), 1), new Date(new Date().getFullYear(), new Date().getMonth() + 1, 0)],
-                            'Mês Passado': [new Date(new Date().getFullYear(), new Date().getMonth() - 1, 1), new Date(new Date().getFullYear(), new Date().getMonth(), 0)],
-                        },
-                        setup: (picker) => {
-                            picker.on('selected', (date1, date2) => {
-                                const controlsDiv = el.closest('[id^="controls-"]');
-                                const key = controlsDiv.id.split('-')[1];
-                                const chart = chartInstances[`${key}TimelineChart`];
-                                // Formata para YYYY-MM-DD para o Chart.js
-                                const start = date1.format('YYYY-MM-DD');
-                                const end = date2.format('YYYY-MM-DD');
-                                applyDateFilter(chart, start, end);
-                            });
+            const updateActiveDayButton = (dateString) => {
+                const container = document.getElementById('bar-chart-day-buttons');
+                container.querySelectorAll('.day-btn').forEach(btn => btn.classList.remove('active'));
+                if (dateString) {
+                    const date = new Date(`${dateString}T12:00:00Z`);
+                    const dayIndex = date.getUTCDay();
+                    const activeButton = container.querySelector(`[data-day-index="${dayIndex}"]`);
+                    if (activeButton) {
+                        activeButton.classList.add('active');
+                    }
+                }
+            };
+            
+            const setupAutoCompareInputs = () => {
+                ['contratados', 'retencao'].forEach(key => {
+                    const controlDiv = document.getElementById(`controls-${key}`);
+                    const startDateInput = controlDiv.querySelector('.compare-start-date');
+                    const endDateInput = controlDiv.querySelector('.compare-end-date');
+                    const chart = chartInstances[`${key}TimelineChart`];
+                    
+                    const applyFilter = () => {
+                        const start = startDateInput.value;
+                        const end = endDateInput.value;
+                        if (chart && start && end && end >= start) {
+                            chart.options.scales.x.min = start;
+                            chart.options.scales.x.max = end;
+                            chart.update();
                         }
-                    });
-                    el.litepickerInstance = picker;
+                    };
+                    startDateInput.addEventListener('change', applyFilter);
+                    endDateInput.addEventListener('change', applyFilter);
                 });
             };
             
             document.querySelectorAll('.btn-reset-chart').forEach(btn => btn.addEventListener('click', (e) => {
                 const controlsDiv = e.target.closest('[id^="controls-"]');
-                const pickerInput = controlsDiv.querySelector('.litepicker-trigger');
-                if (pickerInput && pickerInput.litepickerInstance) {
-                    pickerInput.litepickerInstance.clearSelection();
-                }
+                controlsDiv.querySelector('.compare-start-date').value = '';
+                controlsDiv.querySelector('.compare-end-date').value = '';
                 const key = controlsDiv.id.split('-')[1];
                 const chart = chartInstances[`${key}TimelineChart`];
-                resetZoomAndFilter(chart);
+                if (chart) {
+                    delete chart.options.scales.x.min;
+                    delete chart.options.scales.x.max;
+                    chart.update();
+                }
             }));
 
             document.getElementById('main-date-filter').addEventListener('change', (e) => {
-                const newDate = e.target.value;
-                updateContratadosRetencaoChart(newDate);
-                // ... (outras atualizações de status semanal, etc.)
+                updateContratadosRetencaoChart(e.target.value);
             });
-
-            // ... (restante do código de modais, anotações, etc., sem alterações)
         });
     </script>
 </body>
