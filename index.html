@@ -11,8 +11,6 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom/dist/chartjs-plugin-zoom.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/litepicker/dist/litepicker.js"></script>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/litepicker/dist/css/litepicker.css"/>
     <style>
         body { font-family: 'Inter', sans-serif; background-color: #000000; color: #E0E0E0; }
         .chart-border { border-color: rgba(255, 255, 255, 0.2); }
@@ -34,8 +32,6 @@
         .ai-chat-user { background-color: #007bff; color: white; align-self: flex-end; border-bottom-right-radius: 0; }
         .ai-chat-gemini { background-color: #333; color: white; align-self: flex-start; border-bottom-left-radius: 0;}
         .day-btn.active { background-color: #facc15; color: #111827; font-weight: bold; }
-        /* Estilo para o input do Litepicker */
-        .date-range-picker { padding-left: 0.75rem; padding-right: 0.75rem; width: 220px; }
     </style>
 </head>
 <body class="p-4 sm:p-6 md:p-8" style="display: none;">
@@ -54,21 +50,57 @@
         
         <main class="grid grid-cols-1 lg:grid-cols-2 gap-8">
             <div class="border chart-border rounded-xl p-6 flex flex-col">
-                <div class="flex flex-wrap justify-between items-center mb-4 gap-4" id="controls-contratados"><h2 class="text-lg font-semibold text-white">LINHA DO TEMPO - CONTRATADOS</h2><div class="flex items-center space-x-2"><input type="text" class="input-field p-2 text-sm date-range-picker" placeholder="Comparar período..."><button class="text-purple-400 border border-purple-400 rounded-lg py-1 px-3 text-sm font-semibold hover:bg-purple-400 hover:text-black transition-colors btn-anotacao" data-key="contratados">ANOTAÇÃO</button><button class="text-white border border-gray-500 rounded-lg py-1 px-3 text-sm font-semibold btn-action btn-reset-chart">RESET</button></div></div>
+                <div class="flex flex-wrap justify-between items-center mb-4 gap-4 relative" id="controls-contratados">
+                    <h2 class="text-lg font-semibold text-white">LINHA DO TEMPO - CONTRATADOS</h2>
+                    <div class="absolute top-0 right-0 flex items-center gap-2 p-1" title="Status geral dos últimos 3 dias">
+                        <span class="status-dot-label text-xs font-medium"></span>
+                        <div class="status-dot w-3 h-3 rounded-full"></div>
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        <input type="date" class="input-field p-1 text-sm compare-start-date" title="Data Início">
+                        <input type="date" class="input-field p-1 text-sm compare-end-date" title="Data Fim">
+                        <button class="text-purple-400 border border-purple-400 rounded-lg py-1 px-3 text-sm font-semibold hover:bg-purple-400 hover:text-black transition-colors btn-anotacao" data-key="contratados">ANOTAÇÃO</button>
+                        <button class="text-white border border-gray-500 rounded-lg py-1 px-3 text-sm font-semibold btn-action btn-reset-chart">RESET</button>
+                    </div>
+                </div>
                 <div class="relative flex-grow h-64"><canvas id="contratados-timeline-chart"></canvas></div><div id="timeline-contratados-legend" class="custom-legend"></div>
             </div>
             <div class="border chart-border rounded-xl p-6 flex flex-col">
-                <div class="flex flex-wrap justify-between items-center mb-4 gap-4" id="controls-retencao"><h2 class="text-lg font-semibold text-white">LINHA DO TEMPO - RETENÇÃO</h2><div class="flex items-center space-x-2"><input type="text" class="input-field p-2 text-sm date-range-picker" placeholder="Comparar período..."><button class="text-purple-400 border border-purple-400 rounded-lg py-1 px-3 text-sm font-semibold hover:bg-purple-400 hover:text-black transition-colors btn-anotacao" data-key="retencao">ANOTAÇÃO</button><button class="text-white border border-gray-500 rounded-lg py-1 px-3 text-sm font-semibold btn-action btn-reset-chart">RESET</button></div></div>
+                <div class="flex flex-wrap justify-between items-center mb-4 gap-4 relative" id="controls-retencao">
+                    <h2 class="text-lg font-semibold text-white">LINHA DO TEMPO - RETENÇÃO</h2>
+                     <div class="absolute top-0 right-0 flex items-center gap-2 p-1" title="Status geral dos últimos 3 dias">
+                        <span class="status-dot-label text-xs font-medium"></span>
+                        <div class="status-dot w-3 h-3 rounded-full"></div>
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        <input type="date" class="input-field p-1 text-sm compare-start-date" title="Data Início">
+                        <input type="date" class="input-field p-1 text-sm compare-end-date" title="Data Fim">
+                        <button class="text-purple-400 border border-purple-400 rounded-lg py-1 px-3 text-sm font-semibold hover:bg-purple-400 hover:text-black transition-colors btn-anotacao" data-key="retencao">ANOTAÇÃO</button>
+                        <button class="text-white border border-gray-500 rounded-lg py-1 px-3 text-sm font-semibold btn-action btn-reset-chart">RESET</button>
+                    </div>
+                </div>
                 <div class="relative flex-grow h-64"><canvas id="retencao-timeline-chart"></canvas></div><div id="timeline-retencao-legend" class="custom-legend"></div>
             </div>
             <div class="lg:col-span-2 border chart-border rounded-xl p-6 flex flex-col">
-                <h2 class="text-lg font-semibold text-white mb-2 text-center">CONTRATADOS X RETENÇÃO (SEMANAL)</h2>
-                <div id="daily-stats-container" class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4"></div>
+                <h2 class="text-lg font-semibold text-white mb-2 text-center">CONTRATADOS X RETENÇÃO</h2>
+                <div id="daily-stats-container" class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4 max-w-md mx-auto w-full"></div>
                 <div id="bar-chart-day-buttons" class="flex justify-center items-center flex-wrap gap-2 mb-4"></div>
                 <div class="relative flex-grow h-64"><canvas id="contratados-retencao-bar-chart"></canvas></div>
             </div>
             <div class="border chart-border rounded-xl p-6 flex flex-col">
-                <div class="flex flex-wrap justify-between items-center mb-4 gap-4" id="controls-fac"><h2 class="text-lg font-semibold text-white">FACÇÕES EM FOCO</h2><div class="flex items-center space-x-2"><input type="text" class="input-field p-2 text-sm date-range-picker" placeholder="Comparar período..."><button class="text-purple-400 border border-purple-400 rounded-lg py-1 px-3 text-sm font-semibold hover:bg-purple-400 hover:text-black transition-colors btn-anotacao" data-key="fac">ANOTAÇÃO</button><button class="text-white border border-gray-500 rounded-lg py-1 px-3 text-sm font-semibold btn-action btn-reset-chart">RESET</button></div></div>
+                <div class="flex flex-wrap justify-between items-center mb-4 gap-4 relative" id="controls-fac">
+                     <h2 class="text-lg font-semibold text-white">FACÇÕES EM FOCO</h2>
+                     <div class="absolute top-0 right-0 flex items-center gap-2 p-1" title="Status geral dos últimos 3 dias">
+                        <span class="status-dot-label text-xs font-medium"></span>
+                        <div class="status-dot w-3 h-3 rounded-full"></div>
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        <input type="date" class="input-field p-1 text-sm compare-start-date" title="Data Início">
+                        <input type="date" class="input-field p-1 text-sm compare-end-date" title="Data Fim">
+                        <button class="text-purple-400 border border-purple-400 rounded-lg py-1 px-3 text-sm font-semibold hover:bg-purple-400 hover:text-black transition-colors btn-anotacao" data-key="fac">ANOTAÇÃO</button>
+                        <button class="text-white border border-gray-500 rounded-lg py-1 px-3 text-sm font-semibold btn-action btn-reset-chart">RESET</button>
+                    </div>
+                </div>
                 <div class="relative flex-grow h-64"><canvas id="fac-timeline-chart"></canvas></div><div id="timeline-fac-legend" class="custom-legend"></div>
             </div>
             <div id="status-semanal-fac" class="border chart-border rounded-xl p-6">
@@ -268,67 +300,9 @@
         const accessErrorMessage = document.getElementById('access-error-message');
         const permissionsRef = fbDb.collection('permissions').doc('allowed_users');
 
-        async function loadAllowedUsers() {
-            accessListContainer.innerHTML = '<p class="text-gray-400">Carregando...</p>';
-            try {
-                const doc = await permissionsRef.get();
-                if (doc.exists) {
-                    const allowedEmails = doc.data().emails || [];
-                    if (allowedEmails.length === 0) {
-                        accessListContainer.innerHTML = '<p class="text-gray-500 text-center">Nenhum membro com acesso de espectador.</p>';
-                        return;
-                    }
-                    accessListContainer.innerHTML = allowedEmails.map(email => `
-                        <div class="flex justify-between items-center bg-gray-800 p-2 rounded">
-                            <span class="text-sm">${email}</span>
-                            <button class="text-red-500 hover:text-red-400 font-bold remove-email-btn" data-email="${email}" title="Remover Acesso">&times;</button>
-                        </div>
-                    `).join('');
-                } else {
-                    await permissionsRef.set({ emails: [] });
-                    accessListContainer.innerHTML = '<p class="text-gray-500 text-center">Nenhum membro com acesso. Adicione o primeiro e-mail.</p>';
-                }
-            } catch (error) {
-                console.error("Erro ao carregar e-mails:", error);
-                accessListContainer.innerHTML = '<p class="text-red-500">Erro ao carregar a lista.</p>';
-            }
-        }
-
-        addEmailBtn.addEventListener('click', async () => {
-            const emailToAdd = newEmailInput.value.trim().toLowerCase();
-            if (!emailToAdd || !/^\S+@\S+\.\S+$/.test(emailToAdd)) {
-                accessErrorMessage.textContent = 'Por favor, insira um e-mail válido.';
-                return;
-            }
-            accessErrorMessage.textContent = '';
-            addEmailBtn.disabled = true;
-            try {
-                await permissionsRef.update({ emails: firebase.firestore.FieldValue.arrayUnion(emailToAdd) });
-                newEmailInput.value = '';
-                await loadAllowedUsers();
-            } catch (error) {
-                console.error("Erro ao adicionar e-mail:", error);
-                accessErrorMessage.textContent = 'Erro ao salvar o e-mail.';
-            } finally {
-                addEmailBtn.disabled = false;
-            }
-        });
-
-        accessListContainer.addEventListener('click', async (e) => {
-            if (e.target.classList.contains('remove-email-btn')) {
-                const emailToRemove = e.target.dataset.email;
-                if (confirm(`Tem certeza que deseja remover o acesso de ${emailToRemove}?`)) {
-                    try {
-                        await permissionsRef.update({ emails: firebase.firestore.FieldValue.arrayRemove(emailToRemove) });
-                        await loadAllowedUsers();
-                    } catch (error) {
-                        console.error("Erro ao remover e-mail:", error);
-                        alert('Ocorreu um erro ao remover o e-mail.');
-                    }
-                }
-            }
-        });
-        
+        async function loadAllowedUsers() { accessListContainer.innerHTML = '<p class="text-gray-400">Carregando...</p>'; try { const doc = await permissionsRef.get(); if (doc.exists) { const allowedEmails = doc.data().emails || []; if (allowedEmails.length === 0) { accessListContainer.innerHTML = '<p class="text-gray-500 text-center">Nenhum membro com acesso de espectador.</p>'; return; } accessListContainer.innerHTML = allowedEmails.map(email => ` <div class="flex justify-between items-center bg-gray-800 p-2 rounded"> <span class="text-sm">${email}</span> <button class="text-red-500 hover:text-red-400 font-bold remove-email-btn" data-email="${email}" title="Remover Acesso">&times;</button> </div> `).join(''); } else { await permissionsRef.set({ emails: [] }); accessListContainer.innerHTML = '<p class="text-gray-500 text-center">Nenhum membro com acesso. Adicione o primeiro e-mail.</p>'; } } catch (error) { console.error("Erro ao carregar e-mails:", error); accessListContainer.innerHTML = '<p class="text-red-500">Erro ao carregar a lista.</p>'; } }
+        addEmailBtn.addEventListener('click', async () => { const emailToAdd = newEmailInput.value.trim().toLowerCase(); if (!emailToAdd || !/^\S+@\S+\.\S+$/.test(emailToAdd)) { accessErrorMessage.textContent = 'Por favor, insira um e-mail válido.'; return; } accessErrorMessage.textContent = ''; addEmailBtn.disabled = true; try { await permissionsRef.update({ emails: firebase.firestore.FieldValue.arrayUnion(emailToAdd) }); newEmailInput.value = ''; await loadAllowedUsers(); } catch (error) { console.error("Erro ao adicionar e-mail:", error); accessErrorMessage.textContent = 'Erro ao salvar o e-mail.'; } finally { addEmailBtn.disabled = false; } });
+        accessListContainer.addEventListener('click', async (e) => { if (e.target.classList.contains('remove-email-btn')) { const emailToRemove = e.target.dataset.email; if (confirm(`Tem certeza que deseja remover o acesso de ${emailToRemove}?`)) { try { await permissionsRef.update({ emails: firebase.firestore.FieldValue.arrayRemove(emailToRemove) }); await loadAllowedUsers(); } catch (error) { console.error("Erro ao remover e-mail:", error); alert('Ocorreu um erro ao remover o e-mail.'); } } } });
         closeAccessModalBtn.addEventListener('click', () => closeModal(accessModal));
 
         async function initializeApp() {
@@ -343,7 +317,6 @@
             if (!chartInstances.contratadosRetencaoBarChart) {
                 chartInstances.contratadosRetencaoBarChart = createContratadosRetencaoChart();
             }
-            initLitepickers(); // Inicializa os seletores de período
             updateAllCharts();
         }
 
@@ -352,30 +325,13 @@
         const pastas = categories.map(c => c.name);
         const premiosList = ['VIP PLATINA', 'VIP LANÇAMENTO', 'VIP OURO', 'VIP PRATA', 'VIP BRONZE', 'BATTLEPASS'];
         
-        const getTodayString = () => {
-            const today = new Date();
-            const year = today.getFullYear();
-            const month = String(today.getMonth() + 1).padStart(2, '0');
-            const day = String(today.getDate()).padStart(2, '0');
-            return `${year}-${month}-${day}`;
-        };
-
-        const getWeekRange = (dateString) => {
-            if (!dateString) return { start: null, end: null };
-            const parts = dateString.split('-').map(part => parseInt(part, 10));
-            const d = new Date(Date.UTC(parts[0], parts[1] - 1, parts[2]));
-            const day = d.getUTCDay(); // Dom: 0, Seg: 1, ..., Sab: 6
-            const diff = d.getUTCDate() - day + (day === 0 ? -6 : 1); // Ajuste para a semana começar na segunda
-            const monday = new Date(d.setUTCDate(diff));
-            const sunday = new Date(new Date(monday).setUTCDate(monday.getUTCDate() + 6));
-            return { start: monday.toISOString().split('T')[0], end: sunday.toISOString().split('T')[0] };
-        };
-
+        const getTodayString = () => { const today = new Date(); const year = today.getFullYear(); const month = String(today.getMonth() + 1).padStart(2, '0'); const day = String(today.getDate()).padStart(2, '0'); return `${year}-${month}-${day}`; };
+        const getWeekRange = (dateString) => { if (!dateString) return { start: null, end: null }; const parts = dateString.split('-').map(part => parseInt(part, 10)); const d = new Date(Date.UTC(parts[0], parts[1] - 1, parts[2])); const day = d.getUTCDay(); const diff = d.getUTCDate() - day + (day === 0 ? -6 : 1); const monday = new Date(d.setUTCDate(diff)); const sunday = new Date(new Date(monday).setUTCDate(monday.getUTCDate() + 6)); return { start: monday.toISOString().split('T')[0], end: sunday.toISOString().split('T')[0] }; };
+        
         const fillModal = document.getElementById('fill-modal'), consultModal = document.getElementById('consult-modal'), anotacaoModal = document.getElementById('anotacao-modal'), aiChatModal = document.getElementById('ai-chat-modal');
         const openModal = (modal) => { modal.classList.remove('hidden'); modal.classList.add('flex'); }
         const closeModal = (modal) => { modal.classList.add('hidden'); modal.classList.remove('flex'); }
 
-        // --- Funções do Modal e de Dados (sem grandes alterações) ---
         const resetFillModal = () => { document.getElementById('fill-modal-content').querySelectorAll('input[type="number"], input[type="text"], select').forEach(el => { if (el.type === 'text' || el.type === 'number') { el.value = ''; } else if (el.tagName === 'SELECT') { el.selectedIndex = 0; } }); document.querySelectorAll('.fac-foco-meta-batida').forEach(sel => sel.value = 'Não'); };
         const populateFillModal = (date) => { resetFillModal(); if (!date) return; const dayData = db.dailyData?.[date]; if (dayData) { document.querySelectorAll('#fill-categories input[type="number"]').forEach(input => { const id = input.dataset.id; const type = input.dataset.type; if (dayData[id]?.[type] !== undefined) { input.value = dayData[id][type]; } }); } const premiosDoDia = db.premios?.filter(p => p.date === date) || []; const premioEntries = document.querySelectorAll('.premio-entry'); premioEntries.forEach((entry, index) => { if (premiosDoDia[index]) { entry.querySelector('.premio-pessoa').value = premiosDoDia[index].pessoa || ''; entry.querySelector('.premio-pasta').value = premiosDoDia[index].pasta || ''; entry.querySelector('.premio-nome').value = premiosDoDia[index].premio || ''; } }); const facDoDia = db.facData?.[date] || []; const facEntries = document.querySelectorAll('.fac-entry'); facEntries.forEach((entry, index) => { if (facDoDia[index]) { entry.querySelector('.fac-foco-nome').value = facDoDia[index].fac || ''; entry.querySelector('.fac-foco-pasta').value = facDoDia[index].pasta || ''; entry.querySelector('.fac-foco-meta').value = facDoDia[index].meta || ''; entry.querySelector('.fac-foco-resp').value = facDoDia[index].resp || ''; entry.querySelector('.fac-foco-meta-batida').value = facDoDia[index].metaBatida || 'Não'; entry.querySelector('.fac-foco-qtd').value = facDoDia[index].quantidade || ''; } }); };
         const handleCloseModal = () => { closeModal(fillModal); };
@@ -401,11 +357,11 @@
         const createTimelineChart = (canvasId, dataKey) => { const ctx = document.getElementById(canvasId).getContext('2d'); const sortedDates = Object.keys(db.dailyData).sort(); let datasets = categories.map(cat => ({ label: cat.name, data: sortedDates.map(date => ({ x: date, y: db.dailyData[date]?.[cat.id]?.[dataKey] || 0 })), borderColor: cat.hex, fill: false, tension: 0.1 })); return createChart(ctx, 'line', { datasets }, timelineOptions()); };
         const createFacTimelineChart = () => { const ctx = document.getElementById('fac-timeline-chart').getContext('2d'); if(!db.facData) db.facData={}; const sortedDates = [...new Set([...Object.keys(db.dailyData), ...Object.keys(db.facData)])].sort(); let datasets = categories.map(cat => ({ label: cat.name, data: sortedDates.map(date => ({ x: date, y: (db.facData[date] || []).filter(f => f.pasta === cat.name).reduce((sum, f) => sum + (f.quantidade || 0), 0) })), borderColor: cat.hex, fill: false, tension: 0.1 })); return createChart(ctx, 'line', { datasets }, timelineOptions()); };
         
-        // MODIFICADO: Criação do gráfico de barras semanal
+        // CORRIGIDO: Gráfico de barras volta a exibir dados por pasta para um único dia
         const createContratadosRetencaoChart = () => {
             const ctx = document.getElementById('contratados-retencao-bar-chart').getContext('2d');
             return createChart(ctx, 'bar', {
-                labels: ['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb', 'Dom'], // Eixo X com os dias da semana
+                labels: categories.map(c => c.name), // Eixo X com as Pastas
                 datasets: [
                     { label: 'Contratados', data: [], backgroundColor: '#22d3ee' },
                     { label: 'Retenção', data: [], backgroundColor: '#f97316' }
@@ -427,9 +383,10 @@
         
         const updateAllCharts = () => {
             updateTimelineCharts();
+            updateTimelineStatusDots(); // NOVO: Atualiza os status dots
             const currentDate = document.getElementById('main-date-filter').value;
-            updateWeeklyBarChart(currentDate); // Atualiza o gráfico de barras semanal
-            updateDailyComparisonStats(currentDate); // Atualiza os status de comparação diária
+            updateDailyBarChart(currentDate);
+            updateDailyComparisonStats(currentDate);
             updateActiveDayButton(currentDate);
             updateWeeklyStatus(document.getElementById('weekly-status-date').value);
             updateFacWeeklyStatus(document.getElementById('weekly-status-fac-date').value);
@@ -438,45 +395,22 @@
         };
         const updateTimelineCharts = () => { ['contratados', 'retencao', 'fac'].forEach(key => { const chartKey = `${key}TimelineChart`; if (chartInstances[chartKey]) chartInstances[chartKey].destroy(); if (key === 'fac') { chartInstances[chartKey] = createFacTimelineChart(); } else { chartInstances[chartKey] = createTimelineChart(`${key}-timeline-chart`, key); } }); };
         
-        // NOVO: Atualiza o gráfico de barras para mostrar dados da semana inteira
-        const updateWeeklyBarChart = (selectedDateStr) => {
+        // CORRIGIDO: Função para atualizar o gráfico de barras com dados de um dia específico
+        const updateDailyBarChart = (date) => {
             const chart = chartInstances.contratadosRetencaoBarChart;
-            if (!chart || !selectedDateStr || !db.dailyData) return;
-
-            const { start } = getWeekRange(selectedDateStr);
-            const weekDates = [];
-            const currentDate = new Date(`${start}T12:00:00Z`);
-
-            for (let i = 0; i < 7; i++) {
-                weekDates.push(new Date(currentDate).toISOString().split('T')[0]);
-                currentDate.setUTCDate(currentDate.getUTCDate() + 1);
-            }
-
-            const getTotalsForDate = (date) => {
-                const data = db.dailyData[date];
-                let totalContratados = 0, totalRetencao = 0;
-                if (data) {
-                    for (const catId in data) {
-                        totalContratados += data[catId].contratados || 0;
-                        totalRetencao += data[catId].retencao || 0;
-                    }
-                }
-                return { totalContratados, totalRetencao };
-            };
-
-            chart.data.datasets[0].data = weekDates.map(date => getTotalsForDate(date).totalContratados);
-            chart.data.datasets[1].data = weekDates.map(date => getTotalsForDate(date).totalRetencao);
+            if (!date || !chart) return;
+            const dataForDay = db.dailyData[date] || {};
+            chart.data.datasets[0].data = categories.map(cat => dataForDay[cat.id]?.contratados || 0);
+            chart.data.datasets[1].data = categories.map(cat => dataForDay[cat.id]?.retencao || 0);
             chart.update();
         };
 
-        // NOVO: Calcula e exibe as % de comparação do dia
         const updateDailyComparisonStats = (currentDateStr) => {
             const container = document.getElementById('daily-stats-container');
             if (!currentDateStr || !db.dailyData) {
                 container.innerHTML = `<p class="text-gray-500 col-span-full text-center py-4">Sem dados para comparação.</p>`;
                 return;
             }
-
             const prevDate = new Date(`${currentDateStr}T12:00:00Z`);
             prevDate.setUTCDate(prevDate.getUTCDate() - 7);
             const prevDateStr = prevDate.toISOString().split('T')[0];
@@ -504,90 +438,89 @@
             const createStatBox = (label, change) => {
                 const isPositive = change.value >= 0;
                 const isInfinite = change.value === Infinity;
-                
                 const bgColor = isPositive ? 'bg-green-900/50' : 'bg-red-900/50';
                 const borderColor = isPositive ? 'border-green-700' : 'border-red-700';
                 const iconColor = isPositive ? 'text-green-400' : 'text-red-400';
                 const icon = isPositive ? '↑' : '↓';
-                
-                let valueText;
-                if(isInfinite) valueText = 'Novo';
-                else valueText = `${Math.abs(change.value)}%`;
+                let valueText = isInfinite ? 'Novo' : `${Math.abs(change.value)}%`;
 
-                return `
-                    <div class="p-2 rounded-lg ${bgColor} border ${borderColor}">
-                        <p class="text-xs font-semibold text-white text-center flex items-center justify-center gap-1">
-                            <span class="${iconColor} text-base">${icon}</span> ${valueText}
-                        </p>
-                        <p class="text-center text-[10px] text-gray-400 mt-1">
-                            ${label} (vs 7 dias)
-                        </p>
-                    </div>
-                `;
+                return `<div class="p-2 rounded-lg ${bgColor} border ${borderColor}"><p class="text-sm font-semibold text-white text-center flex items-center justify-center gap-1.5"><span class="${iconColor} text-lg">${icon}</span> ${valueText} <span class="text-gray-300 font-normal"> ${label}</span></p></div>`;
             };
-
             const contratadosChange = calculatePercentageChange(todayTotals.totalContratados, prevTotals.totalContratados);
             const retencaoChange = calculatePercentageChange(todayTotals.totalRetencao, prevTotals.totalRetencao);
-            
-            const todayRate = todayTotals.totalContratados > 0 ? (todayTotals.totalRetencao / todayTotals.totalContratados) * 100 : 0;
-            const prevRate = prevTotals.totalContratados > 0 ? (prevTotals.totalRetencao / prevTotals.totalContratados) * 100 : 0;
-            const rateChange = calculatePercentageChange(todayRate, prevRate);
-            
-            // Simulação de um quarto dado "WL" (Win/Loss?) como placeholder
-            const placeholderChange = { value: Math.floor(Math.random() * 200) - 100 };
-
-            container.innerHTML = `
-                ${createStatBox('Contratados', contratadosChange)}
-                ${createStatBox('Retenção', retencaoChange)}
-                ${createStatBox('Taxa Retenção', rateChange)}
-                ${createStatBox('Métrica WL', placeholderChange)}
-            `;
+            container.innerHTML = `${createStatBox('Contratados', contratadosChange)} ${createStatBox('Retenção', retencaoChange)}`;
         };
         
-        // MODIFICADO: Lógica dos botões de dia da semana
         const setupDayButtons = () => {
             const container = document.getElementById('bar-chart-day-buttons');
-            const days = ['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb', 'Dom']; // Ordem alterada
-            container.innerHTML = days.map((day, index) =>
-                `<button class="day-btn px-3 py-1 text-xs rounded-md btn-action" data-day-index="${index}">${day}</button>`
-            ).join('');
+            const days = ['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb', 'Dom'];
+            container.innerHTML = days.map((day, index) => `<button class="day-btn px-3 py-1 text-xs rounded-md btn-action" data-day-index="${index}">${day}</button>`).join('');
             
             container.addEventListener('click', (e) => {
                 if (e.target.classList.contains('day-btn')) {
                     const mainDateVal = document.getElementById('main-date-filter').value;
                     if (!mainDateVal) return;
-
                     const { start } = getWeekRange(mainDateVal);
                     const monday = new Date(`${start}T12:00:00Z`);
-                    
                     const targetDayIndex = parseInt(e.target.dataset.dayIndex, 10);
-                    
                     const targetDate = new Date(monday);
                     targetDate.setUTCDate(monday.getUTCDate() + targetDayIndex);
-                    
                     const targetDateString = targetDate.toISOString().split('T')[0];
                     
-                    // Apenas atualiza os status e o botão ativo, não o gráfico inteiro
+                    updateDailyBarChart(targetDateString);
                     updateDailyComparisonStats(targetDateString);
                     updateActiveDayButton(targetDateString);
                 }
             });
         };
 
-        // MODIFICADO: Lógica para ativar o botão do dia correto
         const updateActiveDayButton = (dateString) => {
             const container = document.getElementById('bar-chart-day-buttons');
             container.querySelectorAll('.day-btn').forEach(btn => btn.classList.remove('active'));
             if(dateString) {
                 const date = new Date(`${dateString}T12:00:00Z`);
-                let dayIndex = date.getUTCDay(); // Dom: 0, Seg: 1, ...
-                dayIndex = dayIndex === 0 ? 6 : dayIndex - 1; // Converte para Seg: 0, ..., Dom: 6
-                
+                let dayIndex = date.getUTCDay();
+                dayIndex = dayIndex === 0 ? 6 : dayIndex - 1;
                 const activeButton = container.querySelector(`[data-day-index="${dayIndex}"]`);
-                if (activeButton) {
-                    activeButton.classList.add('active');
-                }
+                if (activeButton) activeButton.classList.add('active');
             }
+        };
+
+        // NOVO: Função para atualizar os indicadores de status dos gráficos de linha do tempo
+        const updateTimelineStatusDots = () => {
+            if (!db || !db.dailyData) return;
+            const allDates = Object.keys(db.dailyData).sort((a, b) => new Date(b) - new Date(a));
+            const lastThreeDays = allDates.slice(0, 3);
+            
+            let totalContratados = 0;
+            let totalRetencao = 0;
+
+            lastThreeDays.forEach(date => {
+                const dayData = db.dailyData[date];
+                if (dayData) {
+                    Object.values(dayData).forEach(cat => {
+                        totalContratados += cat.contratados || 0;
+                        totalRetencao += cat.retencao || 0;
+                    });
+                }
+            });
+
+            let status = { text: 'Ruim', color: 'bg-red-500', textColor: 'text-red-300' };
+            if (totalContratados >= 900 && totalRetencao >= 450) {
+                status = { text: 'Excelente', color: 'bg-emerald-500', textColor: 'text-emerald-300' };
+            } else if (totalContratados >= 700 && totalRetencao >= 350) {
+                status = { text: 'Bom', color: 'bg-green-500', textColor: 'text-green-300' };
+            } else if (totalContratados >= 400 && totalRetencao >= 250) {
+                 status = { text: 'Médio', color: 'bg-yellow-500', textColor: 'text-yellow-300' };
+            }
+
+            document.querySelectorAll('.status-dot').forEach(dot => {
+                dot.className = `status-dot w-3 h-3 rounded-full ${status.color}`;
+            });
+            document.querySelectorAll('.status-dot-label').forEach(label => {
+                label.textContent = status.text;
+                label.className = `status-dot-label text-xs font-medium ${status.textColor}`;
+            });
         };
 
         const updatePieChart = () => { if (chartInstances.premiosPieChart) chartInstances.premiosPieChart.destroy(); chartInstances.premiosPieChart = createPieChart(); }
@@ -599,10 +532,9 @@
         document.getElementById('add-anotacao-btn').addEventListener('click', async () => { const key = anotacaoModal.dataset.currentKey; const date = document.getElementById('anotacao-date').value; const text = document.getElementById('new-anotacao-text').value.trim(); if (!text || !key) return; if (!db.notes[key]) db.notes[key] = {}; if (!db.notes[key][date]) db.notes[key][date] = []; db.notes[key][date].push(text); await saveDb(); renderAnotacoes(date, key); document.getElementById('new-anotacao-text').value = ''; });
         document.getElementById('anotacao-card-container').addEventListener('click', async (e) => { if (e.target.classList.contains('delete-anotacao-btn')) { const key = e.target.dataset.key; const date = e.target.dataset.date; const index = parseInt(e.target.dataset.index); db.notes[key][date].splice(index, 1); if (db.notes[key][date].length === 0) delete db.notes[key][date]; await saveDb(); renderAnotacoes(date, key); } });
         
-        // MODIFICADO: Event listener do filtro de data principal
         document.getElementById('main-date-filter').addEventListener('change', (e) => {
             const newDate = e.target.value;
-            updateWeeklyBarChart(newDate);
+            updateDailyBarChart(newDate);
             updateDailyComparisonStats(newDate);
             updateActiveDayButton(newDate);
             document.getElementById('weekly-status-date').value = newDate;
@@ -615,38 +547,22 @@
         ['weekly-status-reset', 'weekly-status-fac-reset'].forEach(id => document.getElementById(id).addEventListener('click', () => { const today = getTodayString(); const dateInputId = id.replace('reset', 'date'); document.getElementById(dateInputId).value = today; id.includes('fac') ? updateFacWeeklyStatus(today) : updateWeeklyStatus(today); }));
         document.addEventListener('click', e => { if (e.target.closest('.legend-item')) { const legendItem = e.target.closest('.legend-item'); const chartKey = legendItem.dataset.chart; const datasetIndex = parseInt(legendItem.dataset.datasetIndex); if (chartInstances[chartKey]) { const chart = chartInstances[chartKey]; chart.setDatasetVisibility(datasetIndex, !chart.isDatasetVisible(datasetIndex)); legendItem.classList.toggle('hidden-dataset'); chart.update(); } } });
         
-        // MODIFICADO: Lógica dos botões de reset e comparação
-        const initLitepickers = () => {
-            document.querySelectorAll('.date-range-picker').forEach(pickerEl => {
-                const controlsDiv = pickerEl.closest('[id^="controls-"]');
+        document.querySelectorAll('.btn-reset-chart').forEach(btn => btn.addEventListener('click', (e) => { const controlsDiv = e.target.closest('[id^="controls-"]'); controlsDiv.querySelector('.compare-start-date').value = ''; controlsDiv.querySelector('.compare-end-date').value = ''; const key = controlsDiv.id.split('-')[1]; const chart = chartInstances[`${key}TimelineChart`]; resetZoomAndFilter(chart); }));
+        
+        // CORRIGIDO: Event listeners para os campos de data de comparação automática
+        document.querySelectorAll('.compare-start-date, .compare-end-date').forEach(input => {
+            input.addEventListener('change', e => {
+                const controlsDiv = e.target.closest('[id^="controls-"]');
                 const key = controlsDiv.id.split('-')[1];
                 const chart = chartInstances[`${key}TimelineChart`];
-                
-                const picker = new Litepicker({
-                    element: pickerEl,
-                    singleMode: false,
-                    autoApply: true,
-                    format: 'YYYY-MM-DD',
-                    setup: (pickerInstance) => {
-                        pickerInstance.on('selected', (date1, date2) => {
-                            applyDateFilter(chart, date1.format('YYYY-MM-DD'), date2.format('YYYY-MM-DD'));
-                        });
-                    }
-                });
-                pickerEl.litepickerInstance = picker; // Armazena a instância para o reset
+                const start = controlsDiv.querySelector('.compare-start-date').value;
+                const end = controlsDiv.querySelector('.compare-end-date').value;
+                if (start && end) {
+                    applyDateFilter(chart, start, end);
+                }
             });
-        };
-        document.querySelectorAll('.btn-reset-chart').forEach(btn => btn.addEventListener('click', (e) => {
-            const controlsDiv = e.target.closest('[id^="controls-"]');
-            const pickerInput = controlsDiv.querySelector('.date-range-picker');
-            if (pickerInput && pickerInput.litepickerInstance) {
-                pickerInput.litepickerInstance.clearSelection();
-            }
-            const key = controlsDiv.id.split('-')[1];
-            const chart = chartInstances[`${key}TimelineChart`];
-            resetZoomAndFilter(chart);
-        }));
-        
+        });
+
         const applyDateFilter = (chart, start, end) => { if (chart && start && end) { chart.options.scales.x.min = start; chart.options.scales.x.max = end; chart.update(); } };
         const resetZoomAndFilter = (chart) => { if (chart) { delete chart.options.scales.x.min; delete chart.options.scales.x.max; chart.resetZoom(); } };
         document.getElementById('consult-rank-btn').addEventListener('click', () => { const date = document.getElementById('consult-date').value; const resultsContainer = document.getElementById('consult-results'); if (!date) { resultsContainer.innerHTML = '<p class="text-red-500">Selecione uma data.</p>'; return; } if(!db.premios) db.premios = []; const premiosDoDia = db.premios.filter(p => p.date === date); if(premiosDoDia.length === 0) { resultsContainer.innerHTML = '<p>Nenhum prêmio registrado.</p>'; return; } resultsContainer.innerHTML = '<h3 class="font-bold mb-2">Ganhadores do Dia</h3>' + premiosDoDia.map((p, i) => `<p><strong>${i+1}º:</strong> ${p.pessoa} (${p.pasta}) - <span class="text-yellow-400">${p.premio}</span></p>`).join(''); });
@@ -654,7 +570,6 @@
         document.getElementById('import-data-btn').addEventListener('click', () => document.getElementById('import-file-input').click());
         document.getElementById('import-file-input').addEventListener('change', async (event) => { const file = event.target.files[0]; if (!file) return; const reader = new FileReader(); reader.onload = async (e) => { try { const fileContent = e.target.result.trim(); const importedDb = JSON.parse(fileContent); if (importedDb.dailyData && importedDb.premios) { if (confirm('Isso irá substituir todos os dados atuais na nuvem. Deseja continuar?')) { db = importedDb; await saveDb(); initializeApp(); alert('Dados importados com sucesso para a nuvem!'); } } else { alert('Arquivo de dados inválido ou com estrutura corrompida.'); } } catch (err) { alert('Erro ao ler o arquivo.'); console.error("Erro no parsing do JSON:", err); } finally { event.target.value = null; } }; reader.readAsText(file); });
         
-        // --- Lógica da Análise IA (inalterada) ---
         const aiChatMessages = document.getElementById('ai-chat-messages');
         const aiChatInput = document.getElementById('ai-chat-input');
         const aiChatSend = document.getElementById('ai-chat-send');
