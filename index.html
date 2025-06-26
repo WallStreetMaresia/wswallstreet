@@ -60,6 +60,10 @@
             <div class="lg:col-span-2 border chart-border rounded-xl p-6 flex flex-col">
                 <h2 class="text-lg font-semibold text-white mb-2 text-center">CONTRATADOS X RETENÇÃO</h2>
                 <div id="bar-chart-day-buttons" class="flex justify-center items-center flex-wrap gap-2 mb-4"></div>
+                
+                <div id="comparison-indicators" class="flex justify-center flex-wrap gap-4 mb-4">
+                    </div>
+
                 <div class="relative flex-grow h-64"><canvas id="contratados-retencao-bar-chart"></canvas></div>
             </div>
             <div class="border chart-border rounded-xl p-6 flex flex-col">
@@ -349,7 +353,7 @@
         const getTodayString = () => {
             const today = new Date();
             const year = today.getFullYear();
-            const month = String(today.getMonth() + 1).padStart(2, '0'); // Meses são de 0 a 11, então +1
+            const month = String(today.getMonth() + 1).padStart(2, '0');
             const day = String(today.getDate()).padStart(2, '0');
             return `${year}-${month}-${day}`;
         };
@@ -618,7 +622,9 @@
         
         const updateAllCharts = () => {
             updateTimelineCharts();
-            updateContratadosRetencaoChart(document.getElementById('main-date-filter').value);
+            const currentDate = document.getElementById('main-date-filter').value;
+            updateContratadosRetencaoChart(currentDate);
+            updateComparisonIndicators(currentDate); // Garante que os indicadores carreguem no início
             updateWeeklyStatus(document.getElementById('weekly-status-date').value);
             updateFacWeeklyStatus(document.getElementById('weekly-status-fac-date').value);
             updatePieChart();
@@ -627,6 +633,7 @@
         const updateTimelineCharts = () => { ['contratados', 'retencao', 'fac'].forEach(key => { const chartKey = `${key}TimelineChart`; if (chartInstances[chartKey]) chartInstances[chartKey].destroy(); if (key === 'fac') { chartInstances[chartKey] = createFacTimelineChart(); } else { chartInstances[chartKey] = createTimelineChart(`${key}-timeline-chart`, key); } }); };
         
         const updateContratadosRetencaoChart = (date) => {
+            updateComparisonIndicators(date); 
             if (!date) return;
             const dataForDay = db.dailyData[date] || {};
             if (chartInstances.contratadosRetencaoBarChart) {
@@ -638,23 +645,95 @@
             updateActiveDayButton(date);
         };
 
+        // NOVA FUNÇÃO PARA GERAR OS INDICADORES DE COMPARAÇÃO
+        const updateComparisonIndicators = (dateString) => {
+            const container = document.getElementById('comparison-indicators');
+            container.innerHTML = ''; // Limpa os indicadores antigos
+
+            if (!dateString || !db.dailyData) {
+                return;
+            }
+
+            // 1. CALCULAR DATAS
+            const currentDate = new Date(`${dateString}T12:00:00`);
+            const previousWeekDate = new Date(currentDate);
+            previousWeekDate.setDate(currentDate.getDate() - 7);
+            const previousWeekDateString = previousWeekDate.toISOString().split('T')[0];
+
+            // 2. OBTER TOTAIS (ATUAL E SEMANA ANTERIOR)
+            const currentData = db.dailyData[dateString] || {};
+            const previousData = db.dailyData[previousWeekDateString] || {};
+
+            const totals = {
+                current: { contratados: 0, retencao: 0 },
+                previous: { contratados: 0, retencao: 0 }
+            };
+
+            categories.forEach(cat => {
+                totals.current.contratados += currentData[cat.id]?.contratados || 0;
+                totals.current.retencao += currentData[cat.id]?.retencao || 0;
+                totals.previous.contratados += previousData[cat.id]?.contratados || 0;
+                totals.previous.retencao += previousData[cat.id]?.retencao || 0;
+            });
+
+            // 3. FUNÇÃO AUXILIAR PARA CALCULAR E FORMATAR
+            const createIndicator = (label, currentValue, previousValue) => {
+                let percentage = 0;
+                let isNew = false;
+
+                if (previousValue > 0) {
+                    percentage = ((currentValue - previousValue) / previousValue) * 100;
+                } else if (currentValue > 0) {
+                    percentage = 100;
+                    isNew = true;
+                }
+
+                const roundedPercentage = Math.round(percentage);
+                const color = roundedPercentage >= 0 ? 'green' : 'red';
+                const arrow = roundedPercentage >= 0 ? '↑' : '↓';
+                let text = `${Math.abs(roundedPercentage)}% referente a 7 dias atrás`;
+                if(isNew && roundedPercentage === 100) text = `100% (Novo)`;
+
+
+                return `
+                    <div class="flex items-center gap-2 p-2 px-3 rounded-md text-white text-xs font-semibold bg-${color}-900/50 border border-${color}-500">
+                        <span>${label}:</span>
+                        <span class="font-bold text-${color}-400">${arrow} ${text}</span>
+                    </div>
+                `;
+            };
+
+            // 4. GERAR E INSERIR O HTML
+            const contratadosIndicator = createIndicator('Contratados', totals.current.contratados, totals.previous.contratados);
+            const retencaoIndicator = createIndicator('Retenção', totals.current.retencao, totals.previous.retencao);
+            
+            container.innerHTML = contratadosIndicator + retencaoIndicator;
+        };
+
         const setupDayButtons = () => {
             const container = document.getElementById('bar-chart-day-buttons');
-            const days = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
+            const days = ['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb', 'Dom'];
+            const dayIndices = [1, 2, 3, 4, 5, 6, 0]; 
+            
             container.innerHTML = days.map((day, index) =>
-                `<button class="day-btn px-3 py-1 text-xs rounded-md btn-action" data-day-index="${index}">${day}</button>`
+                `<button class="day-btn px-3 py-1 text-xs rounded-md btn-action" data-day-index="${dayIndices[index]}">${day}</button>`
             ).join('');
+
             container.addEventListener('click', (e) => {
                 if (e.target.classList.contains('day-btn')) {
                     const mainDateVal = document.getElementById('main-date-filter').value;
                     if (!mainDateVal) return;
+                    
                     const mainDate = new Date(`${mainDateVal}T12:00:00`);
                     const mainDayIndex = mainDate.getDay();
                     const targetDayIndex = parseInt(e.target.dataset.dayIndex, 10);
+                    
                     const dateDiff = targetDayIndex - mainDayIndex;
                     const targetDate = new Date(mainDate);
                     targetDate.setDate(mainDate.getDate() + dateDiff);
+                    
                     const targetDateString = targetDate.toISOString().split('T')[0];
+                    
                     updateContratadosRetencaoChart(targetDateString);
                 }
             });
@@ -675,12 +754,13 @@
 
         const updatePieChart = () => { if (chartInstances.premiosPieChart) chartInstances.premiosPieChart.destroy(); chartInstances.premiosPieChart = createPieChart(); }
         
-        // --- FUNÇÃO MODIFICADA ---
+        // FUNÇÃO ATUALIZADA - STATUS SEMANAL DAS PASTAS
         const updateWeeklyStatus = (dateString) => {
             const container = document.querySelector('#status-semanal .space-y-3');
             container.innerHTML = '';
             const { start, end } = getWeekRange(dateString);
             if (!start || !end) return;
+
             categories.forEach(cat => {
                 let totalContratados = 0;
                 let totalRetencao = 0;
@@ -691,34 +771,37 @@
                     }
                 }
                 const retencaoPercent = totalContratados > 0 ? (totalRetencao / totalContratados) * 100 : 0;
-                
-                let status, color;
-                const retencaoMinima = 45;
 
-                if (totalContratados >= 1000 && retencaoPercent >= 50) { // Adicionado um nível acima do ótimo
-                    status = 'EXCELENTE';
-                    color = 'text-emerald-400';
-                } else if (totalContratados >= 850 && retencaoPercent >= retencaoMinima) {
-                    status = 'ÓTIMO';
-                    color = 'text-green-400';
-                } else if (totalContratados >= 700 && retencaoPercent >= retencaoMinima) {
-                    status = 'BOM';
-                    color = 'text-cyan-400';
-                } else if (totalContratados >= 500 && retencaoPercent >= retencaoMinima) {
-                    status = 'SATISFATÓRIO';
-                    color = 'text-blue-400';
-                } else if (totalContratados >= 350 && retencaoPercent >= retencaoMinima) {
-                    status = 'MÉDIO';
-                    color = 'text-yellow-500';
-                } else if (totalContratados >= 200 && retencaoPercent >= retencaoMinima) {
-                    status = 'RUIM';
-                    color = 'text-orange-500';
-                } else if (totalContratados >= 100 && retencaoPercent >= retencaoMinima) {
-                    status = 'HORRÍVEL';
-                    color = 'text-red-500';
+                let status, color;
+
+                // Nova lógica baseada nas regras de retenção
+                if (retencaoPercent >= 45) {
+                    if (totalContratados >= 900) { // Limiares de volume são ajustáveis
+                        status = 'EXCELENTE';
+                        color = 'text-emerald-400';
+                    } else if (totalContratados >= 600) {
+                        status = 'ÓTIMO';
+                        color = 'text-green-400';
+                    } else if (totalContratados > 0) {
+                        status = 'BOM';
+                        color = 'text-cyan-400';
+                    } else {
+                        status = 'RUIM'; // Nenhum contratado
+                        color = 'text-red-500';
+                    }
+                } else if (retencaoPercent >= 30) {
+                    // Se a retenção está entre 30% e 44.9%, o máximo é "Satisfatório"
+                    if (totalContratados > 150) {
+                        status = 'SATISFATÓRIO';
+                        color = 'text-yellow-500';
+                    } else {
+                        status = 'RUIM'; // Volume muito baixo
+                        color = 'text-red-500';
+                    }
                 } else {
-                    status = 'INSUFICIENTE';
-                    color = 'text-gray-500';
+                    // Se a retenção for menor que 30%, é sempre "Ruim"
+                    status = 'RUIM';
+                    color = 'text-red-500';
                 }
 
                 container.innerHTML += `<div class="flex justify-between items-center text-sm"><span class="font-semibold text-${cat.color}-400">${cat.name}</span><span class="font-bold ${color}">${status}</span></div>`;
@@ -731,7 +814,14 @@
         document.getElementById('anotacao-date').addEventListener('change', (e) => { const key = anotacaoModal.dataset.currentKey; renderAnotacoes(e.target.value, key); });
         document.getElementById('add-anotacao-btn').addEventListener('click', async () => { const key = anotacaoModal.dataset.currentKey; const date = document.getElementById('anotacao-date').value; const text = document.getElementById('new-anotacao-text').value.trim(); if (!text || !key) return; if (!db.notes[key]) db.notes[key] = {}; if (!db.notes[key][date]) db.notes[key][date] = []; db.notes[key][date].push(text); await saveDb(); renderAnotacoes(date, key); document.getElementById('new-anotacao-text').value = ''; });
         document.getElementById('anotacao-card-container').addEventListener('click', async (e) => { if (e.target.classList.contains('delete-anotacao-btn')) { const key = e.target.dataset.key; const date = e.target.dataset.date; const index = parseInt(e.target.dataset.index); db.notes[key][date].splice(index, 1); if (db.notes[key][date].length === 0) delete db.notes[key][date]; await saveDb(); renderAnotacoes(date, key); } });
-        document.getElementById('main-date-filter').addEventListener('change', (e) => { const newDate = e.target.value; updateContratadosRetencaoChart(newDate); document.getElementById('weekly-status-date').value = newDate; document.getElementById('weekly-status-fac-date').value = newDate; updateWeeklyStatus(newDate); updateFacWeeklyStatus(newDate); });
+        document.getElementById('main-date-filter').addEventListener('change', (e) => {
+            const newDate = e.target.value;
+            updateContratadosRetencaoChart(newDate);
+            document.getElementById('weekly-status-date').value = newDate;
+            document.getElementById('weekly-status-fac-date').value = newDate;
+            updateWeeklyStatus(newDate);
+            updateFacWeeklyStatus(newDate);
+        });
         ['weekly-status-date', 'weekly-status-fac-date'].forEach(id => document.getElementById(id).addEventListener('change', (e) => id.includes('fac') ? updateFacWeeklyStatus(e.target.value) : updateWeeklyStatus(e.target.value)));
         ['weekly-status-reset', 'weekly-status-fac-reset'].forEach(id => document.getElementById(id).addEventListener('click', () => { const today = getTodayString(); const dateInputId = id.replace('reset', 'date'); document.getElementById(dateInputId).value = today; id.includes('fac') ? updateFacWeeklyStatus(today) : updateWeeklyStatus(today); }));
         document.addEventListener('click', e => { if (e.target.closest('.legend-item')) { const legendItem = e.target.closest('.legend-item'); const chartKey = legendItem.dataset.chart; const datasetIndex = parseInt(legendItem.dataset.datasetIndex); if (chartInstances[chartKey]) { const chart = chartInstances[chartKey]; chart.setDatasetVisibility(datasetIndex, !chart.isDatasetVisible(datasetIndex)); legendItem.classList.toggle('hidden-dataset'); chart.update(); } } });
