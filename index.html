@@ -1,80 +1,78 @@
 <!DOCTYPE html>
- <html lang="pt-BR">
- <head>
-     <meta charset="UTF-8">
-     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-     <title>Controle de Pastas Wallstreet</title>
-     <script src="https://cdn.tailwindcss.com"></script>
-     <link rel="preconnect" href="https://fonts.googleapis.com">
-     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-     <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
-     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom/dist/chartjs-plugin-zoom.min.js"></script>
-     <style>
-         body { font-family: 'Inter', sans-serif; background-color: #000000; color: #E0E0E0; }
-         .chart-border { border-color: rgba(255, 255, 255, 0.2); }
-         .btn-action { background-color: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 255, 255, 0.2); transition: background-color 0.3s; }
-         .btn-action:hover { background-color: rgba(255, 255, 255, 0.2); }
-         .modal-bg { background-color: rgba(0, 0, 0, 0.8); backdrop-filter: blur(4px); }
-         .modal-content { background-color: #111; border: 1px solid rgba(255, 255, 255, 0.2); }
-         .input-field, .select-field { background-color: #222; border: 1px solid rgba(255, 255, 255, 0.3); color: #E0E0E0; border-radius: 0.375rem; }
-         .select-field { -webkit-appearance: none; -moz-appearance: none; appearance: none; background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e"); background-position: right 0.5rem center; background-repeat: no-repeat; background-size: 1.5em 1.5em; padding-right: 2.5rem; }
-         .custom-legend { display: flex; justify-content: center; align-items: center; gap: 1.5rem; margin-top: 1rem; flex-wrap: wrap; }
-         .legend-item { display: flex; align-items: center; gap: 0.5rem; font-size: 0.75rem; cursor: pointer; transition: opacity 0.2s; }
-         .legend-item.hidden-dataset { opacity: 0.5; text-decoration: line-through; }
-         .legend-dot { width: 0.625rem; height: 0.625rem; border-radius: 9999px; }
-         #chartjs-tooltip { opacity: 0; position: absolute; background: rgba(30, 30, 30, 0.9); color: white; border-radius: 8px; padding: 10px 15px; pointer-events: none; transition: all .1s ease; transform: translate(-50%, -110%); font-size: 12px; border: 1px solid rgba(255, 255, 255, 0.2); z-index: 100; }
-         #chartjs-tooltip table { margin: 0; border-collapse: collapse; width: 100%;}
-         #chartjs-tooltip th, #chartjs-tooltip td { border: none; padding: 4px 0; text-align: left;}
-         #chartjs-tooltip .tooltip-dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 8px; }
-         .ai-chat-bubble { max-width: 80%; padding: 10px 15px; border-radius: 15px; word-wrap: break-word; }
-         .ai-chat-user { background-color: #007bff; color: white; align-self: flex-end; border-bottom-right-radius: 0; }
-         .ai-chat-gemini { background-color: #333; color: white; align-self: flex-start; border-bottom-left-radius: 0;}
-         .day-btn.active { background-color: #facc15; color: #111827; font-weight: bold; }
-         .daily-stats-container-parent { position: relative; }
-         .daily-stats-absolute { position: absolute; top: -30px; left: 50%; transform: translateX(-50%); display: flex; gap: 1rem; }
-     </style>
- </head>
- <body class="p-4 sm:p-6 md:p-8" style="display: none;">
- 
-     <div class="max-w-7xl mx-auto">
-         <header class="flex flex-col sm:flex-row justify-between items-center mb-8">
-             <h1 class="text-2xl md:text-3xl font-bold text-white mb-4 sm:mb-0">CONTROLE DE PASTAS WALLSTREET</h1>
-             <div class="flex items-center space-x-2 sm:space-x-4">
-                 <span id="user-email" class="text-sm text-gray-400 hidden sm:inline"></span>
-                 <button id="logout-btn" class="text-red-500 font-semibold py-2 px-4 rounded-lg hover:bg-red-500 hover:text-white transition-colors text-sm">Sair</button>
-                 <div id="permissioned-controls" class="flex items-center space-x-2 sm:space-x-4"></div>
-                 <button id="open-ai-chat-btn" class="text-white font-semibold py-2 px-6 rounded-lg bg-purple-600 hover:bg-purple-700 transition-colors">Análise IA</button>
-                 <input type="date" id="main-date-filter" class="bg-yellow-400 text-black font-bold py-2 px-4 rounded-lg cursor-pointer">
-             </div>
-         </header>
-         
-         <main class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-             <div class="border chart-border rounded-xl p-6 flex flex-col">
-                 <div class="flex flex-wrap justify-between items-center mb-4 gap-4 relative" id="controls-contratados">
-                     <h2 class="text-lg font-semibold text-white">LINHA DO TEMPO - CONTRATADOS</h2>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Controle de Pastas Wallstreet</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom/dist/chartjs-plugin-zoom.min.js"></script>
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #000000; color: #E0E0E0; }
+        .chart-border { border-color: rgba(255, 255, 255, 0.2); }
+        .btn-action { background-color: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 255, 255, 0.2); transition: background-color 0.3s; }
+        .btn-action:hover { background-color: rgba(255, 255, 255, 0.2); }
+        .modal-bg { background-color: rgba(0, 0, 0, 0.8); backdrop-filter: blur(4px); }
+        .modal-content { background-color: #111; border: 1px solid rgba(255, 255, 255, 0.2); }
+        .input-field, .select-field { background-color: #222; border: 1px solid rgba(255, 255, 255, 0.3); color: #E0E0E0; border-radius: 0.375rem; }
+        .select-field { -webkit-appearance: none; -moz-appearance: none; appearance: none; background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e"); background-position: right 0.5rem center; background-repeat: no-repeat; background-size: 1.5em 1.5em; padding-right: 2.5rem; }
+        .custom-legend { display: flex; justify-content: center; align-items: center; gap: 1.5rem; margin-top: 1rem; flex-wrap: wrap; }
+        .legend-item { display: flex; align-items: center; gap: 0.5rem; font-size: 0.75rem; cursor: pointer; transition: opacity 0.2s; }
+        .legend-item.hidden-dataset { opacity: 0.5; text-decoration: line-through; }
+        .legend-dot { width: 0.625rem; height: 0.625rem; border-radius: 9999px; }
+        #chartjs-tooltip { opacity: 0; position: absolute; background: rgba(30, 30, 30, 0.9); color: white; border-radius: 8px; padding: 10px 15px; pointer-events: none; transition: all .1s ease; transform: translate(-50%, -110%); font-size: 12px; border: 1px solid rgba(255, 255, 255, 0.2); z-index: 100; }
+        #chartjs-tooltip table { margin: 0; border-collapse: collapse; width: 100%;}
+        #chartjs-tooltip th, #chartjs-tooltip td { border: none; padding: 4px 0; text-align: left;}
+        #chartjs-tooltip .tooltip-dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 8px; }
+        .ai-chat-bubble { max-width: 80%; padding: 10px 15px; border-radius: 15px; word-wrap: break-word; }
+        .ai-chat-user { background-color: #007bff; color: white; align-self: flex-end; border-bottom-right-radius: 0; }
+        .ai-chat-gemini { background-color: #333; color: white; align-self: flex-start; border-bottom-left-radius: 0;}
+        .day-btn.active { background-color: #facc15; color: #111827; font-weight: bold; }
+    </style>
+</head>
+<body class="p-4 sm:p-6 md:p-8" style="display: none;">
+
+    <div class="max-w-7xl mx-auto">
+        <header class="flex flex-col sm:flex-row justify-between items-center mb-8">
+            <h1 class="text-2xl md:text-3xl font-bold text-white mb-4 sm:mb-0">CONTROLE DE PASTAS WALLSTREET</h1>
+            <div class="flex items-center space-x-2 sm:space-x-4">
+                <span id="user-email" class="text-sm text-gray-400 hidden sm:inline"></span>
+                <button id="logout-btn" class="text-red-500 font-semibold py-2 px-4 rounded-lg hover:bg-red-500 hover:text-white transition-colors text-sm">Sair</button>
+                <div id="permissioned-controls" class="flex items-center space-x-2 sm:space-x-4"></div>
+                <button id="open-ai-chat-btn" class="text-white font-semibold py-2 px-6 rounded-lg bg-purple-600 hover:bg-purple-700 transition-colors">Análise IA</button>
+                <input type="date" id="main-date-filter" class="bg-yellow-400 text-black font-bold py-2 px-4 rounded-lg cursor-pointer">
+            </div>
+        </header>
+        
+        <main class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <div class="border chart-border rounded-xl p-6 flex flex-col">
+                <div class="flex flex-wrap justify-between items-center mb-4 gap-4 relative" id="controls-contratados">
+                    <h2 class="text-lg font-semibold text-white">LINHA DO TEMPO - CONTRATADOS</h2>
+                    <div class="absolute top-0 right-0 flex items-center gap-2 p-1" title="Status geral dos últimos 3 dias">
+                        <span class="status-dot-label text-xs font-medium"></span>
+                        <div class="status-dot w-4 h-4 rounded-full"></div>
+                        <span class="status-trend-label text-xs italic text-gray-400"></span>
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        <input type="date" class="input-field p-1 text-sm compare-start-date" title="Data Início">
+                        <input type="date" class="input-field p-1 text-sm compare-end-date" title="Data Fim">
+                        <button class="text-purple-400 border border-purple-400 rounded-lg py-1 px-3 text-sm font-semibold hover:bg-purple-400 hover:text-black transition-colors btn-anotacao" data-key="contratados">ANOTAÇÃO</button>
+                        <button class="text-white border border-gray-500 rounded-lg py-1 px-3 text-sm font-semibold btn-action btn-reset-chart">RESET</button>
+                    </div>
+                </div>
+                <div class="relative flex-grow h-64"><canvas id="contratados-timeline-chart"></canvas></div><div id="timeline-contratados-legend" class="custom-legend"></div>
+            </div>
+            <div class="border chart-border rounded-xl p-6 flex flex-col">
+                <div class="flex flex-wrap justify-between items-center mb-4 gap-4 relative" id="controls-retencao">
+                    <h2 class="text-lg font-semibold text-white">LINHA DO TEMPO - RETENÇÃO</h2>
                      <div class="absolute top-0 right-0 flex items-center gap-2 p-1" title="Status geral dos últimos 3 dias">
-                         <span class="status-dot-label text-xs font-medium"></span>
-                         <div class="status-dot w-4 h-4 rounded-full"></div>
-                         <span class="status-trend-label text-xs italic text-gray-400"></span>
-                     </div>
-                     <div class="flex items-center space-x-2">
-                         <input type="date" class="input-field p-1 text-sm compare-start-date" title="Data Início">
-                         <input type="date" class="input-field p-1 text-sm compare-end-date" title="Data Fim">
-                         <button class="text-purple-400 border border-purple-400 rounded-lg py-1 px-3 text-sm font-semibold hover:bg-purple-400 hover:text-black transition-colors btn-anotacao" data-key="contratados">ANOTAÇÃO</button>
-                         <button class="text-white border border-gray-500 rounded-lg py-1 px-3 text-sm font-semibold btn-action btn-reset-chart">RESET</button>
-                     </div>
-                 </div>
-                 <div class="relative flex-grow h-64"><canvas id="contratados-timeline-chart"></canvas></div><div id="timeline-contratados-legend" class="custom-legend"></div>
-             </div>
-             <div class="border chart-border rounded-xl p-6 flex flex-col">
-                 <div class="flex flex-wrap justify-between items-center mb-4 gap-4 relative" id="controls-retencao">
-                     <h2 class="text-lg font-semibold text-white">LINHA DO TEMPO - RETENÇÃO</h2>
-                      <div class="absolute top-0 right-0 flex items-center gap-2 p-1" title="Status geral dos últimos 3 dias">
-                         <span class="status-dot-label text-xs font-medium"></span>
-                         <div class="status-dot w-4 h-4 rounded-full"></div>
-                         <span class="status-trend-label text-xs italic text-gray-400"></span>
+                        <span class="status-dot-label text-xs font-medium"></span>
+                        <div class="status-dot w-4 h-4 rounded-full"></div>
+                        <span class="status-trend-label text-xs italic text-gray-400"></span>
                      </div>
                      <div class="flex items-center space-x-2">
                          <input type="date" class="input-field p-1 text-sm compare-start-date" title="Data Início">
@@ -82,24 +80,24 @@
                          <button class="text-purple-400 border border-purple-400 rounded-lg py-1 px-3 text-sm font-semibold hover:bg-purple-400 hover:text-black transition-colors btn-anotacao" data-key="retencao">ANOTAÇÃO</button>
                          <button class="text-white border border-gray-500 rounded-lg py-1 px-3 text-sm font-semibold btn-action btn-reset-chart">RESET</button>
                      </div>
-                 </div>
-                 <div class="relative flex-grow h-64"><canvas id="retencao-timeline-chart"></canvas></div><div id="timeline-retencao-legend" class="custom-legend"></div>
-             </div>
-             <div class="lg:col-span-2 border chart-border rounded-xl p-6 flex flex-col">
-                 <h2 class="text-lg font-semibold text-white mb-2 text-center">CONTRATADOS X RETENÇÃO</h2>
-                 <div class="daily-stats-container-parent relative w-fit mx-auto">
-                     <div id="daily-stats-container" class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4 max-w-md w-full daily-stats-absolute"></div>
-                 </div>
-                 <div id="bar-chart-day-buttons" class="flex justify-center items-center flex-wrap gap-2 mb-4"></div>
-                 <div class="relative flex-grow h-64"><canvas id="contratados-retencao-bar-chart"></canvas></div>
-             </div>
-             <div class="border chart-border rounded-xl p-6 flex flex-col">
-                 <div class="flex flex-wrap justify-between items-center mb-4 gap-4 relative" id="controls-fac">
-                      <h2 class="text-lg font-semibold text-white">FACÇÕES EM FOCO</h2>
-                      <div class="absolute top-0 right-0 flex items-center gap-2 p-1" title="Status geral dos últimos 3 dias">
-                         <span class="status-dot-label text-xs font-medium"></span>
-                         <div class="status-dot w-4 h-4 rounded-full"></div>
-                         <span class="status-trend-label text-xs italic text-gray-400"></span>
+                </div>
+                <div class="relative flex-grow h-64"><canvas id="retencao-timeline-chart"></canvas></div><div id="timeline-retencao-legend" class="custom-legend"></div>
+            </div>
+            <div class="lg:col-span-2 border chart-border rounded-xl p-6 flex flex-col">
+                <h2 class="text-lg font-semibold text-white mb-2 text-center">CONTRATADOS X RETENÇÃO</h2>
+                <div class="relative w-full h-8 mb-4">
+                    <div id="daily-stats-container" class="absolute inset-x-0 top-0 flex justify-center gap-4"></div>
+                </div>
+                <div id="bar-chart-day-buttons" class="flex justify-center items-center flex-wrap gap-2 mb-4"></div>
+                <div class="relative flex-grow h-64"><canvas id="contratados-retencao-bar-chart"></canvas></div>
+            </div>
+            <div class="border chart-border rounded-xl p-6 flex flex-col">
+                <div class="flex flex-wrap justify-between items-center mb-4 gap-4 relative" id="controls-fac">
+                     <h2 class="text-lg font-semibold text-white">FACÇÕES EM FOCO</h2>
+                     <div class="absolute top-0 right-0 flex items-center gap-2 p-1" title="Status geral dos últimos 3 dias">
+                        <span class="status-dot-label text-xs font-medium"></span>
+                        <div class="status-dot w-4 h-4 rounded-full"></div>
+                        <span class="status-trend-label text-xs italic text-gray-400"></span>
                      </div>
                      <div class="flex items-center space-x-2">
                          <input type="date" class="input-field p-1 text-sm compare-start-date" title="Data Início">
@@ -107,225 +105,521 @@
                          <button class="text-purple-400 border border-purple-400 rounded-lg py-1 px-3 text-sm font-semibold hover:bg-purple-400 hover:text-black transition-colors btn-anotacao" data-key="fac">ANOTAÇÃO</button>
                          <button class="text-white border border-gray-500 rounded-lg py-1 px-3 text-sm font-semibold btn-action btn-reset-chart">RESET</button>
                      </div>
-                 </div>
-                 <div class="relative flex-grow h-64"><canvas id="fac-timeline-chart"></canvas></div><div id="timeline-fac-legend" class="custom-legend"></div>
-             </div>
-             <div id="status-semanal-fac" class="border chart-border rounded-xl p-6">
-                 <div class="flex flex-wrap justify-between items-center mb-6 gap-4"><h2 class="text-lg font-semibold text-white">STATUS SEMANAL FACS FOCO</h2><div class="flex items-center space-x-2"><input type="date" id="weekly-status-fac-date" class="input-field p-1 text-sm" title="Selecione um dia da semana"><button id="weekly-status-fac-reset" class="text-white border border-gray-500 rounded-lg py-1 px-3 text-sm font-semibold btn-action">RESET</button></div></div>
-                 <div class="space-y-3"></div>
-             </div>
-             <div id="status-semanal" class="border chart-border rounded-xl p-6">
-                 <div class="flex flex-wrap justify-between items-center mb-6 gap-4"><h2 class="text-lg font-semibold text-white">STATUS SEMANAL DAS PASTAS</h2><div class="flex items-center space-x-2"><input type="date" id="weekly-status-date" class="input-field p-1 text-sm" title="Selecione um dia da semana"><button id="weekly-status-reset" class="text-white border border-gray-500 rounded-lg py-1 px-3 text-sm font-semibold btn-action">RESET</button></div></div>
-                 <div class="space-y-3"></div>
-             </div>
-             <div class="border chart-border rounded-xl p-6 flex flex-col justify-between">
-                 <div><h2 class="text-lg font-semibold text-white mb-6">RANK DE PRÊMIOS (GERAL POR PASTA)</h2><div class="relative h-48 w-full"><canvas id="premios-pie-chart"></canvas></div></div>
-                 <button id="open-consult-modal-btn" class="w-full mt-6 bg-yellow-400 text-black font-bold py-3 rounded-lg hover:bg-yellow-500 transition-colors">CONSULTAR RANK DIÁRIO</button>
-             </div>
-         </main>
-         
-         <div class="mt-12 flex justify-center items-center gap-4">
-             <button id="export-data-btn" class="text-white font-semibold py-2 px-6 rounded-lg btn-action">Exportar Dados</button>
-             <button id="import-data-btn" class="text-white font-semibold py-2 px-6 rounded-lg btn-action">Importar Dados</button>
-             <input type="file" id="import-file-input" class="hidden" accept=".json">
-         </div>
-         <footer class="text-center mt-8 text-gray-500 text-sm">
-             <p>TODOS DIREITOS RESERVADOS - SHEMIAH #S3LO - 2025</p>
-         </footer>
-     </div>
-     
-     <div id="chartjs-tooltip"></div>
-     <div id="fill-modal" class="fixed inset-0 modal-bg items-center justify-center hidden z-50">
-         <div id="fill-modal-content" class="modal-content rounded-xl p-8 w-full max-w-6xl max-h-[90vh] overflow-y-auto">
-             <h2 class="text-xl font-bold text-white mb-6">Preencher / Editar Dados</h2>
-             <div class="mb-6"><label for="fill-date" class="block text-sm font-medium text-gray-300 mb-2">Data do Registro</label><input type="date" id="fill-date" class="w-full p-2 input-field"></div>
-             <div id="fill-categories" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4 mb-8"></div>
-             <h3 class="text-lg font-bold text-white mb-4 mt-6">Adicionar Prêmios (3)</h3>
-             <div id="premios-container" class="space-y-4 mb-8"></div>
-             <h3 class="text-lg font-bold text-white mb-4 mt-6">FAC em Foco (6)</h3>
-             <div id="fac-container" class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4"></div>
-             <div class="flex justify-end space-x-4 mt-8">
-                 <button id="cancel-fill-btn" class="py-2 px-6 rounded-lg btn-action">Cancelar</button>
-                 <button id="clear-day-btn" class="bg-red-600 text-white font-bold py-2 px-6 rounded-lg hover:bg-red-700">Limpar Dia</button>
-                 <button id="save-fill-btn" class="bg-green-500 text-white font-bold py-2 px-8 rounded-lg hover:bg-green-600">Salvar</button>
-             </div>
-         </div>
-     </div>
-     <div id="consult-modal" class="fixed inset-0 modal-bg items-center justify-center hidden z-50">
-         <div class="modal-content rounded-xl p-8 w-full max-w-md">
-             <h2 class="text-xl font-bold text-white mb-6">Consultar Prêmios do Dia</h2>
-             <div class="space-y-4">
-                 <div><label for="consult-date" class="block text-sm font-medium text-gray-300 mb-2">Selecione a Data</label><input type="date" id="consult-date" class="w-full p-2 input-field"></div>
-                 <button id="consult-rank-btn" class="w-full bg-yellow-400 text-black font-bold py-3 rounded-lg hover:bg-yellow-500">Consultar</button>
-                 <div id="consult-results" class="mt-6 text-gray-300"></div>
-             </div>
-             <div class="flex justify-end mt-6"><button id="close-consult-modal-btn" class="py-2 px-6 rounded-lg btn-action">Fechar</button></div>
-         </div>
-     </div>
-     <div id="anotacao-modal" class="fixed inset-0 modal-bg items-center justify-center hidden z-50">
-         <div class="modal-content rounded-xl p-8 w-full max-w-2xl h-[70vh] flex flex-col">
-             <h2 id="anotacao-modal-title" class="text-xl font-bold text-white mb-4">Anotações</h2>
-             <div class="flex items-center gap-4 mb-4">
-                 <label for="anotacao-date" class="text-sm">Data:</label>
-                 <input type="date" id="anotacao-date" class="input-field p-2">
-             </div>
-             <div id="anotacao-card-container" class="flex-grow overflow-y-auto space-y-4 pr-2"></div>
-             <div class="mt-4">
-                 <textarea id="new-anotacao-text" class="w-full input-field p-2" rows="3" placeholder="Escreva sua anotação..."></textarea>
-                 <button id="add-anotacao-btn" class="w-full mt-2 bg-green-500 text-white font-bold py-2 rounded-lg hover:bg-green-600">Adicionar Anotação</button>
-             </div>
-             <div class="flex justify-end mt-6">
-                 <button id="close-anotacao-modal-btn" class="py-2 px-6 rounded-lg btn-action">Fechar</button>
-             </div>
-         </div>
-     </div>
-     <div id="ai-chat-modal" class="fixed inset-0 modal-bg items-center justify-center hidden z-50">
-         <div class="modal-content rounded-xl p-6 w-full max-w-2xl h-[80vh] flex flex-col">
-             <div class="flex justify-between items-center mb-4">
-                 <h2 class="text-xl font-bold text-white">Análise com IA</h2>
-                 <button id="configure-api-key-btn" class="text-xs text-gray-400 hover:text-white">Configurar Chave</button>
-             </div>
-             <div id="ai-chat-messages" class="flex-grow overflow-y-auto space-y-4 p-4 bg-black/20 rounded-lg flex flex-col"></div>
-             <div class="mt-4 flex gap-2">
-                 <input type="text" id="ai-chat-input" class="w-full p-2 input-field" placeholder="Converse com a IA ou peça uma análise...">
-                 <button id="ai-chat-send" class="bg-purple-600 text-white font-bold py-2 px-6 rounded-lg hover:bg-purple-700">Enviar</button>
-             </div>
-             <div class="flex justify-end mt-4">
-                 <button id="close-ai-chat-modal-btn" class="py-2 px-6 rounded-lg btn-action">Fechar</button>
-             </div>
-         </div>
-     </div>
-     <div id="access-modal" class="fixed inset-0 modal-bg items-center justify-center hidden z-50">
-         <div class="modal-content rounded-xl p-8 w-full max-w-lg">
-             <h2 class="text-xl font-bold text-white mb-6">Gerenciar Acessos</h2>
-             <div class="mb-6">
-                 <label for="new-email-input" class="block text-sm font-medium text-gray-300 mb-2">Adicionar novo e-mail</label>
-                 <div class="flex gap-2">
-                     <input type="email" id="new-email-input" class="w-full p-2 input-field" placeholder="email.membro@exemplo.com">
-                     <button id="add-email-btn" class="bg-green-600 text-white font-bold py-2 px-6 rounded-lg hover:bg-green-700">Adicionar</button>
-                 </div>
-                 <p id="access-error-message" class="text-red-500 text-sm mt-2 h-4"></p>
-             </div>
-             <h3 class="text-lg font-semibold text-white mb-4">E-mails com Acesso:</h3>
-             <div id="access-list-container" class="space-y-2 max-h-[40vh] overflow-y-auto">
-                 <p class="text-gray-400">Carregando...</p>
-             </div>
-             <div class="flex justify-end mt-8">
-                 <button id="close-access-modal-btn" class="py-2 px-6 rounded-lg btn-action">Fechar</button>
-             </div>
-         </div>
-     </div>
- 
-     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
-     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
-     
-     <script>
-         // --- CONFIGURAÇÃO E AUTENTICAÇÃO ---
-         const firebaseConfig = {
-           apiKey: "AIzaSyCONofXx4NlCP34PZrs4pV-gDRJ_Uasw3c",
-           authDomain: "wswallstreet-3ab24.firebaseapp.com",
-           projectId: "wswallstreet-3ab24",
-           storageBucket: "wswallstreet-3ab24.firebasestorage.app",
-           messagingSenderId: "255776848131",
-           appId: "1:255776848131:web:17af511729c29eb2569136"
-         };
-         
-         const fbApp = firebase.initializeApp(firebaseConfig);
-         const fbAuth = firebase.auth();
-         const fbDb = firebase.firestore();
-         const ADMIN_EMAIL = 'kraznelofc@gmail.com';
- 
-         fbAuth.onAuthStateChanged(async (user) => {
-             if (user) {
-                 document.body.style.display = 'block';
-                 document.getElementById('user-email').textContent = user.email;
-                 const controlsContainer = document.getElementById('permissioned-controls');
-                 
-                 if (user.email === ADMIN_EMAIL) {
-                     controlsContainer.innerHTML = `
-                         <button id="open-access-modal-btn" class="text-white font-semibold py-2 px-4 rounded-lg btn-action bg-blue-600 hover:bg-blue-700">GERENCIAR</button>
-                         <button id="open-fill-modal-btn" class="text-white font-semibold py-2 px-6 rounded-lg btn-action">PREENCHER</button>
-                     `;
-                     document.getElementById('open-access-modal-btn').addEventListener('click', () => {
-                         loadAllowedUsers();
-                         openModal(document.getElementById('access-modal'));
-                     });
-                 } else {
-                     controlsContainer.innerHTML = '';
-                 }
-                 await initializeApp();
-             } else {
-                 window.location.href = 'login.html';
-             }
-         });
-         
-         document.getElementById('logout-btn').addEventListener('click', () => fbAuth.signOut());
-         
-         let db;
-         const dbRef = fbDb.collection('application_data').doc('main');
-         const LOCAL_DB_KEY = 'wallstreetDashboardData';
- 
-         async function loadDb() {
-             try {
-                 const doc = await dbRef.get();
-                 if (doc.exists && doc.data().dailyData && Object.keys(doc.data().dailyData).length > 0) {
-                     return doc.data();
-                 }
-                 const localDataString = localStorage.getItem(LOCAL_DB_KEY);
-                 if (localDataString) {
-                     const localDb = JSON.parse(localDataString);
-                     await dbRef.set(localDb);
-                     localStorage.removeItem(LOCAL_DB_KEY); 
-                     return localDb;
-                 }
-                 const backupData = {"dailyData":{},"premios":[],"facData":{},"notes":{"contratados":{},"retencao":{},"fac":{}}};
-                 if (fbAuth.currentUser.email === ADMIN_EMAIL) {
-                     await dbRef.set(backupData);
-                 }
-                 return backupData;
-             } catch (error) {
-                 console.error("Erro durante o carregamento/migração dos dados:", error);
-                 return { dailyData: {}, premios: [], facData: {}, notes: {contratados: {}, retencao: {}, fac: {}} };
-             }
-         }
-         
-         async function saveDb() {
-             try {
-                 await dbRef.set(db);
-             } catch (error) {
-                 console.error("Erro ao salvar dados no Firestore:", error);
-                 alert("Não foi possível salvar os dados.");
-             }
-         }
-         
-         const accessModal = document.getElementById('access-modal');
-         const accessListContainer = document.getElementById('access-list-container');
-         const addEmailBtn = document.getElementById('add-email-btn');
-         const newEmailInput = document.getElementById('new-email-input');
-         const closeAccessModalBtn = document.getElementById('close-access-modal-btn');
-         const accessErrorMessage = document.getElementById('access-error-message');
-         const permissionsRef = fbDb.collection('permissions').doc('allowed_users');
- 
-         async function loadAllowedUsers() { accessListContainer.innerHTML = '<p class="text-gray-400">Carregando...</p>'; try { const doc = await permissionsRef.get(); if (doc.exists) { const allowedEmails = doc.data().emails || []; if (allowedEmails.length === 0) { accessListContainer.innerHTML = '<p class="text-gray-500 text-center">Nenhum membro com acesso de espectador.</p>'; return; } accessListContainer.innerHTML = allowedEmails.map(email => ` <div class="flex justify-between items-center bg-gray-800 p-2 rounded"> <span class="text-sm">${email}</span> <button class="text-red-500 hover:text-red-400 font-bold remove-email-btn" data-email="${email}" title="Remover Acesso">&times;</button> </div> `).join(''); } else { await permissionsRef.set({ emails: [] }); accessListContainer.innerHTML = '<p class="text-gray-500 text-center">Nenhum membro com acesso. Adicione o primeiro e-mail.</p>'; } } catch (error) { console.error("Erro ao carregar e-mails:", error); accessListContainer.innerHTML = '<p class="text-red-500">Erro ao carregar a lista.</p>'; } }
-         addEmailBtn.addEventListener('click', async () => { const emailToAdd = newEmailInput.value.trim().toLowerCase(); if (!emailToAdd || !/^\S+@\S+\.\S+$/.test(emailToAdd)) { accessErrorMessage.textContent = 'Por favor, insira um e-mail válido.'; return; } accessErrorMessage.textContent = ''; addEmailBtn.disabled = true; try { await permissionsRef.update({ emails: firebase.firestore.FieldValue.arrayUnion(emailToAdd) }); newEmailInput.value = ''; await loadAllowedUsers(); } catch (error) { console.error("Erro ao adicionar e-mail:", error); accessErrorMessage.textContent = 'Erro ao salvar o e-mail.'; } finally { addEmailBtn.disabled = false; } });
-         accessListContainer.addEventListener('click', async (e) => { if (e.target.classList.contains('remove-email-btn')) { const emailToRemove = e.target.dataset.email; if (confirm(`Tem certeza que deseja remover o acesso de ${emailToRemove}?`)) { try { await permissionsRef.update({ emails: firebase.firestore.FieldValue.arrayRemove(emailToRemove) }); await loadAllowedUsers(); } catch (error) { console.error("Erro ao remover e-mail:", error); alert('Ocorreu um erro ao remover o e-mail.'); } } } });
-         closeAccessModalBtn.addEventListener('click', () => closeModal(accessModal));
- 
-         async function initializeApp() {
-             db = await loadDb();
-             const today = getTodayString();
-             document.getElementById('main-date-filter').value = today;
-             document.getElementById('consult-date').value = today;
-             document.getElementById('weekly-status-date').value = today;
-             document.getElementById('weekly-status-fac-date').value = today;
-             setupFillModal(); 
-             setupDayButtons();
-             if (!chartInstances.contratadosRetencaoBarChart) {
-                 chartInstances.contratadosRetencaoBarChart = createContratadosRetencaoChart();
-             }
-             updateAllCharts();
-         }
- 
-         let chartInstances = {};
-         const categories = [ { id: 'conexao', name: 'Conexão', color: 'cyan', hex: '#22d3ee' }, { id: 'retencao_cat', name: 'Retenção', color: 'orange', hex: '#f
+                </div>
+                <div class="relative flex-grow h-64"><canvas id="fac-timeline-chart"></canvas></div><div id="timeline-fac-legend" class="custom-legend"></div>
+            </div>
+            <div id="status-semanal-fac" class="border chart-border rounded-xl p-6">
+                <div class="flex flex-wrap justify-between items-center mb-6 gap-4"><h2 class="text-lg font-semibold text-white">STATUS SEMANAL FACS FOCO</h2><div class="flex items-center space-x-2"><input type="date" id="weekly-status-fac-date" class="input-field p-1 text-sm" title="Selecione um dia da semana"><button id="weekly-status-fac-reset" class="text-white border border-gray-500 rounded-lg py-1 px-3 text-sm font-semibold btn-action">RESET</button></div></div>
+                <div class="space-y-3"></div>
+            </div>
+            <div id="status-semanal" class="border chart-border rounded-xl p-6">
+                <div class="flex flex-wrap justify-between items-center mb-6 gap-4"><h2 class="text-lg font-semibold text-white">STATUS SEMANAL DAS PASTAS</h2><div class="flex items-center space-x-2"><input type="date" id="weekly-status-date" class="input-field p-1 text-sm" title="Selecione um dia da semana"><button id="weekly-status-reset" class="text-white border border-gray-500 rounded-lg py-1 px-3 text-sm font-semibold btn-action">RESET</button></div></div>
+                <div class="space-y-3"></div>
+            </div>
+            <div class="border chart-border rounded-xl p-6 flex flex-col justify-between">
+                <div><h2 class="text-lg font-semibold text-white mb-6">RANK DE PRÊMIOS (GERAL POR PASTA)</h2><div class="relative h-48 w-full"><canvas id="premios-pie-chart"></canvas></div></div>
+                <button id="open-consult-modal-btn" class="w-full mt-6 bg-yellow-400 text-black font-bold py-3 rounded-lg hover:bg-yellow-500 transition-colors">CONSULTAR RANK DIÁRIO</button>
+            </div>
+        </main>
+        
+        <div class="mt-12 flex justify-center items-center gap-4">
+            <button id="export-data-btn" class="text-white font-semibold py-2 px-6 rounded-lg btn-action">Exportar Dados</button>
+            <button id="import-data-btn" class="text-white font-semibold py-2 px-6 rounded-lg btn-action">Importar Dados</button>
+            <input type="file" id="import-file-input" class="hidden" accept=".json">
+        </div>
+        <footer class="text-center mt-8 text-gray-500 text-sm">
+            <p>TODOS DIREITOS RESERVADOS - SHEMIAH #S3LO - 2025</p>
+        </footer>
+    </div>
+    
+    <div id="chartjs-tooltip"></div>
+    <div id="fill-modal" class="fixed inset-0 modal-bg items-center justify-center hidden z-50">
+        <div id="fill-modal-content" class="modal-content rounded-xl p-8 w-full max-w-6xl max-h-[90vh] overflow-y-auto">
+            <h2 class="text-xl font-bold text-white mb-6">Preencher / Editar Dados</h2>
+            <div class="mb-6"><label for="fill-date" class="block text-sm font-medium text-gray-300 mb-2">Data do Registro</label><input type="date" id="fill-date" class="w-full p-2 input-field"></div>
+            <div id="fill-categories" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4 mb-8"></div>
+            <h3 class="text-lg font-bold text-white mb-4 mt-6">Adicionar Prêmios (3)</h3>
+            <div id="premios-container" class="space-y-4 mb-8"></div>
+            <h3 class="text-lg font-bold text-white mb-4 mt-6">FAC em Foco (6)</h3>
+            <div id="fac-container" class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4"></div>
+            <div class="flex justify-end space-x-4 mt-8">
+                <button id="cancel-fill-btn" class="py-2 px-6 rounded-lg btn-action">Cancelar</button>
+                <button id="clear-day-btn" class="bg-red-600 text-white font-bold py-2 px-6 rounded-lg hover:bg-red-700">Limpar Dia</button>
+                <button id="save-fill-btn" class="bg-green-500 text-white font-bold py-2 px-8 rounded-lg hover:bg-green-600">Salvar</button>
+            </div>
+        </div>
+    </div>
+    <div id="consult-modal" class="fixed inset-0 modal-bg items-center justify-center hidden z-50">
+        <div class="modal-content rounded-xl p-8 w-full max-w-md">
+            <h2 class="text-xl font-bold text-white mb-6">Consultar Prêmios do Dia</h2>
+            <div class="space-y-4">
+                <div><label for="consult-date" class="block text-sm font-medium text-gray-300 mb-2">Selecione a Data</label><input type="date" id="consult-date" class="w-full p-2 input-field"></div>
+                <button id="consult-rank-btn" class="w-full bg-yellow-400 text-black font-bold py-3 rounded-lg hover:bg-yellow-500">Consultar</button>
+                <div id="consult-results" class="mt-6 text-gray-300"></div>
+            </div>
+            <div class="flex justify-end mt-6"><button id="close-consult-modal-btn" class="py-2 px-6 rounded-lg btn-action">Fechar</button></div>
+        </div>
+    </div>
+    <div id="anotacao-modal" class="fixed inset-0 modal-bg items-center justify-center hidden z-50">
+        <div class="modal-content rounded-xl p-8 w-full max-w-2xl h-[70vh] flex flex-col">
+            <h2 id="anotacao-modal-title" class="text-xl font-bold text-white mb-4">Anotações</h2>
+            <div class="flex items-center gap-4 mb-4">
+                <label for="anotacao-date" class="text-sm">Data:</label>
+                <input type="date" id="anotacao-date" class="input-field p-2">
+            </div>
+            <div id="anotacao-card-container" class="flex-grow overflow-y-auto space-y-4 pr-2"></div>
+            <div class="mt-4">
+                <textarea id="new-anotacao-text" class="w-full input-field p-2" rows="3" placeholder="Escreva sua anotação..."></textarea>
+                <button id="add-anotacao-btn" class="w-full mt-2 bg-green-500 text-white font-bold py-2 rounded-lg hover:bg-green-600">Adicionar Anotação</button>
+            </div>
+            <div class="flex justify-end mt-6">
+                <button id="close-anotacao-modal-btn" class="py-2 px-6 rounded-lg btn-action">Fechar</button>
+            </div>
+        </div>
+    </div>
+    <div id="ai-chat-modal" class="fixed inset-0 modal-bg items-center justify-center hidden z-50">
+        <div class="modal-content rounded-xl p-6 w-full max-w-2xl h-[80vh] flex flex-col">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-xl font-bold text-white">Análise com IA</h2>
+                <button id="configure-api-key-btn" class="text-xs text-gray-400 hover:text-white">Configurar Chave</button>
+            </div>
+            <div id="ai-chat-messages" class="flex-grow overflow-y-auto space-y-4 p-4 bg-black/20 rounded-lg flex flex-col"></div>
+            <div class="mt-4 flex gap-2">
+                <input type="text" id="ai-chat-input" class="w-full p-2 input-field" placeholder="Converse com a IA ou peça uma análise...">
+                <button id="ai-chat-send" class="bg-purple-600 text-white font-bold py-2 px-6 rounded-lg hover:bg-purple-700">Enviar</button>
+            </div>
+            <div class="flex justify-end mt-4">
+                <button id="close-ai-chat-modal-btn" class="py-2 px-6 rounded-lg btn-action">Fechar</button>
+            </div>
+        </div>
+    </div>
+    <div id="access-modal" class="fixed inset-0 modal-bg items-center justify-center hidden z-50">
+        <div class="modal-content rounded-xl p-8 w-full max-w-lg">
+            <h2 class="text-xl font-bold text-white mb-6">Gerenciar Acessos</h2>
+            <div class="mb-6">
+                <label for="new-email-input" class="block text-sm font-medium text-gray-300 mb-2">Adicionar novo e-mail</label>
+                <div class="flex gap-2">
+                    <input type="email" id="new-email-input" class="w-full p-2 input-field" placeholder="email.membro@exemplo.com">
+                    <button id="add-email-btn" class="bg-green-600 text-white font-bold py-2 px-6 rounded-lg hover:bg-green-700">Adicionar</button>
+                </div>
+                <p id="access-error-message" class="text-red-500 text-sm mt-2 h-4"></p>
+            </div>
+            <h3 class="text-lg font-semibold text-white mb-4">E-mails com Acesso:</h3>
+            <div id="access-list-container" class="space-y-2 max-h-[40vh] overflow-y-auto">
+                <p class="text-gray-400">Carregando...</p>
+            </div>
+            <div class="flex justify-end mt-8">
+                <button id="close-access-modal-btn" class="py-2 px-6 rounded-lg btn-action">Fechar</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+    
+    <script>
+        // --- CONFIGURAÇÃO E AUTENTICAÇÃO ---
+        const firebaseConfig = {
+          apiKey: "AIzaSyCONofXx4NlCP34PZrs4pV-gDRJ_Uasw3c",
+          authDomain: "wswallstreet-3ab24.firebaseapp.com",
+          projectId: "wswallstreet-3ab24",
+          storageBucket: "wswallstreet-3ab24.firebasestorage.app",
+          messagingSenderId: "255776848131",
+          appId: "1:255776848131:web:17af511729c29eb2569136"
+        };
+        
+        const fbApp = firebase.initializeApp(firebaseConfig);
+        const fbAuth = firebase.auth();
+        const fbDb = firebase.firestore();
+        const ADMIN_EMAIL = 'kraznelofc@gmail.com';
+
+        fbAuth.onAuthStateChanged(async (user) => {
+            if (user) {
+                document.body.style.display = 'block';
+                document.getElementById('user-email').textContent = user.email;
+                const controlsContainer = document.getElementById('permissioned-controls');
+                
+                if (user.email === ADMIN_EMAIL) {
+                    controlsContainer.innerHTML = `
+                        <button id="open-access-modal-btn" class="text-white font-semibold py-2 px-4 rounded-lg btn-action bg-blue-600 hover:bg-blue-700">GERENCIAR</button>
+                        <button id="open-fill-modal-btn" class="text-white font-semibold py-2 px-6 rounded-lg btn-action">PREENCHER</button>
+                    `;
+                    document.getElementById('open-access-modal-btn').addEventListener('click', () => {
+                        loadAllowedUsers();
+                        openModal(document.getElementById('access-modal'));
+                    });
+                } else {
+                    controlsContainer.innerHTML = '';
+                }
+                await initializeApp();
+            } else {
+                window.location.href = 'login.html';
+            }
+        });
+        
+        document.getElementById('logout-btn').addEventListener('click', () => fbAuth.signOut());
+        
+        let db;
+        const dbRef = fbDb.collection('application_data').doc('main');
+        const LOCAL_DB_KEY = 'wallstreetDashboardData';
+
+        async function loadDb() {
+            try {
+                const doc = await dbRef.get();
+                if (doc.exists && doc.data().dailyData && Object.keys(doc.data().dailyData).length > 0) {
+                    return doc.data();
+                }
+                const localDataString = localStorage.getItem(LOCAL_DB_KEY);
+                if (localDataString) {
+                    const localDb = JSON.parse(localDataString);
+                    await dbRef.set(localDb);
+                    localStorage.removeItem(LOCAL_DB_KEY); 
+                    return localDb;
+                }
+                const backupData = {"dailyData":{},"premios":[],"facData":{},"notes":{"contratados":{},"retencao":{},"fac":{}}};
+                if (fbAuth.currentUser.email === ADMIN_EMAIL) {
+                    await dbRef.set(backupData);
+                }
+                return backupData;
+            } catch (error) {
+                console.error("Erro durante o carregamento/migração dos dados:", error);
+                return { dailyData: {}, premios: [], facData: {}, notes: {contratados: {}, retencao: {}, fac: {}} };
+            }
+        }
+        
+        async function saveDb() {
+            try {
+                await dbRef.set(db);
+            } catch (error) {
+                console.error("Erro ao salvar dados no Firestore:", error);
+                alert("Não foi possível salvar os dados.");
+            }
+        }
+        
+        const accessModal = document.getElementById('access-modal');
+        const accessListContainer = document.getElementById('access-list-container');
+        const addEmailBtn = document.getElementById('add-email-btn');
+        const newEmailInput = document.getElementById('new-email-input');
+        const closeAccessModalBtn = document.getElementById('close-access-modal-btn');
+        const accessErrorMessage = document.getElementById('access-error-message');
+        const permissionsRef = fbDb.collection('permissions').doc('allowed_users');
+
+        async function loadAllowedUsers() { accessListContainer.innerHTML = '<p class="text-gray-400">Carregando...</p>'; try { const doc = await permissionsRef.get(); if (doc.exists) { const allowedEmails = doc.data().emails || []; if (allowedEmails.length === 0) { accessListContainer.innerHTML = '<p class="text-gray-500 text-center">Nenhum membro com acesso de espectador.</p>'; return; } accessListContainer.innerHTML = allowedEmails.map(email => ` <div class="flex justify-between items-center bg-gray-800 p-2 rounded"> <span class="text-sm">${email}</span> <button class="text-red-500 hover:text-red-400 font-bold remove-email-btn" data-email="${email}" title="Remover Acesso">&times;</button> </div> `).join(''); } else { await permissionsRef.set({ emails: [] }); accessListContainer.innerHTML = '<p class="text-gray-500 text-center">Nenhum membro com acesso. Adicione o primeiro e-mail.</p>'; } } catch (error) { console.error("Erro ao carregar e-mails:", error); accessListContainer.innerHTML = '<p class="text-red-500">Erro ao carregar a lista.</p>'; } }
+        addEmailBtn.addEventListener('click', async () => { const emailToAdd = newEmailInput.value.trim().toLowerCase(); if (!emailToAdd || !/^\S+@\S+\.\S+$/.test(emailToAdd)) { accessErrorMessage.textContent = 'Por favor, insira um e-mail válido.'; return; } accessErrorMessage.textContent = ''; addEmailBtn.disabled = true; try { await permissionsRef.update({ emails: firebase.firestore.FieldValue.arrayUnion(emailToAdd) }); newEmailInput.value = ''; await loadAllowedUsers(); } catch (error) { console.error("Erro ao adicionar e-mail:", error); accessErrorMessage.textContent = 'Erro ao salvar o e-mail.'; } finally { addEmailBtn.disabled = false; } });
+        accessListContainer.addEventListener('click', async (e) => { if (e.target.classList.contains('remove-email-btn')) { const emailToRemove = e.target.dataset.email; if (confirm(`Tem certeza que deseja remover o acesso de ${emailToRemove}?`)) { try { await permissionsRef.update({ emails: firebase.firestore.FieldValue.arrayRemove(emailToRemove) }); await loadAllowedUsers(); } catch (error) { console.error("Erro ao remover e-mail:", error); alert('Ocorreu um erro ao remover o e-mail.'); } } } });
+        closeAccessModalBtn.addEventListener('click', () => closeModal(accessModal));
+
+        async function initializeApp() {
+            db = await loadDb();
+            const today = getTodayString();
+            document.getElementById('main-date-filter').value = today;
+            document.getElementById('consult-date').value = today;
+            document.getElementById('weekly-status-date').value = today;
+            document.getElementById('weekly-status-fac-date').value = today;
+            setupFillModal(); 
+            setupDayButtons();
+            if (!chartInstances.contratadosRetencaoBarChart) {
+                chartInstances.contratadosRetencaoBarChart = createContratadosRetencaoChart();
+            }
+            updateAllCharts();
+        }
+
+        let chartInstances = {};
+        const categories = [ { id: 'conexao', name: 'Conexão', color: 'cyan', hex: '#22d3ee' }, { id: 'retencao_cat', name: 'Retenção', color: 'orange', hex: '#f97316' }, { id: 'introducao', name: 'Introdução', color: 'green', hex: '#22c55e' }, { id: 'evolucao', name: 'Evolução', color: 'red', hex: '#ef4444' }, { id: 'interacao', name: 'Interação', color: 'purple', hex: '#a855f7' }, { id: 'expansao', name: 'Expansão', color: 'yellow', hex: '#eab308' }];
+        const pastas = categories.map(c => c.name);
+        const premiosList = ['VIP PLATINA', 'VIP LANÇAMENTO', 'VIP OURO', 'VIP PRATA', 'VIP BRONZE', 'BATTLEPASS'];
+        
+        const getTodayString = () => { const today = new Date(); const year = today.getFullYear(); const month = String(today.getMonth() + 1).padStart(2, '0'); const day = String(today.getDate()).padStart(2, '0'); return `${year}-${month}-${day}`; };
+        const getWeekRange = (dateString) => { if (!dateString) return { start: null, end: null }; const parts = dateString.split('-').map(part => parseInt(part, 10)); const d = new Date(Date.UTC(parts[0], parts[1] - 1, parts[2])); const day = d.getUTCDay(); const diff = d.getUTCDate() - day + (day === 0 ? -6 : 1); const monday = new Date(d.setUTCDate(diff)); const sunday = new Date(new Date(monday).setUTCDate(monday.getUTCDate() + 6)); return { start: monday.toISOString().split('T')[0], end: sunday.toISOString().split('T')[0] }; };
+        
+        const fillModal = document.getElementById('fill-modal'), consultModal = document.getElementById('consult-modal'), anotacaoModal = document.getElementById('anotacao-modal'), aiChatModal = document.getElementById('ai-chat-modal');
+        const openModal = (modal) => { modal.classList.remove('hidden'); modal.classList.add('flex'); }
+        const closeModal = (modal) => { modal.classList.add('hidden'); modal.classList.remove('flex'); }
+
+        const resetFillModal = () => { document.getElementById('fill-modal-content').querySelectorAll('input[type="number"], input[type="text"], select').forEach(el => { if (el.type === 'text' || el.type === 'number') { el.value = ''; } else if (el.tagName === 'SELECT') { el.selectedIndex = 0; } }); document.querySelectorAll('.fac-foco-meta-batida').forEach(sel => sel.value = 'Não'); };
+        const populateFillModal = (date) => { resetFillModal(); if (!date) return; const dayData = db.dailyData?.[date]; if (dayData) { document.querySelectorAll('#fill-categories input[type="number"]').forEach(input => { const id = input.dataset.id; const type = input.dataset.type; if (dayData[id]?.[type] !== undefined) { input.value = dayData[id][type]; } }); } const premiosDoDia = db.premios?.filter(p => p.date === date) || []; const premioEntries = document.querySelectorAll('.premio-entry'); premioEntries.forEach((entry, index) => { if (premiosDoDia[index]) { entry.querySelector('.premio-pessoa').value = premiosDoDia[index].pessoa || ''; entry.querySelector('.premio-pasta').value = premiosDoDia[index].pasta || ''; entry.querySelector('.premio-nome').value = premiosDoDia[index].premio || ''; } }); const facDoDia = db.facData?.[date] || []; const facEntries = document.querySelectorAll('.fac-entry'); facEntries.forEach((entry, index) => { if (facDoDia[index]) { entry.querySelector('.fac-foco-nome').value = facDoDia[index].fac || ''; entry.querySelector('.fac-foco-pasta').value = facDoDia[index].pasta || ''; entry.querySelector('.fac-foco-meta').value = facDoDia[index].meta || ''; entry.querySelector('.fac-foco-resp').value = facDoDia[index].resp || ''; entry.querySelector('.fac-foco-meta-batida').value = facDoDia[index].metaBatida || 'Não'; entry.querySelector('.fac-foco-qtd').value = facDoDia[index].quantidade || ''; } }); };
+        const handleCloseModal = () => { closeModal(fillModal); };
+        document.addEventListener('click', (e) => { if (e.target.id === 'open-fill-modal-btn') { const fillDateInput = document.getElementById('fill-date'); fillDateInput.value = document.getElementById('main-date-filter').value || getTodayString(); populateFillModal(fillDateInput.value); openModal(fillModal); } });
+        document.getElementById('fill-date').addEventListener('change', (e) => { populateFillModal(e.target.value); });
+        document.getElementById('cancel-fill-btn').addEventListener('click', handleCloseModal);
+        document.getElementById('clear-day-btn').addEventListener('click', async () => { const date = document.getElementById('fill-date').value; if (!date) { alert('Nenhuma data selecionada para limpar.'); return; } const hasData = db.dailyData?.[date] || db.premios?.some(p => p.date === date) || db.facData?.[date]; if (!hasData) { alert('Não há dados para limpar neste dia.'); return; } if (confirm(`Tem certeza que deseja apagar TODOS os dados do dia ${date}? Esta ação não pode ser desfeita.`)) { if (db.dailyData?.[date]) delete db.dailyData[date]; if (db.premios) db.premios = db.premios.filter(p => p.date !== date); if (db.facData?.[date]) delete db.facData[date]; Object.keys(db.notes).forEach(key => { if (db.notes[key]?.[date]) delete db.notes[key][date]; }); await saveDb(); alert(`Dados do dia ${date} foram removidos com sucesso.`); handleCloseModal(); updateAllCharts(); setupDayButtons();  } });
+        document.getElementById('save-fill-btn').addEventListener('click', async () => { const date = document.getElementById('fill-date').value; if (!date) { alert('Por favor, selecione uma data.'); return; } if(!db.dailyData) db.dailyData = {}; if(!db.dailyData[date]) db.dailyData[date] = {}; document.querySelectorAll('#fill-categories input[type="number"]').forEach(input => { const id = input.dataset.id; const type = input.dataset.type; if (!db.dailyData[date][id]) db.dailyData[date][id] = {}; db.dailyData[date][id][type] = parseInt(input.value) || 0; }); if(!db.premios) db.premios = []; db.premios = db.premios.filter(p => p.date !== date); document.querySelectorAll('.premio-entry').forEach(entry => { const pessoa = entry.querySelector('.premio-pessoa').value.trim(); const pasta = entry.querySelector('.premio-pasta').value; const premio = entry.querySelector('.premio-nome').value; if(pessoa && pasta && premio) db.premios.push({ date, pessoa, pasta, premio }); }); if(!db.facData) db.facData = {}; db.facData[date] = []; document.querySelectorAll('.fac-entry').forEach(entry => { const fac = entry.querySelector('.fac-foco-nome').value.trim(); if(fac) { db.facData[date].push({ fac, pasta: entry.querySelector('.fac-foco-pasta').value, meta: entry.querySelector('.fac-foco-meta').value, resp: entry.querySelector('.fac-foco-resp').value, metaBatida: entry.querySelector('.fac-foco-meta-batida').value, quantidade: parseInt(entry.querySelector('.fac-foco-qtd').value) || 0 }); } }); await saveDb(); alert('Dados salvos com sucesso na nuvem!'); handleCloseModal(); updateAllCharts(); setupDayButtons(); });
+        document.getElementById('open-consult-modal-btn').addEventListener('click', () => { document.getElementById('consult-date').value = getTodayString(); openModal(consultModal);});
+        document.getElementById('close-consult-modal-btn').addEventListener('click', () => closeModal(consultModal));
+        document.querySelectorAll('.btn-anotacao').forEach(btn => btn.addEventListener('click', (e) => { const key = e.target.dataset.key; const date = document.getElementById('main-date-filter').value || getTodayString(); document.getElementById('anotacao-date').value = date; anotacaoModal.dataset.currentKey = key; const title = `Anotações - ${key.charAt(0).toUpperCase() + key.slice(1)}`; document.getElementById('anotacao-modal-title').textContent = title; renderAnotacoes(date, key); openModal(anotacaoModal); }));
+        document.getElementById('close-anotacao-modal-btn').addEventListener('click', () => closeModal(anotacaoModal));
+        document.getElementById('open-ai-chat-btn').addEventListener('click', () => { setupAIChat(); openModal(aiChatModal); });
+        document.getElementById('close-ai-chat-modal-btn').addEventListener('click', () => closeModal(aiChatModal));
+        const setupFillModal = () => { document.getElementById('fill-categories').innerHTML = categories.map(cat => `<div class="p-3 rounded-lg modal-content text-center"><h4 class="font-semibold text-sm text-${cat.color}-400 mb-2">${cat.name}</h4><div class="space-y-2"><input type="number" data-id="${cat.id}" data-type="contratados" placeholder="Cont." class="w-full p-2 text-xs input-field"><input type="number" data-id="${cat.id}" data-type="retencao" placeholder="Ret." class="w-full p-2 text-xs input-field"></div></div>`).join(''); const pastaOptions = pastas.map(p => `<option value="${p}">${p}</option>`).join(''); const premioOptions = premiosList.map(p => `<option value="${p}">${p}</option>`).join(''); document.getElementById('premios-container').innerHTML = Array(3).fill(0).map(() => `<div class="grid grid-cols-1 md:grid-cols-3 gap-2 items-center premio-entry"><input type="text" placeholder="Nome da Pessoa" class="p-2 text-sm input-field premio-pessoa"><select class="p-2 text-sm select-field premio-pasta">${pastaOptions}</select><select class="p-2 text-sm select-field premio-nome">${premioOptions}</select></div>`).join(''); document.getElementById('fac-container').innerHTML = Array(6).fill(0).map(() => `<div class="grid grid-cols-2 md:grid-cols-3 gap-2 items-center fac-entry border border-gray-700 p-3 rounded-lg"><div class="col-span-2 md:col-span-3"><input type="text" placeholder="Nome FAC" class="w-full p-2 text-sm input-field fac-foco-nome"></div><div><select class="w-full p-2 text-sm select-field fac-foco-pasta">${pastaOptions}</select></div><div><input type="text" placeholder="Meta" class="w-full p-2 text-sm input-field fac-foco-meta"></div><div><input type="text" placeholder="Resp." class="w-full p-2 text-sm input-field fac-foco-resp"></div><div><select class="w-full p-2 text-sm select-field fac-foco-meta-batida"><option value="Não">Não</option><option value="Sim">Sim</option></select></div><div class="col-span-2 md:col-span-1"><input type="number" placeholder="Qtd. Levada" class="w-full p-2 text-sm input-field fac-foco-qtd"></div></div>`).join(''); };
+        
+        // --- LÓGICA DOS GRÁFICOS ---
+        const createChart = (ctx, type, data, options) => new Chart(ctx, { type, data, options });
+        const renderCustomLegends = () => { ['contratados', 'retencao', 'fac'].forEach(key => { const legendId = `timeline-${key}-legend`; const chartKey = `${key}TimelineChart`; const legendEl = document.getElementById(legendId); if (legendEl && chartInstances[chartKey]) { const chart = chartInstances[chartKey]; legendEl.innerHTML = categories.map((cat, index) => { const isHidden = !chart.isDatasetVisible(index); return `<div class="legend-item ${isHidden ? 'hidden-dataset' : ''}" data-chart="${chartKey}" data-dataset-index="${index}"><div class="legend-dot" style="background-color: ${cat.hex};"></div><span>${cat.name.toUpperCase()}</span></div>` }).join(''); } }); };
+        const externalTooltipHandler = (context) => { const {chart, tooltip} = context; const tooltipEl = document.getElementById('chartjs-tooltip'); if (tooltip.opacity === 0) { tooltipEl.style.opacity = 0; return; } const chartKey = chart.canvas.id.replace('-timeline-chart', ''); const pointDate = tooltip.dataPoints[0].raw.x; let innerHtml = `<thead><tr><th colspan="2">${new Date(pointDate).toLocaleDateString('pt-BR', {timeZone: 'UTC'})}</th></tr></thead><tbody>`; tooltip.dataPoints.forEach(point => { const dataset = chart.data.datasets[point.datasetIndex]; if (dataset.isVerticalLine) return; innerHtml += `<tr><td><span class="tooltip-dot" style="background-color: ${dataset.borderColor};"></span>${dataset.label}</td><td class="text-right font-bold">${point.raw.y}</td></tr>`; }); if (['contratados', 'retencao', 'fac'].includes(chartKey)) { const notesForDay = db.notes?.[chartKey]?.[pointDate] || []; const noteCount = notesForDay.length; if (noteCount > 0) { const noteText = noteCount === 1 ? 'Anotação' : 'Anotações'; innerHtml += `<tr><td colspan="2" style="padding-top: 5px; border-top: 1px solid rgba(255,255,255,0.2); margin-top: 5px;"></td></tr>`; innerHtml += `<tr><td><span class="tooltip-dot" style="background-color: #a855f7;"></span><strong>${noteText}</strong></td><td class="text-right font-bold">${noteCount}</td></tr>`; } } innerHtml += `</tbody>`; tooltipEl.innerHTML = `<table>${innerHtml}</table>`; tooltipEl.style.opacity = 1; tooltipEl.style.left = chart.canvas.getBoundingClientRect().left + window.scrollX + tooltip.caretX + 'px'; tooltipEl.style.top = chart.canvas.getBoundingClientRect().top + window.scrollY + tooltip.caretY + 'px'; };
+        const barChartTooltipHandler = (context) => { const {chart, tooltip} = context; const tooltipEl = document.getElementById('chartjs-tooltip'); if (tooltip.opacity === 0) { tooltipEl.style.opacity = 0; return; } let innerHtml = ''; if (tooltip.title.length > 0) { innerHtml += `<thead><tr><th colspan="2">${tooltip.title[0]}</th></tr></thead>`; } innerHtml += '<tbody>'; tooltip.dataPoints.forEach(dataPoint => { const dataset = chart.data.datasets[dataPoint.datasetIndex]; const value = dataPoint.raw; const color = dataset.backgroundColor; const label = dataset.label; innerHtml += `<tr><td><span class="tooltip-dot" style="background-color: ${color};"></span>${label}</td><td class="text-right font-bold">${value}</td></tr>`; }); innerHtml += '</tbody>'; tooltipEl.innerHTML = `<table>${innerHtml}</table>`; tooltipEl.style.opacity = 1; tooltipEl.style.left = chart.canvas.getBoundingClientRect().left + window.scrollX + tooltip.caretX + 'px'; tooltipEl.style.top = chart.canvas.getBoundingClientRect().top + window.scrollY + tooltip.caretY + 'px'; };
+        
+        const noDataPlugin = {
+            id: 'noDataPlugin',
+            afterDraw: (chart) => {
+                const hasData = chart.data.datasets.some(ds => ds.data.some(d => d > 0));
+                if (!hasData) {
+                    const { ctx, width, height } = chart;
+                    ctx.save();
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'middle';
+                    ctx.font = "bold 16px 'Inter', sans-serif";
+                    ctx.fillStyle = 'rgba(255, 255, 255, 0.5)';
+                    ctx.fillText('Aguardando dados para este dia', width / 2, height / 2);
+                    ctx.restore();
+                }
+            }
+        };
+
+        const timelineOptions = () => ({ maintainAspectRatio: false, interaction: { mode: 'index', intersect: false }, plugins: { legend: { display: false }, zoom: { pan: { enabled: true, mode: 'x' }, zoom: { wheel: { enabled: true }, pinch: { enabled: true }, mode: 'x' } }, tooltip: { enabled: false, external: externalTooltipHandler } }, scales: { x: { type: 'time', time: { unit: 'day', tooltipFormat: 'dd/MM/yyyy', displayFormats: { day: 'MMM dd' } }, grid: { color: 'rgba(255, 255, 255, 0.1)' }, ticks: { color: '#9CA3AF' } }, y: { beginAtZero: true, grid: { color: 'rgba(255, 255, 255, 0.1)' }, ticks: { color: '#9CA3AF' } } } });
+        const createTimelineChart = (canvasId, dataKey) => { const ctx = document.getElementById(canvasId).getContext('2d'); const sortedDates = Object.keys(db.dailyData).sort(); let datasets = categories.map(cat => ({ label: cat.name, data: sortedDates.map(date => ({ x: date, y: db.dailyData[date]?.[cat.id]?.[dataKey] || 0 })), borderColor: cat.hex, fill: false, tension: 0.1 })); return createChart(ctx, 'line', { datasets }, timelineOptions()); };
+        const createFacTimelineChart = () => { const ctx = document.getElementById('fac-timeline-chart').getContext('2d'); if(!db.facData) db.facData={}; const sortedDates = [...new Set([...Object.keys(db.dailyData), ...Object.keys(db.facData)])].sort(); let datasets = categories.map(cat => ({ label: cat.name, data: sortedDates.map(date => ({ x: date, y: (db.facData[date] || []).filter(f => f.pasta === cat.name).reduce((sum, f) => sum + (f.quantidade || 0), 0) })), borderColor: cat.hex, fill: false, tension: 0.1 })); return createChart(ctx, 'line', { datasets }, timelineOptions()); };
+        
+        const createContratadosRetencaoChart = () => {
+            const ctx = document.getElementById('contratados-retencao-bar-chart').getContext('2d');
+            return createChart(ctx, 'bar', {
+                labels: categories.map(c => c.name),
+                datasets: [
+                    { label: 'Contratados', data: [], backgroundColor: '#22d3ee' },
+                    { label: 'Retenção', data: [], backgroundColor: '#f97316' }
+                ]
+            }, {
+                maintainAspectRatio: false,
+                interaction: { mode: 'index', intersect: false },
+                plugins: {
+                    legend: { display: true, position: 'bottom', labels: { color: '#E0E0E0' }},
+                    tooltip: { enabled: false, external: barChartTooltipHandler },
+                    noDataPlugin // Adiciona o plugin aqui
+                },
+                scales: {
+                    x: { ticks: { color: '#9CA3AF' }, grid: { display: false } },
+                    y: { beginAtZero: true, grid: { color: 'rgba(255, 255, 255, 0.1)'}, ticks: { color: '#9CA3AF' } }
+                }
+            });
+        };
+        const createPieChart = () => { if(!db.premios) db.premios = []; const ctx = document.getElementById('premios-pie-chart').getContext('2d'); const pastaCounts = db.premios.reduce((acc, p) => { acc[p.pasta] = (acc[p.pasta] || 0) + 1; return acc; }, {}); const sortedPastas = Object.entries(pastaCounts).sort(([,a],[,b]) => b-a); return createChart(ctx, 'pie', { labels: sortedPastas.map(p => p[0]), datasets: [{ data: sortedPastas.map(p => p[1]), backgroundColor: ['#F472B6', '#38BDF8', '#8B5CF6'].concat(categories.map(c=>c.hex)), hoverOffset: 4 }] }, { maintainAspectRatio: false, plugins: { legend: { position: 'right', labels: { color: '#E0E0E0' } } } }); };
+        
+        const updateAllCharts = () => {
+            updateTimelineCharts();
+            updateTimelineStatusDots();
+            const currentDate = document.getElementById('main-date-filter').value;
+            updateDailyBarChart(currentDate);
+            updateDailyComparisonStats(currentDate);
+            updateActiveDayButton(currentDate);
+            updateWeeklyStatus(document.getElementById('weekly-status-date').value);
+            updateFacWeeklyStatus(document.getElementById('weekly-status-fac-date').value);
+            updatePieChart();
+            renderCustomLegends();
+        };
+        const updateTimelineCharts = () => { ['contratados', 'retencao', 'fac'].forEach(key => { const chartKey = `${key}TimelineChart`; if (chartInstances[chartKey]) chartInstances[chartKey].destroy(); if (key === 'fac') { chartInstances[chartKey] = createFacTimelineChart(); } else { chartInstances[chartKey] = createTimelineChart(`${key}-timeline-chart`, key); } }); };
+        
+        const updateDailyBarChart = (date) => {
+            const chart = chartInstances.contratadosRetencaoBarChart;
+            if (!date || !chart) return;
+            const dataForDay = db.dailyData[date] || {};
+            chart.data.datasets[0].data = categories.map(cat => dataForDay[cat.id]?.contratados || 0);
+            chart.data.datasets[1].data = categories.map(cat => dataForDay[cat.id]?.retencao || 0);
+            chart.update();
+        };
+
+        const updateDailyComparisonStats = (currentDateStr) => {
+            const container = document.getElementById('daily-stats-container');
+            if (!currentDateStr || !db.dailyData) {
+                container.innerHTML = `<p class="text-gray-500 col-span-full text-center py-4">Sem dados para comparação.</p>`;
+                return;
+            }
+            const prevDate = new Date(`${currentDateStr}T12:00:00Z`);
+            prevDate.setUTCDate(prevDate.getUTCDate() - 7);
+            const prevDateStr = prevDate.toISOString().split('T')[0];
+
+            const getTotalsForDate = (date) => {
+                const data = db.dailyData[date];
+                let totalContratados = 0, totalRetencao = 0;
+                if (data) {
+                    Object.values(data).forEach(catData => {
+                        totalContratados += catData.contratados || 0;
+                        totalRetencao += catData.retencao || 0;
+                    });
+                }
+                return { totalContratados, totalRetencao };
+            };
+
+            const todayTotals = getTotalsForDate(currentDateStr);
+            const prevTotals = getTotalsForDate(prevDateStr);
+
+            const calculatePercentageChange = (current, previous) => {
+                if (previous === 0) return current > 0 ? { value: Infinity } : { value: 0 };
+                return { value: Math.round(((current - previous) / previous) * 100) };
+            };
+
+            const createStatBox = (label, change) => {
+                const isPositive = change.value >= 0;
+                const isInfinite = change.value === Infinity;
+                const bgColor = isPositive ? 'bg-green-900/50' : 'bg-red-900/50';
+                const borderColor = isPositive ? 'border-green-700' : 'border-red-700';
+                const iconColor = isPositive ? 'text-green-400' : 'text-red-400';
+                const icon = isPositive ? '↑' : '↓';
+                let valueText = isInfinite ? 'Novo' : `${Math.abs(change.value)}%`;
+
+                return `<div class="p-2 rounded-lg ${bgColor} border ${borderColor}"><p class="text-sm font-semibold text-white text-center flex items-center justify-center gap-1.5"><span class="${iconColor} text-lg">${icon}</span> ${valueText} <span class="text-gray-300 font-normal"> ${label}</span></p></div>`;
+            };
+            const contratadosChange = calculatePercentageChange(todayTotals.totalContratados, prevTotals.totalContratados);
+            const retencaoChange = calculatePercentageChange(todayTotals.totalRetencao, prevTotals.totalRetencao);
+            container.innerHTML = `${createStatBox('Contratados', contratadosChange)} ${createStatBox('Retenção', retencaoChange)}`;
+        };
+        
+        const setupDayButtons = () => {
+            const container = document.getElementById('bar-chart-day-buttons');
+            const days = ['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb', 'Dom'];
+            container.innerHTML = days.map((day, index) => `<button class="day-btn px-3 py-1 text-xs rounded-md btn-action" data-day-index="${index}">${day}</button>`).join('');
+            
+            container.addEventListener('click', (e) => {
+                if (e.target.classList.contains('day-btn')) {
+                    const mainDateVal = document.getElementById('main-date-filter').value;
+                    if (!mainDateVal) return;
+                    const { start } = getWeekRange(mainDateVal);
+                    const monday = new Date(`${start}T12:00:00Z`);
+                    const targetDayIndex = parseInt(e.target.dataset.dayIndex, 10);
+                    const targetDate = new Date(monday);
+                    targetDate.setUTCDate(monday.getUTCDate() + targetDayIndex);
+                    const targetDateString = targetDate.toISOString().split('T')[0];
+                    
+                    updateDailyBarChart(targetDateString);
+                    updateDailyComparisonStats(targetDateString);
+                    updateActiveDayButton(targetDateString);
+                }
+            });
+        };
+
+        const updateActiveDayButton = (dateString) => {
+            const container = document.getElementById('bar-chart-day-buttons');
+            container.querySelectorAll('.day-btn').forEach(btn => btn.classList.remove('active'));
+            if(dateString) {
+                const date = new Date(`${dateString}T12:00:00Z`);
+                let dayIndex = date.getUTCDay();
+                dayIndex = dayIndex === 0 ? 6 : dayIndex - 1;
+                const activeButton = container.querySelector(`[data-day-index="${dayIndex}"]`);
+                if (activeButton) activeButton.classList.add('active');
+            }
+        };
+
+        const updateTimelineStatusDots = () => {
+            if (!db || !db.dailyData || Object.keys(db.dailyData).length < 6) {
+                document.querySelectorAll('.status-dot-label').forEach(label => label.textContent = 'Insuficiente');
+                document.querySelectorAll('.status-dot').forEach(dot => dot.className = 'status-dot w-4 h-4 rounded-full bg-gray-600');
+                document.querySelectorAll('.status-trend-label').forEach(label => label.textContent = '');
+                return;
+            }
+            const allDates = Object.keys(db.dailyData).sort((a, b) => new Date(b) - new Date(a));
+            
+            const getSumForDays = (days) => {
+                let totalContratados = 0, totalRetencao = 0;
+                days.forEach(date => {
+                    const dayData = db.dailyData[date];
+                    if (dayData) {
+                        Object.values(dayData).forEach(cat => {
+                            totalContratados += cat.contratados || 0;
+                            totalRetencao += cat.retencao || 0;
+                        });
+                    }
+                });
+                return { totalContratados, totalRetencao };
+            };
+
+            const currentPeriodSum = getSumForDays(allDates.slice(0, 3));
+            const previousPeriodSum = getSumForDays(allDates.slice(3, 6));
+
+            let status = { text: 'Ruim', color: 'bg-red-500', textColor: 'text-red-300' };
+            if (currentPeriodSum.totalContratados >= 900 && currentPeriodSum.totalRetencao >= 450) {
+                status = { text: 'Excelente', color: 'bg-emerald-500', textColor: 'text-emerald-300' };
+            } else if (currentPeriodSum.totalContratados >= 700 && currentPeriodSum.totalRetencao >= 350) {
+                status = { text: 'Bom', color: 'bg-green-500', textColor: 'text-green-300' };
+            } else if (currentPeriodSum.totalContratados >= 400 && currentPeriodSum.totalRetencao >= 250) {
+                 status = { text: 'Médio', color: 'bg-yellow-500', textColor: 'text-yellow-300' };
+            }
+
+            const currentScore = currentPeriodSum.totalContratados + currentPeriodSum.totalRetencao;
+            const previousScore = previousPeriodSum.totalContratados + previousPeriodSum.totalRetencao;
+            let trend = { text: ' (Estável)', icon: '' };
+            if (currentScore > previousScore) {
+                trend = { text: ' (Subindo)', icon: '↑' };
+            } else if (currentScore < previousScore) {
+                trend = { text: ' (Descendo)', icon: '↓' };
+            }
+
+            document.querySelectorAll('.status-dot').forEach(dot => dot.className = `status-dot w-4 h-4 rounded-full ${status.color}`);
+            document.querySelectorAll('.status-dot-label').forEach(label => {
+                label.textContent = status.text;
+                label.className = `status-dot-label text-xs font-medium ${status.textColor}`;
+            });
+            document.querySelectorAll('.status-trend-label').forEach(label => {
+                label.textContent = trend.text;
+                label.className = trend.icon === '↑' ? 'text-green-400 text-xs' : trend.icon === '↓' ? 'text-red-400 text-xs' : 'text-gray-400 text-xs';
+            });
+        };
+
+        const updatePieChart = () => { if (chartInstances.premiosPieChart) chartInstances.premiosPieChart.destroy(); chartInstances.premiosPieChart = createPieChart(); }
+        const updateWeeklyStatus = (dateString) => { const container = document.querySelector('#status-semanal .space-y-3'); container.innerHTML = ''; const { start, end } = getWeekRange(dateString); if(!start || !end) return; categories.forEach(cat => { let totalContratados = 0; let totalRetencao = 0; for (const date in db.dailyData) { if(date >= start && date <= end && db.dailyData[date]?.[cat.id]) { totalContratados += db.dailyData[date][cat.id].contratados || 0; totalRetencao += db.dailyData[date][cat.id].retencao || 0; } } const retencaoPercent = totalContratados > 0 ? (totalRetencao / totalContratados) * 100 : 0; let status, color; const minRec = 400, maxRec = 1100, minRet = 20, maxRet = 45; const recScore = totalContratados <= minRec ? 0 : Math.min(1, (totalContratados - minRec) / (maxRec - minRec)); const retScore = retencaoPercent <= minRet ? 0 : Math.min(1, (retencaoPercent - minRet) / (maxRet - minRet)); const finalScore = totalContratados > 0 ? (recScore + retScore) / 2 : 0; if (finalScore >= 0.9) { status = 'EXCELENTE'; color = 'text-emerald-400'; } else if (finalScore >= 0.7) { status = 'ÓTIMO'; color = 'text-green-400'; } else if (finalScore >= 0.5) { status = 'BOM'; color = 'text-cyan-400'; } else if (finalScore > 0) { status = 'SATISFATÓRIO'; color = 'text-green-500'; } else { status = 'RUIM'; color = 'text-red-500'; } container.innerHTML += `<div class="flex justify-between items-center text-sm"><span class="font-semibold text-${cat.color}-400">${cat.name}</span><span class="font-bold ${color}">${status}</span></div>`; });};
+        const updateFacWeeklyStatus = (dateString) => { const container = document.querySelector('#status-semanal-fac .space-y-3'); container.innerHTML = ''; const { start, end } = getWeekRange(dateString); if(!start || !end) return; if(!db.facData) db.facData={}; categories.forEach(cat => { let metasBatidas = 0; for(const date in db.facData) { if(date >= start && date <= end) { metasBatidas += (db.facData[date] || []).filter(f => f.pasta === cat.name && f.metaBatida === 'Sim' && (parseInt(f.quantidade, 10) >= parseInt(f.meta, 10))).length; }} let status, color; if (metasBatidas >= 7) { status = 'EXCELENTE'; color = 'text-emerald-400';} else if (metasBatidas === 6) { status = 'ÓTIMO'; color = 'text-green-400';} else if (metasBatidas === 5) { status = 'BOM'; color = 'text-cyan-400';} else if (metasBatidas === 4) { status = 'SATISFATÓRIO'; color = 'text-green-500';} else if (metasBatidas === 3) { status = 'MÉDIO'; color = 'text-yellow-500';} else { status = 'RUIM'; color = 'text-red-500'; } container.innerHTML += `<div class="flex justify-between items-center text-sm"><span class="font-semibold text-${cat.color}-400">${cat.name}</span><span class="font-bold ${color}">${status} (${metasBatidas})</span></div>`; });};
+        const renderAnotacoes = (date, key) => { if(!db.notes) db.notes={contratados:{}, retencao:{}, fac:{}}; const container = document.getElementById('anotacao-card-container'); container.innerHTML = ''; const notesForDay = db.notes[key]?.[date] || []; if (notesForDay.length === 0) { container.innerHTML = `<p class="text-gray-500 text-center">Nenhuma anotação para este dia.</p>`; return; } notesForDay.forEach((note, index) => { const card = document.createElement('div'); card.className = 'bg-gray-800 p-4 rounded-lg flex justify-between items-start'; card.innerHTML = `<p class="text-gray-300 whitespace-pre-wrap">${note}</p><button class="text-red-500 hover:text-red-400 font-bold delete-anotacao-btn" data-key="${key}" data-date="${date}" data-index="${index}">&times;</button>`; container.appendChild(card); }); };
+        
+        document.getElementById('anotacao-date').addEventListener('change', (e) => { const key = anotacaoModal.dataset.currentKey; renderAnotacoes(e.target.value, key); });
+        document.getElementById('add-anotacao-btn').addEventListener('click', async () => { const key = anotacaoModal.dataset.currentKey; const date = document.getElementById('anotacao-date').value; const text = document.getElementById('new-anotacao-text').value.trim(); if (!text || !key) return; if (!db.notes[key]) db.notes[key] = {}; if (!db.notes[key][date]) db.notes[key][date] = []; db.notes[key][date].push(text); await saveDb(); renderAnotacoes(date, key); document.getElementById('new-anotacao-text').value = ''; });
+        document.getElementById('anotacao-card-container').addEventListener('click', async (e) => { if (e.target.classList.contains('delete-anotacao-btn')) { const key = e.target.dataset.key; const date = e.target.dataset.date; const index = parseInt(e.target.dataset.index); db.notes[key][date].splice(index, 1); if (db.notes[key][date].length === 0) delete db.notes[key][date]; await saveDb(); renderAnotacoes(date, key); } });
+        
+        document.getElementById('main-date-filter').addEventListener('change', (e) => {
+            const newDate = e.target.value;
+            updateDailyBarChart(newDate);
+            updateDailyComparisonStats(newDate);
+            updateActiveDayButton(newDate);
+            document.getElementById('weekly-status-date').value = newDate;
+            document.getElementById('weekly-status-fac-date').value = newDate;
+            updateWeeklyStatus(newDate);
+            updateFacWeeklyStatus(newDate);
+        });
+
+        ['weekly-status-date', 'weekly-status-fac-date'].forEach(id => document.getElementById(id).addEventListener('change', (e) => id.includes('fac') ? updateFacWeeklyStatus(e.target.value) : updateWeeklyStatus(e.target.value)));
+        ['weekly-status-reset', 'weekly-status-fac-reset'].forEach(id => document.getElementById(id).addEventListener('click', () => { const today = getTodayString(); const dateInputId = id.replace('reset', 'date'); document.getElementById(dateInputId).value = today; id.includes('fac') ? updateFacWeeklyStatus(today) : updateWeeklyStatus(today); }));
+        document.addEventListener('click', e => { if (e.target.closest('.legend-item')) { const legendItem = e.target.closest('.legend-item'); const chartKey = legendItem.dataset.chart; const datasetIndex = parseInt(legendItem.dataset.datasetIndex); if (chartInstances[chartKey]) { const chart = chartInstances[chartKey]; chart.setDatasetVisibility(datasetIndex, !chart.isDatasetVisible(datasetIndex)); legendItem.classList.toggle('hidden-dataset'); chart.update(); } } });
+        
+        document.querySelectorAll('.btn-reset-chart').forEach(btn => btn.addEventListener('click', (e) => { const controlsDiv = e.target.closest('[id^="controls-"]'); controlsDiv.querySelector('.compare-start-date').value = ''; controlsDiv.querySelector('.compare-end-date').value = ''; const key = controlsDiv.id.split('-')[1]; const chart = chartInstances[`${key}TimelineChart`]; resetZoomAndFilter(chart); }));
+        
+        document.querySelectorAll('.compare-start-date, .compare-end-date').forEach(input => {
+            input.addEventListener('change', e => {
+                const controlsDiv = e.target.closest('[id^="controls-"]');
+                const key = controlsDiv.id.split('-')[1];
+                const chart = chartInstances[`${key}TimelineChart`];
+                const start = controlsDiv.querySelector('.compare-start-date').value;
+                const end = controlsDiv.querySelector('.compare-end-date').value;
+                if (start && end) {
+                    applyDateFilter(chart, start, end);
+                }
+            });
+        });
+
+        const applyDateFilter = (chart, start, end) => { if (chart && start && end) { chart.options.scales.x.min = start; chart.options.scales.x.max = end; chart.update(); } };
+        const resetZoomAndFilter = (chart) => { if (chart) { delete chart.options.scales.x.min; delete chart.options.scales.x.max; chart.resetZoom(); } };
+        document.getElementById('consult-rank-btn').addEventListener('click', () => { const date = document.getElementById('consult-date').value; const resultsContainer = document.getElementById('consult-results'); if (!date) { resultsContainer.innerHTML = '<p class="text-red-500">Selecione uma data.</p>'; return; } if(!db.premios) db.premios = []; const premiosDoDia = db.premios.filter(p => p.date === date); if(premiosDoDia.length === 0) { resultsContainer.innerHTML = '<p>Nenhum prêmio registrado.</p>'; return; } resultsContainer.innerHTML = '<h3 class="font-bold mb-2">Ganhadores do Dia</h3>' + premiosDoDia.map((p, i) => `<p><strong>${i+1}º:</strong> ${p.pessoa} (${p.pasta}) - <span class="text-yellow-400">${p.premio}</span></p>`).join(''); });
+        document.getElementById('export-data-btn').addEventListener('click', () => { const dataStr = JSON.stringify(db); const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr); const exportFileDefaultName = `wallstreet_data_${getTodayString()}.json`; const linkElement = document.createElement('a'); linkElement.setAttribute('href', dataUri); linkElement.setAttribute('download', exportFileDefaultName); linkElement.click(); });
+        document.getElementById('import-data-btn').addEventListener('click', () => document.getElementById('import-file-input').click());
+        document.getElementById('import-file-input').addEventListener('change', async (event) => { const file = event.target.files[0]; if (!file) return; const reader = new FileReader(); reader.onload = async (e) => { try { const fileContent = e.target.result.trim(); const importedDb = JSON.parse(fileContent); if (importedDb.dailyData && importedDb.premios) { if (confirm('Isso irá substituir todos os dados atuais na nuvem. Deseja continuar?')) { db = importedDb; await saveDb(); initializeApp(); alert('Dados importados com sucesso para a nuvem!'); } } else { alert('Arquivo de dados inválido ou com estrutura corrompida.'); } } catch (err) { alert('Erro ao ler o arquivo.'); console.error("Erro no parsing do JSON:", err); } finally { event.target.value = null; } }; reader.readAsText(file); });
+        
+        const aiChatMessages = document.getElementById('ai-chat-messages');
+        const aiChatInput = document.getElementById('ai-chat-input');
+        const aiChatSend = document.getElementById('ai-chat-send');
+        let chatHistory = [];
+        const addChatMessage = (message, sender) => { const bubble = document.createElement('div'); bubble.className = `ai-chat-bubble ${sender === 'user' ? 'ai-chat-user' : 'ai-chat-gemini'}`; message = message.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>').replace(/\n/g, '<br>'); bubble.innerHTML = message; aiChatMessages.appendChild(bubble); aiChatMessages.scrollTop = aiChatMessages.scrollHeight; return bubble; };
+        const getFullDashboardDataAsString = () => { let fullDataString = "## Contexto Completo do Painel Wallstreet\n\n"; fullDataString += `Data de hoje: ${getTodayString()}\n\n`; fullDataString += "### Dados Diários (Contratados e Retenção):\n"; const sortedDates = Object.keys(db.dailyData).sort().reverse(); for(const date of sortedDates.slice(0, 30)){ fullDataString += `Data: ${date}: `; let dailyEntries = []; for(const cat of categories){ const entry = db.dailyData[date][cat.id]; if(entry && (entry.contratados > 0 || entry.retencao > 0)){ dailyEntries.push(`${cat.name}: C${entry.contratados}/R${entry.retencao}`); } } fullDataString += dailyEntries.join(', ') + '\n'; } fullDataString += "\n### Registros de Prêmios (últimos 20):\n"; if(db.premios) { db.premios.slice(-20).forEach(p => { fullDataString += `- ${p.date}: ${p.pessoa} (${p.pasta}) - ${p.premio}\n`; }); } fullDataString += "\n### Anotações Recentes:\n"; if(db.notes) { Object.keys(db.notes).forEach(key => { if(db.notes[key]) { Object.keys(db.notes[key]).slice(-5).forEach(date => { fullDataString += `- ${date} (${key}): ${db.notes[key][date].join('; ')}\n`; }); } }); } return fullDataString; }
+        const setupAIChat = () => { aiChatMessages.innerHTML = ''; chatHistory = []; const apiKey = localStorage.getItem('geminiApiKey'); if (!apiKey) { addChatMessage("Bem-vindo! Para começar, insira sua Chave de API do Google AI Studio clicando em 'Configurar Chave' no canto superior direito.", 'gemini'); return; } const systemInstruction = `Você é um assistente de IA multifuncional. Sua principal função é ser um assistente geral, capaz de conversar sobre qualquer assunto. No entanto, você também tem acesso a um conjunto de dados de um painel de controle chamado "Wallstreet". Se o usuário fizer uma pergunta que pareça relacionada a dados, performance, pastas, contratações, retenção, prêmios ou qualquer termo do painel, use os dados fornecidos abaixo para formular sua resposta. Para todas as outras perguntas, responda usando seu conhecimento geral. Seja prestativo e amigável.\n---\nDADOS DO PAINEL:\n${getFullDashboardDataAsString()}\n---\nAgora, comece a conversa com o usuário.`; chatHistory.push({ role: 'user', parts: [{ text: systemInstruction }] }); addChatMessage("Olá! Sou sua assistente IA. Posso analisar os dados do seu painel ou conversar sobre qualquer outro assunto. O que você gostaria de fazer?", 'gemini'); chatHistory.push({ role: 'model', parts: [{ text: "Olá! Sou sua assistente IA. Posso analisar os dados do seu painel ou conversar sobre qualquer outro assunto. O que você gostaria de fazer?" }] }); };
+        const handleAIChat = async () => { const userMessage = aiChatInput.value.trim(); if (!userMessage) return; const apiKey = localStorage.getItem('geminiApiKey'); if (!apiKey) { addChatMessage("Por favor, configure sua chave de API primeiro.", 'gemini'); return; } addChatMessage(userMessage, 'user'); aiChatInput.value = ''; const thinkingBubble = addChatMessage('Pensando...', 'gemini'); chatHistory.push({ role: 'user', parts: [{ text: userMessage }] }); const payload = { contents: chatHistory }; const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${apiKey}`; try { const response = await fetch(apiUrl, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) }); if (!response.ok) { const errorBody = await response.json(); console.error("API Error Response:", errorBody); throw new Error(`A API retornou um erro ${response.status}: ${errorBody.error?.message || 'Erro desconhecido'}`); } const result = await response.json(); if (result.candidates && result.candidates[0]?.content?.parts[0]?.text) { const aiResponse = result.candidates[0].content.parts[0].text; thinkingBubble.innerHTML = aiResponse.replace(/\n/g, '<br>'); chatHistory.push({ role: 'model', parts: [{ text: aiResponse }] }); } else { thinkingBubble.textContent = "Desculpe, não consegui obter uma resposta válida da IA."; console.error("Invalid API response structure:", result); } } catch (error) { thinkingBubble.textContent = "Ocorreu um erro ao conectar com a IA. Verifique o console para detalhes."; console.error("Fetch Error:", error); } };
+        aiChatSend.addEventListener('click', handleAIChat);
+        aiChatInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') handleAIChat(); });
+        document.getElementById('configure-api-key-btn').addEventListener('click', () => { const newApiKey = prompt("Insira sua chave de API do Google AI Studio. Deixe em branco para remover."); if (newApiKey !== null) { localStorage.setItem('geminiApiKey', newApiKey); alert(newApiKey ? 'Chave de API atualizada!' : 'Chave de API removida.'); setupAIChat(); } });
+    </script>
+</body>
+</html>
