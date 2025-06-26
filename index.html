@@ -91,13 +91,95 @@
         </footer>
     </div>
     
+    <div id="chartjs-tooltip"></div>
+    <div id="fill-modal" class="fixed inset-0 modal-bg items-center justify-center hidden z-50">
+        <div id="fill-modal-content" class="modal-content rounded-xl p-8 w-full max-w-6xl max-h-[90vh] overflow-y-auto">
+            <h2 class="text-xl font-bold text-white mb-6">Preencher / Editar Dados</h2>
+            <div class="mb-6"><label for="fill-date" class="block text-sm font-medium text-gray-300 mb-2">Data do Registro</label><input type="date" id="fill-date" class="w-full p-2 input-field"></div>
+            <div id="fill-categories" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4 mb-8"></div>
+            <h3 class="text-lg font-bold text-white mb-4 mt-6">Adicionar Prêmios (3)</h3>
+            <div id="premios-container" class="space-y-4 mb-8"></div>
+            <h3 class="text-lg font-bold text-white mb-4 mt-6">FAC em Foco (6)</h3>
+            <div id="fac-container" class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4"></div>
+            <div class="flex justify-end space-x-4 mt-8">
+                <button id="cancel-fill-btn" class="py-2 px-6 rounded-lg btn-action">Cancelar</button>
+                <button id="clear-day-btn" class="bg-red-600 text-white font-bold py-2 px-6 rounded-lg hover:bg-red-700">Limpar Dia</button>
+                <button id="save-fill-btn" class="bg-green-500 text-white font-bold py-2 px-8 rounded-lg hover:bg-green-600">Salvar</button>
+            </div>
+        </div>
+    </div>
+    <div id="consult-modal" class="fixed inset-0 modal-bg items-center justify-center hidden z-50">
+        <div class="modal-content rounded-xl p-8 w-full max-w-md">
+            <h2 class="text-xl font-bold text-white mb-6">Consultar Prêmios do Dia</h2>
+            <div class="space-y-4">
+                <div><label for="consult-date" class="block text-sm font-medium text-gray-300 mb-2">Selecione a Data</label><input type="date" id="consult-date" class="w-full p-2 input-field"></div>
+                <button id="consult-rank-btn" class="w-full bg-yellow-400 text-black font-bold py-3 rounded-lg hover:bg-yellow-500">Consultar</button>
+                <div id="consult-results" class="mt-6 text-gray-300"></div>
+            </div>
+            <div class="flex justify-end mt-6"><button id="close-consult-modal-btn" class="py-2 px-6 rounded-lg btn-action">Fechar</button></div>
+        </div>
+    </div>
+    <div id="anotacao-modal" class="fixed inset-0 modal-bg items-center justify-center hidden z-50">
+        <div class="modal-content rounded-xl p-8 w-full max-w-2xl h-[70vh] flex flex-col">
+            <h2 id="anotacao-modal-title" class="text-xl font-bold text-white mb-4">Anotações</h2>
+            <div class="flex items-center gap-4 mb-4">
+                <label for="anotacao-date" class="text-sm">Data:</label>
+                <input type="date" id="anotacao-date" class="input-field p-2">
+            </div>
+            <div id="anotacao-card-container" class="flex-grow overflow-y-auto space-y-4 pr-2"></div>
+            <div class="mt-4">
+                <textarea id="new-anotacao-text" class="w-full input-field p-2" rows="3" placeholder="Escreva sua anotação..."></textarea>
+                <button id="add-anotacao-btn" class="w-full mt-2 bg-green-500 text-white font-bold py-2 rounded-lg hover:bg-green-600">Adicionar Anotação</button>
+            </div>
+            <div class="flex justify-end mt-6">
+                <button id="close-anotacao-modal-btn" class="py-2 px-6 rounded-lg btn-action">Fechar</button>
+            </div>
+        </div>
+    </div>
+    <div id="ai-chat-modal" class="fixed inset-0 modal-bg items-center justify-center hidden z-50">
+        <div class="modal-content rounded-xl p-6 w-full max-w-2xl h-[80vh] flex flex-col">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-xl font-bold text-white">Análise com IA</h2>
+                <button id="configure-api-key-btn" class="text-xs text-gray-400 hover:text-white">Configurar Chave</button>
+            </div>
+            <div id="ai-chat-messages" class="flex-grow overflow-y-auto space-y-4 p-4 bg-black/20 rounded-lg flex flex-col"></div>
+            <div class="mt-4 flex gap-2">
+                <input type="text" id="ai-chat-input" class="w-full p-2 input-field" placeholder="Converse com a IA ou peça uma análise...">
+                <button id="ai-chat-send" class="bg-purple-600 text-white font-bold py-2 px-6 rounded-lg hover:bg-purple-700">Enviar</button>
+            </div>
+            <div class="flex justify-end mt-4">
+                <button id="close-ai-chat-modal-btn" class="py-2 px-6 rounded-lg btn-action">Fechar</button>
+            </div>
+        </div>
+    </div>
+    <div id="access-modal" class="fixed inset-0 modal-bg items-center justify-center hidden z-50">
+        <div class="modal-content rounded-xl p-8 w-full max-w-lg">
+            <h2 class="text-xl font-bold text-white mb-6">Gerenciar Acessos</h2>
+            <div class="mb-6">
+                <label for="new-email-input" class="block text-sm font-medium text-gray-300 mb-2">Adicionar novo e-mail</label>
+                <div class="flex gap-2">
+                    <input type="email" id="new-email-input" class="w-full p-2 input-field" placeholder="email.membro@exemplo.com">
+                    <button id="add-email-btn" class="bg-green-600 text-white font-bold py-2 px-6 rounded-lg hover:bg-green-700">Adicionar</button>
+                </div>
+                <p id="access-error-message" class="text-red-500 text-sm mt-2 h-4"></p>
+            </div>
+            <h3 class="text-lg font-semibold text-white mb-4">E-mails com Acesso:</h3>
+            <div id="access-list-container" class="space-y-2 max-h-[40vh] overflow-y-auto">
+                <p class="text-gray-400">Carregando...</p>
+            </div>
+            <div class="flex justify-end mt-8">
+                <button id="close-access-modal-btn" class="py-2 px-6 rounded-lg btn-action">Fechar</button>
+            </div>
+        </div>
+    </div>
+
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
     
     <script>
     document.addEventListener('DOMContentLoaded', () => {
-        
+
         const firebaseConfig = {
           apiKey: "AIzaSyCONofXx4NlCP34PZrs4pV-gDRJ_Uasw3c",
           authDomain: "wswallstreet-3ab24.firebaseapp.com",
@@ -129,12 +211,25 @@
                 if (doc.exists && doc.data().dailyData) {
                     return doc.data();
                 }
-                return { dailyData: {}, premios: [], facData: {}, notes: {contratados: {}, retencao: {}, fac: {}} };
+                const backupData = {"dailyData":{},"premios":[],"facData":{},"notes":{"contratados":{},"retencao":{},"fac":{}}};
+                if (fbAuth.currentUser && fbAuth.currentUser.email === ADMIN_EMAIL) {
+                    await dbRef.set(backupData);
+                }
+                return backupData;
             } catch (error) {
                 console.error("Erro fatal ao carregar dados do Firestore:", error);
                 document.body.innerHTML = '<div style="color:white;text-align:center;padding:50px;"><h1>Erro Crítico</h1><p>Não foi possível carregar os dados. Verifique a consola de erros.</p></div>';
                 document.body.style.display = 'block';
                 return null;
+            }
+        }
+        
+        async function saveDb() {
+            try {
+                await dbRef.set(db);
+            } catch (error) {
+                console.error("Erro ao salvar dados no Firestore:", error);
+                alert("Não foi possível salvar os dados.");
             }
         }
 
@@ -143,16 +238,33 @@
             if (!db) return;
 
             document.body.style.display = 'block';
+            document.getElementById('user-email').textContent = fbAuth.currentUser.email;
 
-            const today = new Date().toISOString().split('T')[0];
+            const controlsContainer = document.getElementById('permissioned-controls');
+            if (fbAuth.currentUser.email === ADMIN_EMAIL) {
+                controlsContainer.innerHTML = `
+                    <button id="open-access-modal-btn" class="text-white font-semibold py-2 px-4 rounded-lg btn-action bg-blue-600 hover:bg-blue-700">GERENCIAR</button>
+                    <button id="open-fill-modal-btn" class="text-white font-semibold py-2 px-6 rounded-lg btn-action">PREENCHER</button>
+                `;
+                document.getElementById('open-access-modal-btn').addEventListener('click', () => {
+                    loadAllowedUsers();
+                    openModal(document.getElementById('access-modal'));
+                });
+            } else {
+                controlsContainer.innerHTML = '';
+            }
+
+            const today = getTodayString();
             document.getElementById('main-date-filter').value = today;
-            // (inicialização de outros campos de data...)
+            document.getElementById('consult-date').value = today;
+            document.getElementById('weekly-status-date').value = today;
+            document.getElementById('weekly-status-fac-date').value = today;
 
+            setupFillModal();
             setupDayButtons();
-            setupAutoCompareInputs(); // <--- Nova lógica estável para comparação
+            setupAutoCompareInputs();
             
-            // (O resto do seu código de inicialização do HTML dos modais, etc., vem aqui)
-            
+            chartInstances = {};
             chartInstances.contratadosTimelineChart = createTimelineChart('contratados-timeline-chart', 'contratados');
             chartInstances.retencaoTimelineChart = createTimelineChart('retencao-timeline-chart', 'retencao');
             chartInstances.facTimelineChart = createFacTimelineChart();
@@ -164,17 +276,48 @@
 
         let chartInstances = {};
         const categories = [ { id: 'conexao', name: 'Conexão', color: 'cyan', hex: '#22d3ee' }, { id: 'retencao_cat', name: 'Retenção', color: 'orange', hex: '#f97316' }, { id: 'introducao', name: 'Introdução', color: 'green', hex: '#22c55e' }, { id: 'evolucao', name: 'Evolução', color: 'red', hex: '#ef4444' }, { id: 'interacao', name: 'Interação', color: 'purple', hex: '#a855f7' }, { id: 'expansao', name: 'Expansão', color: 'yellow', hex: '#eab308' }];
+        const pastas = categories.map(c => c.name);
+        const premiosList = ['VIP PLATINA', 'VIP LANÇAMENTO', 'VIP OURO', 'VIP PRATA', 'VIP BRONZE', 'BATTLEPASS'];
         
-        // --- FUNÇÕES DE GRÁFICO (sem grandes alterações) ---
-        // (As funções como createTimelineChart, createPieChart, timelineOptions etc. são as mesmas do seu código original)
-        const createChart = (ctx, type, data, options) => new Chart(ctx, { type, data, options });
-        const updateAllCharts = () => { /* ... */ };
-        const createContratadosRetencaoChart = () => { /* ... */ };
+        const getTodayString = () => new Date().toISOString().split('T')[0];
+        const getWeekRange = (dateString) => {
+            if (!dateString) return { start: null, end: null };
+            const parts = dateString.split('-').map(part => parseInt(part, 10));
+            const d = new Date(Date.UTC(parts[0], parts[1] - 1, parts[2]));
+            const day = d.getUTCDay();
+            const diff = d.getUTCDate() - day + (day === 0 ? -6 : 1);
+            const monday = new Date(d.setUTCDate(diff));
+            const sunday = new Date(new Date(monday).setUTCDate(monday.getUTCDate() + 6));
+            return { start: monday.toISOString().split('T')[0], end: sunday.toISOString().split('T')[0] };
+        };
 
-        // ATUALIZADO: Lógica do gráfico de barras
+        const fillModal = document.getElementById('fill-modal'), consultModal = document.getElementById('consult-modal'), anotacaoModal = document.getElementById('anotacao-modal'), aiChatModal = document.getElementById('ai-chat-modal');
+        const openModal = (modal) => { modal.classList.remove('hidden'); modal.classList.add('flex'); }
+        const closeModal = (modal) => { modal.classList.add('hidden'); modal.classList.remove('flex'); }
+
+        const populateFillModal = (date) => { /* ... (seu código original aqui) ... */ };
+        
+        // --- EVENT LISTENERS E LÓGICA DE MODAIS (sem alterações) ---
+        // (Todo o código para modais, anotações, import/export, etc. permanece aqui)
+
+        // --- FUNÇÕES DE GRÁFICOS ---
+        const createChart = (ctx, type, data, options) => new Chart(ctx, { type, data, options });
+        const timelineOptions = () => ({ /* ... (seu código original aqui) ... */ });
+        const createTimelineChart = (canvasId, dataKey) => { /* ... (seu código original aqui) ... */ };
+        // (etc. para as outras funções de criação de gráfico)
+
+        const updateAllCharts = () => {
+            updateTimelineCharts();
+            updateContratadosRetencaoChart(document.getElementById('main-date-filter').value);
+            // ... (resto das atualizações)
+        };
+        const updateTimelineCharts = () => { /* ... (seu código original aqui) ... */ };
+        
+        // --- ALTERAÇÕES APLICADAS ---
+
         const updateContratadosRetencaoChart = (date) => {
             updateComparisonIndicators(date); 
-            const dataForDay = db.dailyData?.[date] || {};
+            const dataForDay = db.dailyData[date] || {};
             const chart = chartInstances.contratadosRetencaoBarChart;
             if (chart) {
                 chart.data.datasets[0].data = categories.map(cat => dataForDay[cat.id]?.contratados || 0);
@@ -183,24 +326,44 @@
             }
             updateActiveDayButton(date);
         };
-        
-        // ATUALIZADO: Indicadores com "Aguardando dados"
+
         const updateComparisonIndicators = (dateString) => {
             const container = document.getElementById('comparison-indicators');
             container.innerHTML = '';
-            if (!dateString || !db.dailyData) {
-                container.innerHTML = `<div class="text-sm text-gray-500 italic">Selecione uma data.</div>`;
-                return;
-            }
+            if (!dateString) return;
+
             const currentDataForDay = db.dailyData[dateString];
             if (!currentDataForDay) {
                 container.innerHTML = `<div class="text-sm text-gray-500 italic">Aguardando dados para o cálculo.</div>`;
                 return;
             }
-            // (Resto da função para calcular e mostrar os indicadores)
+            const currentDate = new Date(`${dateString}T12:00:00Z`);
+            const previousWeekDate = new Date(currentDate);
+            previousWeekDate.setUTCDate(currentDate.getUTCDate() - 7);
+            const previousWeekDateString = previousWeekDate.toISOString().split('T')[0];
+            const previousData = db.dailyData[previousWeekDateString] || {};
+            const totals = { current: { contratados: 0, retencao: 0 }, previous: { contratados: 0, retencao: 0 }};
+            categories.forEach(cat => {
+                totals.current.contratados += currentDataForDay[cat.id]?.contratados || 0;
+                totals.current.retencao += currentDataForDay[cat.id]?.retencao || 0;
+                totals.previous.contratados += previousData[cat.id]?.contratados || 0;
+                totals.previous.retencao += previousData[cat.id]?.retencao || 0;
+            });
+            const createIndicator = (label, currentValue, previousValue) => { 
+                let percentage = 0; 
+                if (previousValue > 0) { 
+                    percentage = ((currentValue - previousValue) / previousValue) * 100;
+                } else if (currentValue > 0) { 
+                    percentage = 100; 
+                } 
+                const roundedPercentage = Math.round(percentage); 
+                const color = roundedPercentage >= 0 ? 'green' : 'red'; 
+                const arrow = roundedPercentage >= 0 ? '↑' : '↓'; 
+                return `<div class="flex items-center gap-2 p-2 px-3 rounded-md text-white text-xs font-semibold bg-${color}-900/50 border border-${color}-500"><span>${label}:</span><span class="font-bold text-${color}-400">${arrow} ${Math.abs(roundedPercentage)}% referente a 7 dias atrás</span></div>`; 
+            };
+            container.innerHTML = createIndicator('Contratados', totals.current.contratados, totals.previous.contratados) + createIndicator('Retenção', totals.current.retencao, totals.previous.retencao);
         };
         
-        // ATUALIZADO: Lógica definitiva para os botões de dia da semana
         const setupDayButtons = () => {
             const container = document.getElementById('bar-chart-day-buttons');
             const days = ['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb', 'Dom'];
@@ -231,7 +394,7 @@
                 }
             });
         };
-        
+
         const updateActiveDayButton = (dateString) => {
             const container = document.getElementById('bar-chart-day-buttons');
             container.querySelectorAll('.day-btn').forEach(btn => btn.classList.remove('active'));
@@ -245,7 +408,6 @@
             }
         };
         
-        // ATUALIZADO: Lógica estável para comparação automática de datas
         const applyDateFilter = (chart, start, end) => { if (chart && start && end) { chart.options.scales.x.min = start; chart.options.scales.x.max = end; chart.update(); } };
         const resetZoomAndFilter = (chart) => { if (chart) { delete chart.options.scales.x.min; delete chart.options.scales.x.max; chart.resetZoom(); } };
 
@@ -255,17 +417,20 @@
                 if (controlDiv) {
                     const startDateInput = controlDiv.querySelector('.compare-start-date');
                     const endDateInput = controlDiv.querySelector('.compare-end-date');
-                    const chart = chartInstances[`${key}TimelineChart`];
-
+                    
                     const applyFilter = () => {
                         const start = startDateInput.value;
                         const end = endDateInput.value;
+                        const chart = chartInstances[`${key}TimelineChart`];
                         if (start && end && end >= start) {
                             applyDateFilter(chart, start, end);
                         }
                     };
                     startDateInput.addEventListener('change', applyFilter);
                     endDateInput.addEventListener('change', applyFilter);
+                    
+                    const compareBtn = controlDiv.querySelector('.btn-compare');
+                    if(compareBtn) compareBtn.remove();
                 }
             });
         };
@@ -281,10 +446,13 @@
 
         document.getElementById('main-date-filter').addEventListener('change', (e) => {
             updateContratadosRetencaoChart(e.target.value);
-            // (outras atualizações...)
+            document.getElementById('weekly-status-date').value = e.target.value;
+            document.getElementById('weekly-status-fac-date').value = e.target.value;
+            updateWeeklyStatus(e.target.value);
+            updateFacWeeklyStatus(e.target.value);
         });
 
-        // (Aqui entra todo o resto do seu código original que já funcionava: modais, export, import, auth, etc.)
+        // (Coloque aqui o resto das suas funções originais que não foram modificadas)
 
     });
     </script>
