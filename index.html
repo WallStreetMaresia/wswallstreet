@@ -11,7 +11,6 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom/dist/chartjs-plugin-zoom.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/litepicker/dist/litepicker.js"></script>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/litepicker/dist/css/litepicker.css"/>
     <style>
         body { font-family: 'Inter', sans-serif; background-color: #000000; color: #E0E0E0; }
@@ -225,11 +224,14 @@
         </div>
     </div>
 
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/litepicker/dist/litepicker.js" defer></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js" defer></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js" defer></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js" defer></script>
     
     <script>
+    // Envolve todo o script principal em um listener para garantir que o DOM e os scripts externos estejam prontos
+    document.addEventListener('DOMContentLoaded', function() {
         // --- CONFIGURAÇÃO E AUTENTICAÇÃO ---
         const firebaseConfig = {
           apiKey: "AIzaSyCONofXx4NlCP34PZrs4pV-gDRJ_Uasw3c",
@@ -331,12 +333,11 @@
             setupFillModal();
             setupDayButtons();
             
-            // A inicialização dos gráficos agora acontece antes dos componentes que dependem deles
             if (!chartInstances.contratadosRetencaoBarChart) {
                 chartInstances.contratadosRetencaoBarChart = createContratadosRetencaoChart();
             }
             updateAllCharts();
-            initLitepickers(); // Inicializa o seletor de data após os gráficos existirem
+            initLitepickers();
         }
 
         let chartInstances = {};
@@ -654,6 +655,7 @@
         aiChatSend.addEventListener('click', handleAIChat);
         aiChatInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') handleAIChat(); });
         document.getElementById('configure-api-key-btn').addEventListener('click', () => { const newApiKey = prompt("Insira sua chave de API do Google AI Studio. Deixe em branco para remover."); if (newApiKey !== null) { localStorage.setItem('geminiApiKey', newApiKey); alert(newApiKey ? 'Chave de API atualizada!' : 'Chave de API removida.'); setupAIChat(); } });
+    });
     </script>
 </body>
 </html>
