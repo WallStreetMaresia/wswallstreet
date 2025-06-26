@@ -11,6 +11,7 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom/dist/chartjs-plugin-zoom.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/litepicker/dist/css/litepicker.css"/>
     <style>
         body { font-family: 'Inter', sans-serif; background-color: #000000; color: #E0E0E0; }
         .chart-border { border-color: rgba(255, 255, 255, 0.2); }
@@ -18,7 +19,7 @@
         .btn-action:hover { background-color: rgba(255, 255, 255, 0.2); }
         .modal-bg { background-color: rgba(0, 0, 0, 0.8); backdrop-filter: blur(4px); }
         .modal-content { background-color: #111; border: 1px solid rgba(255, 255, 255, 0.2); }
-        .input-field, .select-field { background-color: #222; border: 1px solid rgba(255, 255, 255, 0.3); color: #E0E0E0; border-radius: 0.375rem; padding: 0.25rem 0.5rem; }
+        .input-field, .select-field, .date-range-picker { background-color: #222; border: 1px solid rgba(255, 255, 255, 0.3); color: #E0E0E0; border-radius: 0.375rem; padding: 0.25rem 0.5rem; }
         .select-field { -webkit-appearance: none; -moz-appearance: none; appearance: none; background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e"); background-position: right 0.5rem center; background-repeat: no-repeat; background-size: 1.5em 1.5em; padding-right: 2.5rem; }
         .custom-legend { display: flex; justify-content: center; align-items: center; gap: 1.5rem; margin-top: 1rem; flex-wrap: wrap; }
         .legend-item { display: flex; align-items: center; gap: 0.5rem; font-size: 0.75rem; cursor: pointer; transition: opacity 0.2s; }
@@ -32,6 +33,17 @@
         .ai-chat-user { background-color: #007bff; color: white; align-self: flex-end; border-bottom-right-radius: 0; }
         .ai-chat-gemini { background-color: #333; color: white; align-self: flex-start; border-bottom-left-radius: 0;}
         .day-btn.active { background-color: #facc15; color: #111827; font-weight: bold; }
+        /* Estilos customizados para o Litepicker */
+        .litepicker { background-color: #111111; border: 1px solid rgba(255, 255, 255, 0.2); box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3), 0 4px 6px -2px rgba(0, 0, 0, 0.2); z-index: 999; }
+        .litepicker .container__months { background-color: #111111; }
+        .litepicker .month-item-header, .litepicker .month-item-weekdays-row { color: #E0E0E0; }
+        .litepicker .month-item, .litepicker .day-item { color: #d1d5db; }
+        .litepicker .day-item:hover { background-color: #374151; border-radius: 0.375rem; }
+        .litepicker .day-item.is-start-date, .litepicker .day-item.is-end-date { background-color: #facc15; color: #111827; border-radius: 0.375rem; }
+        .litepicker .day-item.is-in-range { background-color: rgba(250, 204, 21, 0.2); border-radius: 0; }
+        .litepicker .button-previous-month, .litepicker .button-next-month { color: #facc15; }
+        .litepicker .button-apply, .litepicker .button-cancel { background-color: #222; color: #E0E0E0; }
+        .date-range-picker { text-align: center; width: 200px;}
     </style>
 </head>
 <body class="p-4 sm:p-6 md:p-8" style="display: none;">
@@ -58,8 +70,7 @@
                         <span class="status-trend-label text-xs italic"></span>
                     </div>
                     <div class="flex items-center space-x-2">
-                        <input type="date" class="input-field p-1 text-sm compare-start-date" title="Data Início">
-                        <input type="date" class="input-field p-1 text-sm compare-end-date" title="Data Fim">
+                        <input type="text" class="input-field p-1 text-sm date-range-picker" placeholder="Comparar período...">
                         <button class="text-purple-400 border border-purple-400 rounded-lg py-1 px-3 text-sm font-semibold hover:bg-purple-400 hover:text-black transition-colors btn-anotacao" data-key="contratados">ANOTAÇÃO</button>
                         <button class="text-white border border-gray-500 rounded-lg py-1 px-3 text-sm font-semibold btn-action btn-reset-chart">RESET</button>
                     </div>
@@ -75,8 +86,7 @@
                         <span class="status-trend-label text-xs italic"></span>
                      </div>
                      <div class="flex items-center space-x-2">
-                         <input type="date" class="input-field p-1 text-sm compare-start-date" title="Data Início">
-                         <input type="date" class="input-field p-1 text-sm compare-end-date" title="Data Fim">
+                         <input type="text" class="input-field p-1 text-sm date-range-picker" placeholder="Comparar período...">
                          <button class="text-purple-400 border border-purple-400 rounded-lg py-1 px-3 text-sm font-semibold hover:bg-purple-400 hover:text-black transition-colors btn-anotacao" data-key="retencao">ANOTAÇÃO</button>
                          <button class="text-white border border-gray-500 rounded-lg py-1 px-3 text-sm font-semibold btn-action btn-reset-chart">RESET</button>
                      </div>
@@ -101,8 +111,7 @@
                         <span class="status-trend-label text-xs italic"></span>
                      </div>
                      <div class="flex items-center space-x-2">
-                         <input type="date" class="input-field p-1 text-sm compare-start-date" title="Data Início">
-                         <input type="date" class="input-field p-1 text-sm compare-end-date" title="Data Fim">
+                         <input type="text" class="input-field p-1 text-sm date-range-picker" placeholder="Comparar período...">
                          <button class="text-purple-400 border border-purple-400 rounded-lg py-1 px-3 text-sm font-semibold hover:bg-purple-400 hover:text-black transition-colors btn-anotacao" data-key="fac">ANOTAÇÃO</button>
                          <button class="text-white border border-gray-500 rounded-lg py-1 px-3 text-sm font-semibold btn-action btn-reset-chart">RESET</button>
                      </div>
@@ -215,6 +224,7 @@
         </div>
     </div>
 
+    <script src="https://cdn.jsdelivr.net/npm/litepicker/dist/litepicker.js" defer></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js" defer></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js" defer></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js" defer></script>
@@ -285,7 +295,7 @@
                     return localDb;
                 }
                 const backupData = {"dailyData":{},"premios":[],"facData":{},"notes":{"contratados":{},"retencao":{},"fac":{}}};
-                if (fbAuth.currentUser.email === ADMIN_EMAIL) {
+                if (fbAuth.currentUser?.email === ADMIN_EMAIL) {
                     await dbRef.set(backupData);
                 }
                 return backupData;
@@ -331,6 +341,7 @@
                 chartInstances.contratadosRetencaoBarChart = createContratadosRetencaoChart();
             }
             updateAllCharts();
+            initLitepickers();
         }
 
         let chartInstances = {};
@@ -544,8 +555,13 @@
                 let totalContratados = 0, totalRetencao = 0;
                 days.forEach(date => {
                     const dayData = db.dailyData[date];
-                    if (dayData) Object.values(dayData).forEach(cat => { totalContratados += cat.contratados || 0; totalRetencao += cat.retencao || 0; });
-                }
+                    if (dayData) {
+                        Object.values(dayData).forEach(cat => {
+                            totalContratados += cat.contratados || 0;
+                            totalRetencao += cat.retencao || 0;
+                        });
+                    }
+                });
                 return { totalContratados, totalRetencao, score: (totalContratados + totalRetencao) };
             };
 
@@ -571,9 +587,31 @@
             document.querySelectorAll('.status-trend-label').forEach(label => { label.textContent = trend.text; label.className = `status-trend-label text-xs italic ${trend.color}`; });
         };
         
-        // AINDA TEMPORARIAMENTE REMOVIDO PARA ESTABILIDADE.
-        // Se a página carregar com este código, o próximo passo é reintroduzir o seletor de data ideal.
-        // const initLitepickers = () => { ... }
+        const initLitepickers = () => {
+            if (typeof Litepicker === 'undefined') {
+                console.error("Litepicker não foi carregado. O seletor de datas não funcionará.");
+                return;
+            }
+            document.querySelectorAll('.date-range-picker').forEach(pickerEl => {
+                const picker = new Litepicker({
+                    element: pickerEl,
+                    singleMode: false,
+                    autoApply: true,
+                    numberOfMonths: 2,
+                    numberOfColumns: 2,
+                    format: 'YYYY-MM-DD',
+                    setup: (pickerInstance) => {
+                        pickerInstance.on('selected', (date1, date2) => {
+                            const controlsDiv = pickerEl.closest('[id^="controls-"]');
+                            const key = controlsDiv.id.split('-')[1];
+                            const chart = chartInstances[`${key}TimelineChart`];
+                            applyDateFilter(chart, date1.format('YYYY-MM-DD'), date2.format('YYYY-MM-DD'));
+                        });
+                    }
+                });
+                pickerEl.litepickerInstance = picker;
+            });
+        };
 
         const updatePieChart = () => { if (chartInstances.premiosPieChart) chartInstances.premiosPieChart.destroy(); chartInstances.premiosPieChart = createPieChart(); }
         const updateWeeklyStatus = (dateString) => { const container = document.querySelector('#status-semanal .space-y-3'); container.innerHTML = ''; const { start, end } = getWeekRange(dateString); if(!start || !end) return; categories.forEach(cat => { let totalContratados = 0; let totalRetencao = 0; for (const date in db.dailyData) { if(date >= start && date <= end && db.dailyData[date]?.[cat.id]) { totalContratados += db.dailyData[date][cat.id].contratados || 0; totalRetencao += db.dailyData[date][cat.id].retencao || 0; } } const retencaoPercent = totalContratados > 0 ? (totalRetencao / totalContratados) * 100 : 0; let status, color; const minRec = 400, maxRec = 1100, minRet = 20, maxRet = 45; const recScore = totalContratados <= minRec ? 0 : Math.min(1, (totalContratados - minRec) / (maxRec - minRec)); const retScore = retencaoPercent <= minRet ? 0 : Math.min(1, (retencaoPercent - minRet) / (maxRet - minRet)); const finalScore = totalContratados > 0 ? (recScore + retScore) / 2 : 0; if (finalScore >= 0.9) { status = 'EXCELENTE'; color = 'text-emerald-400'; } else if (finalScore >= 0.7) { status = 'ÓTIMO'; color = 'text-green-400'; } else if (finalScore >= 0.5) { status = 'BOM'; color = 'text-cyan-400'; } else if (finalScore > 0) { status = 'SATISFATÓRIO'; color = 'text-green-500'; } else { status = 'RUIM'; color = 'text-red-500'; } container.innerHTML += `<div class="flex justify-between items-center text-sm"><span class="font-semibold text-${cat.color}-400">${cat.name}</span><span class="font-bold ${color}">${status}</span></div>`; });};
@@ -602,27 +640,17 @@
         document.querySelectorAll('.btn-reset-chart').forEach(btn => {
             btn.addEventListener('click', (e) => {
                 const controlsDiv = e.target.closest('[id^="controls-"]');
-                controlsDiv.querySelector('.compare-start-date').value = '';
-                controlsDiv.querySelector('.compare-end-date').value = '';
+                const pickerInput = controlsDiv.querySelector('.date-range-picker');
+                if (pickerInput && pickerInput.litepickerInstance) {
+                    pickerInput.litepickerInstance.clearSelection();
+                }
                 const key = controlsDiv.id.split('-')[1];
                 const chart = chartInstances[`${key}TimelineChart`];
                 resetZoomAndFilter(chart);
             });
         });
         
-        document.querySelectorAll('.compare-start-date, .compare-end-date').forEach(input => {
-            input.addEventListener('change', e => {
-                const controlsDiv = e.target.closest('[id^="controls-"]');
-                const key = controlsDiv.id.split('-')[1];
-                const chart = chartInstances[`${key}TimelineChart`];
-                const start = controlsDiv.querySelector('.compare-start-date').value;
-                const end = controlsDiv.querySelector('.compare-end-date').value;
-                if (start && end) {
-                    applyDateFilter(chart, start, end);
-                }
-            });
-        });
-
+        // Removido o seletor de data antigo para usar apenas o Litepicker
         const applyDateFilter = (chart, start, end) => { if (chart && start && end) { chart.options.scales.x.min = start; chart.options.scales.x.max = end; chart.update(); } };
         const resetZoomAndFilter = (chart) => { if (chart) { delete chart.options.scales.x.min; delete chart.options.scales.x.max; chart.resetZoom(); } };
         document.getElementById('consult-rank-btn').addEventListener('click', () => { const date = document.getElementById('consult-date').value; const resultsContainer = document.getElementById('consult-results'); if (!date) { resultsContainer.innerHTML = '<p class="text-red-500">Selecione uma data.</p>'; return; } if(!db.premios) db.premios = []; const premiosDoDia = db.premios.filter(p => p.date === date); if(premiosDoDia.length === 0) { resultsContainer.innerHTML = '<p>Nenhum prêmio registrado.</p>'; return; } resultsContainer.innerHTML = '<h3 class="font-bold mb-2">Ganhadores do Dia</h3>' + premiosDoDia.map((p, i) => `<p><strong>${i+1}º:</strong> ${p.pessoa} (${p.pasta}) - <span class="text-yellow-400">${p.premio}</span></p>`).join(''); });
