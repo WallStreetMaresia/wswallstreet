@@ -28,6 +28,11 @@
                     <label for="login-password" class="block text-sm font-medium text-gray-300">Senha</label>
                     <input type="password" id="login-password" required class="w-full p-3 mt-1 input-field" placeholder="••••••••">
                 </div>
+                
+                <div class="text-right text-sm">
+                    <a href="#" id="forgot-password-link" class="font-medium text-yellow-400 hover:text-yellow-300">Esqueci minha senha</a>
+                </div>
+                
                 <button type="submit" id="login-btn" class="w-full bg-purple-600 text-white font-bold py-3 rounded-lg hover:bg-purple-700 transition-colors">Entrar</button>
             </form>
 
@@ -67,7 +72,7 @@
 
         const app = firebase.initializeApp(firebaseConfig);
         const auth = firebase.auth();
-        const db = firebase.firestore(); // Inicializa o Firestore
+        const db = firebase.firestore();
         const ADMIN_EMAIL = 'kraznelofc@gmail.com';
 
         const loginForm = document.getElementById('login-form');
@@ -75,7 +80,9 @@
         const toggleLink = document.getElementById('toggle-form');
         const errorMessage = document.getElementById('error-message');
         const loginBtn = document.getElementById('login-btn');
-
+        
+        // NOVO: Referência ao link de redefinição de senha
+        const forgotPasswordLink = document.getElementById('forgot-password-link');
 
         toggleLink.addEventListener('click', (e) => {
             e.preventDefault();
@@ -84,6 +91,31 @@
             toggleLink.textContent = loginForm.classList.contains('hidden') ? 'Já tem uma conta? Entre' : 'Não tem uma conta? Cadastre-se';
             errorMessage.textContent = '';
         });
+        
+        // NOVO: Função para redefinir a senha
+        forgotPasswordLink.addEventListener('click', (e) => {
+            e.preventDefault();
+            const email = loginForm['login-email'].value;
+            if (!email) {
+                errorMessage.textContent = 'Digite seu e-mail acima e clique em "Esqueci minha senha" novamente.';
+                return;
+            }
+
+            auth.sendPasswordResetEmail(email)
+                .then(() => {
+                    errorMessage.style.color = 'lightgreen'; // Muda a cor para sucesso
+                    errorMessage.textContent = 'Link de redefinição enviado! Verifique seu e-mail.';
+                })
+                .catch((error) => {
+                    errorMessage.style.color = 'red';
+                    if (error.code === 'auth/user-not-found') {
+                        errorMessage.textContent = 'Nenhum usuário encontrado com este e-mail.';
+                    } else {
+                        errorMessage.textContent = 'Erro ao enviar o e-mail de redefinição.';
+                    }
+                    console.error("Erro ao redefinir senha:", error);
+                });
+        });
 
         // Login Handler com verificação de permissão
         loginForm.addEventListener('submit', (e) => {
@@ -91,6 +123,7 @@
             loginBtn.disabled = true;
             loginBtn.textContent = 'Verificando...';
             errorMessage.textContent = '';
+            errorMessage.style.color = 'red'; // Garante que a cor volte para vermelho em caso de erro
 
             const email = loginForm['login-email'].value;
             const password = loginForm['login-password'].value;
@@ -99,13 +132,11 @@
                 .then(async (userCredential) => {
                     const userEmail = userCredential.user.email;
                     
-                    // Se for o admin, libera o acesso direto.
                     if (userEmail === ADMIN_EMAIL) {
                         window.location.href = 'index.html';
                         return;
                     }
 
-                    // Se for membro, verifica a permissão na lista.
                     const docRef = db.collection('permissions').doc('allowed_users');
                     const docSnap = await docRef.get();
 
@@ -113,7 +144,7 @@
                         window.location.href = 'index.html';
                     } else {
                         errorMessage.textContent = 'Acesso não liberado. Fale com o administrador.';
-                        auth.signOut(); // Desloga o usuário se não tiver permissão
+                        auth.signOut();
                         loginBtn.disabled = false;
                         loginBtn.textContent = 'Entrar';
                     }
